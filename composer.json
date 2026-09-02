@@ -1,0 +1,17 @@
+{
+    "name": "leilabrito/portal-aluno",
+    "autoload": {
+        "psr-4": {
+            "Leilabrito\\PortalAluno\\": "app/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Mateus Souza",
+            "email": "mateus.h1055@gmail.com"
+        }
+    ],
+    "require": {
+        "vlucas/phpdotenv": "^5.7"
+    }
+}
