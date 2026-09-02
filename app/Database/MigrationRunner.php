@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Leilabrito\PortalAluno\Database;
 
-use mysqli;
+use PDO;
 use RuntimeException;
 
 class MigrationRunner
 {
-    private mysqli $db;
+    private PDO $db;
     private string $migrationsPath;
 
-    public function __construct(mysqli $db, string $migrationsPath)
+    public function __construct(PDO $db, string $migrationsPath)
     {
         $this->db = $db;
         $this->migrationsPath = rtrim($migrationsPath, '/');
@@ -58,36 +58,23 @@ class MigrationRunner
               COLLATE=utf8mb4_unicode_ci
         ";
 
-        if (!$this->db->query($sql)) {
-            throw new RuntimeException(
-                'Erro ao criar tabela migrations: ' .
-                $this->db->error
-            );
-        }
+        $this->db->exec($sql);
     }
 
     private function alreadyExecuted(string $migration): bool
     {
         $stmt = $this->db->prepare(
-            'SELECT id FROM migrations WHERE migration = ? LIMIT 1'
+            'SELECT id
+             FROM migrations
+             WHERE migration = :migration
+             LIMIT 1'
         );
 
-        if (!$stmt) {
-            throw new RuntimeException(
-                'Erro ao preparar consulta de migrations: ' .
-                $this->db->error
-            );
-        }
+        $stmt->execute([
+            'migration' => $migration
+        ]);
 
-        $stmt->bind_param('s', $migration);
-        $stmt->execute();
-
-        $result = $stmt->get_result();
-        $exists = $result->num_rows > 0;
-
-        $stmt->close();
-
-        return $exists;
+        return $stmt->fetchColumn() !== false;
     }
 
     private function executeMigration(
@@ -102,55 +89,56 @@ class MigrationRunner
             );
         }
 
-        if (!$this->db->begin_transaction()) {
-            throw new RuntimeException(
-                'Não foi possível iniciar a transação.'
-            );
-        }
-
         try {
-            if (!$this->db->multi_query($sql)) {
-                throw new RuntimeException(
-                    "Erro na migration {$migration}: " .
-                    $this->db->error
-                );
-            }
+            $this->db->beginTransaction();
 
-            do {
-                if ($result = $this->db->store_result()) {
-                    $result->free();
+            /*
+             * As migrations atuais podem conter mais de uma
+             * instrução SQL. PDO não possui equivalente direto
+             * ao multi_query() do MySQLi.
+             *
+             * Por isso, dividimos as instruções pelo delimitador ;
+             */
+            $statements = $this->splitSqlStatements($sql);
+
+            foreach ($statements as $statement) {
+                if (trim($statement) === '') {
+                    continue;
                 }
-            } while ($this->db->more_results() && $this->db->next_result());
 
-            if ($this->db->errno) {
-                throw new RuntimeException(
-                    "Erro na migration {$migration}: " .
-                    $this->db->error
-                );
+                $this->db->exec($statement);
             }
 
             $stmt = $this->db->prepare(
-                'INSERT INTO migrations (migration) VALUES (?)'
+                'INSERT INTO migrations (migration)
+                 VALUES (:migration)'
             );
 
-            if (!$stmt) {
-                throw new RuntimeException(
-                    'Erro ao registrar migration: ' .
-                    $this->db->error
-                );
-            }
-
-            $stmt->bind_param('s', $migration);
-            $stmt->execute();
-            $stmt->close();
+            $stmt->execute([
+                'migration' => $migration
+            ]);
 
             $this->db->commit();
 
         } catch (\Throwable $e) {
 
-            $this->db->rollback();
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
 
-            throw $e;
+            throw new RuntimeException(
+                "Erro na migration {$migration}: " . $e->getMessage(),
+                0,
+                $e
+            );
         }
+    }
+
+    private function splitSqlStatements(string $sql): array
+    {
+        return preg_split(
+            '/;\s*(?=(?:[^\'"]|\'[^\']*\'|"[^"]*")*$)/',
+            $sql
+        ) ?: [];
     }
 }
