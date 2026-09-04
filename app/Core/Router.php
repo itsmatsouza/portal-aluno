@@ -11,22 +11,42 @@ class Router
 {
     private array $routes = [];
 
-    public function get(string $path, Closure|array $handler): void
-    {
-        $this->addRoute('GET', $path, $handler);
+    public function get(
+        string $path,
+        Closure|array $handler,
+        array $middleware = []
+    ): void {
+        $this->addRoute(
+            'GET',
+            $path,
+            $handler,
+            $middleware
+        );
     }
 
-    public function post(string $path, Closure|array $handler): void
-    {
-        $this->addRoute('POST', $path, $handler);
+    public function post(
+        string $path,
+        Closure|array $handler,
+        array $middleware = []
+    ): void {
+        $this->addRoute(
+            'POST',
+            $path,
+            $handler,
+            $middleware
+        );
     }
 
     private function addRoute(
         string $method,
         string $path,
-        Closure|array $handler
+        Closure|array $handler,
+        array $middleware = []
     ): void {
-        $this->routes[$method][$path] = $handler;
+        $this->routes[$method][$path] = [
+            'handler' => $handler,
+            'middleware' => $middleware,
+        ];
     }
 
     public function dispatch(
@@ -35,9 +55,9 @@ class Router
     ): mixed {
         $path = parse_url($uri, PHP_URL_PATH) ?: '/';
 
-        $handler = $this->routes[$method][$path] ?? null;
+        $route = $this->routes[$method][$path] ?? null;
 
-        if ($handler === null) {
+        if ($route === null) {
             http_response_code(404);
 
             throw new RuntimeException(
@@ -45,13 +65,19 @@ class Router
             );
         }
 
+        foreach ($route['middleware'] as $middleware) {
+            $middleware->handle();
+        }
+
+        $handler = $route['handler'];
+
         if ($handler instanceof Closure) {
             return $handler();
         }
 
         [$controller, $action] = $handler;
 
-        $instance = new $controller();
+        $instance = $controller;
 
         return $instance->$action();
     }
