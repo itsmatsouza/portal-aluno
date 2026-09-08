@@ -33,28 +33,6 @@ $authController = new AuthController(
     $authService
 );
 
-$userCourseRepository = new UserCourseRepository();
-
-$dashboardController = new DashboardController(
-    $userCourseRepository
-);
-
-$authMiddleware = new AuthMiddleware(
-    $authService
-);
-
-$authMiddleware = new AuthMiddleware(
-    $authService
-);
-
-$adminMiddleware = new AdminMiddleware(
-    $authService
-);
-
-$adminController = new AdminController(
-    $userRepository
-);
-
 /*
  * Dependências dos cursos.
  */
@@ -69,6 +47,29 @@ $courseAccessService = new CourseAccessService(
 
 $courseController = new CourseController(
     $courseAccessService
+);
+
+$dashboardController = new DashboardController(
+    $userCourseRepository
+);
+
+/*
+ * Middlewares.
+ */
+$authMiddleware = new AuthMiddleware(
+    $authService
+);
+
+$adminMiddleware = new AdminMiddleware(
+    $authService
+);
+
+/*
+ * Dependências administrativas.
+ */
+$adminController = new AdminController(
+    $userRepository,
+    $courseRepository
 );
 
 /*
