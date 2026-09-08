@@ -101,10 +101,16 @@ $router->get(
     ]
 );
 
-$router->get('/course/{courseId}', [
-    $courseController,
-    'show'
-]);
+$router->get(
+    '/course/{courseId}',
+    [
+        $courseController,
+        'show'
+    ],
+    [
+        $authMiddleware
+    ]
+);
 
 $router->get('/dashboard', [
     $dashboardController,

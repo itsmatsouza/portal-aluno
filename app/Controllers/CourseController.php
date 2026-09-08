@@ -17,13 +17,6 @@ class CourseController
 
     public function show(int $courseId): never
     {
-        if (!SessionManager::get('user_id')) {
-            Response::json([
-                'success' => false,
-                'message' => 'Usuário não autenticado.'
-            ], 401);
-        }
-
         $userId = (int) SessionManager::get('user_id');
 
         $course = $this->courseAccess->getCourseForUser(

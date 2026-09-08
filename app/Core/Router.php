@@ -55,6 +55,50 @@ class Router
         $path = parse_url($uri, PHP_URL_PATH) ?: '/';
 
         $route = $this->routes[$method][$path] ?? null;
+        $params = [];
+
+        /*
+        * Tenta encontrar uma rota dinâmica caso
+        * não exista uma rota estática correspondente.
+        */
+        if ($route === null) {
+            foreach ($this->routes[$method] ?? [] as $routePath => $routeData) {
+
+                $pattern = preg_replace(
+                    '#\{([a-zA-Z_][a-zA-Z0-9_]*)\}#',
+                    '([^/]+)',
+                    $routePath
+                );
+
+                $pattern = '#^' . $pattern . '$#';
+
+                if (
+                    preg_match(
+                        $pattern,
+                        $path,
+                        $matches
+                    )
+                ) {
+                    array_shift($matches);
+
+                    preg_match_all(
+                        '#\{([a-zA-Z_][a-zA-Z0-9_]*)\}#',
+                        $routePath,
+                        $parameterNames
+                    );
+
+                    foreach (
+                        $parameterNames[1] as $index => $name
+                    ) {
+                        $params[$name] = $matches[$index] ?? null;
+                    }
+
+                    $route = $routeData;
+
+                    break;
+                }
+            }
+        }
 
         if ($route === null) {
             Response::json([
@@ -77,6 +121,14 @@ class Router
 
         $instance = $controller;
 
-        return $instance->$action();
-    }
+        $args = array_values($params);
+
+        foreach ($args as $index => $value) {
+            if (is_string($value) && ctype_digit($value)) {
+                $args[$index] = (int) $value;
+            }
+        }
+
+        return $instance->$action(...$args);
+            }
 }
