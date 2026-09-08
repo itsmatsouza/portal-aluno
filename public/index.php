@@ -106,6 +106,13 @@ $router->get('/dashboard', [
     $authMiddleware
 ]);
 
+$router->get('/admin-test', function (): void {
+    echo 'Área administrativa liberada.';
+}, [
+    $authMiddleware,
+    $adminMiddleware
+]);
+
 /*
  * Executa a rota atual.
  */
