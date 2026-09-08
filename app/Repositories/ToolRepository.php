@@ -121,6 +121,68 @@ class ToolRepository
         return $tools;
     }
 
+    public function findActiveByCourseIds(array $courseIds): array
+    {
+        if ($courseIds === []) {
+            return [];
+        }
+
+        $courseIds = array_values(
+            array_unique(
+                array_map('intval', $courseIds)
+            )
+        );
+
+        $placeholders = [];
+
+        foreach ($courseIds as $index => $courseId) {
+            $placeholders[] = ':course_id_' . $index;
+        }
+
+        $sql = "
+            SELECT DISTINCT
+                ct.course_id,
+                t.id,
+                t.name,
+                t.description,
+                t.slug,
+                t.url,
+                t.is_active,
+                t.deleted_at,
+                t.created_at,
+                t.updated_at
+            FROM course_tools ct
+            INNER JOIN tools t
+                ON t.id = ct.tool_id
+            WHERE ct.course_id IN (" . implode(', ', $placeholders) . ")
+            AND ct.is_active = 1
+            AND t.is_active = 1
+            AND t.deleted_at IS NULL
+            ORDER BY ct.course_id ASC, t.name ASC
+        ";
+
+        $stmt = $this->db->prepare($sql);
+
+        $params = [];
+
+        foreach ($courseIds as $index => $courseId) {
+            $params['course_id_' . $index] = $courseId;
+        }
+
+        $stmt->execute($params);
+
+        $tools = [];
+
+        while ($data = $stmt->fetch()) {
+            $tools[] = [
+                'course_id' => (int) $data['course_id'],
+                'tool' => $this->mapToTool($data),
+            ];
+        }
+
+        return $tools;
+    }
+
     private function mapToTool(array $data): Tool
     {
         return new Tool(

@@ -17,4 +17,25 @@ class CourseToolService
     {
         return $this->tools->findActiveByCourseId($courseId);
     }
+
+    public function getToolsForCourses(array $courseIds): array
+    {
+        $tools = $this->tools->findActiveByCourseIds(
+            $courseIds
+        );
+
+        $result = [];
+
+        foreach ($tools as $item) {
+            $courseId = $item['course_id'];
+
+            if (!isset($result[$courseId])) {
+                $result[$courseId] = [];
+            }
+
+            $result[$courseId][] = $item['tool'];
+        }
+
+        return $result;
+    }
 }

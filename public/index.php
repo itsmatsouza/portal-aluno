@@ -59,7 +59,8 @@ $courseController = new CourseController(
 );
 
 $dashboardController = new DashboardController(
-    $userCourseRepository
+    $userCourseRepository,
+    $courseToolService
 );
 
 /*

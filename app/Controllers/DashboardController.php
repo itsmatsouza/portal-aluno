@@ -7,11 +7,13 @@ namespace Leilabrito\PortalAluno\Controllers;
 use Leilabrito\PortalAluno\Core\Response;
 use Leilabrito\PortalAluno\Core\SessionManager;
 use Leilabrito\PortalAluno\Repositories\UserCourseRepository;
+use Leilabrito\PortalAluno\Services\CourseToolService;
 
 class DashboardController
 {
     public function __construct(
-        private UserCourseRepository $userCourses
+        private UserCourseRepository $userCourses,
+        private CourseToolService $courseTools
     ) {
     }
 
@@ -23,13 +25,40 @@ class DashboardController
             $userId
         );
 
+        $courseIds = [];
+
+        foreach ($courses as $course) {
+            $courseIds[] = $course->getId();
+        }
+
+        $toolsByCourse = $this->courseTools->getToolsForCourses(
+            $courseIds
+        );
+
         $result = [];
 
         foreach ($courses as $course) {
+            $courseId = $course->getId();
+
+            $tools = $toolsByCourse[$courseId] ?? [];
+
+            $toolsResult = [];
+
+            foreach ($tools as $tool) {
+                $toolsResult[] = [
+                    'id' => $tool->getId(),
+                    'name' => $tool->getName(),
+                    'description' => $tool->getDescription(),
+                    'slug' => $tool->getSlug(),
+                    'url' => $tool->getUrl(),
+                ];
+            }
+
             $result[] = [
-                'id' => $course->getId(),
+                'id' => $courseId,
                 'name' => $course->getName(),
                 'description' => $course->getDescription(),
+                'tools' => $toolsResult,
             ];
         }
 
