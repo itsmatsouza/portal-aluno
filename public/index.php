@@ -112,7 +112,7 @@ $router->get('/dashboard', [
     $authMiddleware
 ]);
 
-$router->get('/admin-test', [
+$router->get('/admin', [
     $adminController,
     'index'
 ], [

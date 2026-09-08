@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Leilabrito\PortalAluno\Core;
 
 use Closure;
-use RuntimeException;
 
 class Router
 {
@@ -58,11 +57,10 @@ class Router
         $route = $this->routes[$method][$path] ?? null;
 
         if ($route === null) {
-            http_response_code(404);
-
-            throw new RuntimeException(
-                'Página não encontrada.'
-            );
+            Response::json([
+                'success' => false,
+                'message' => 'Página não encontrada.'
+            ], 404);
         }
 
         foreach ($route['middleware'] as $middleware) {
