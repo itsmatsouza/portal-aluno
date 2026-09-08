@@ -115,6 +115,47 @@ class CourseRepository
         return $courses;
     }
 
+    public function countAll(): int
+    {
+        $sql = "
+            SELECT COUNT(*)
+            FROM courses
+            WHERE deleted_at IS NULL
+        ";
+
+        return (int) $this->db
+            ->query($sql)
+            ->fetchColumn();
+    }
+
+    public function countActive(): int
+    {
+        $sql = "
+            SELECT COUNT(*)
+            FROM courses
+            WHERE is_active = 1
+            AND deleted_at IS NULL
+        ";
+
+        return (int) $this->db
+            ->query($sql)
+            ->fetchColumn();
+    }
+
+    public function countInactive(): int
+    {
+        $sql = "
+            SELECT COUNT(*)
+            FROM courses
+            WHERE is_active = 0
+            AND deleted_at IS NULL
+        ";
+
+        return (int) $this->db
+            ->query($sql)
+            ->fetchColumn();
+    }
+
     private function mapToCourse(array $data): Course
     {
         return new Course(
