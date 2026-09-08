@@ -16,6 +16,7 @@ use Leilabrito\PortalAluno\Repositories\CourseRepository;
 use Leilabrito\PortalAluno\Repositories\UserCourseRepository;
 use Leilabrito\PortalAluno\Services\CourseAccessService;
 use Leilabrito\PortalAluno\Controllers\DashboardController;
+use Leilabrito\PortalAluno\Controllers\AdminController;
 
 $router = new Router();
 
@@ -48,6 +49,10 @@ $authMiddleware = new AuthMiddleware(
 
 $adminMiddleware = new AdminMiddleware(
     $authService
+);
+
+$adminController = new AdminController(
+    $userRepository
 );
 
 /*
@@ -106,9 +111,10 @@ $router->get('/dashboard', [
     $authMiddleware
 ]);
 
-$router->get('/admin-test', function (): void {
-    echo 'Área administrativa liberada.';
-}, [
+$router->get('/admin-test', [
+    $adminController,
+    'index'
+], [
     $authMiddleware,
     $adminMiddleware
 ]);
