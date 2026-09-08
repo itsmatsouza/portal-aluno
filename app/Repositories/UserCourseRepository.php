@@ -186,6 +186,18 @@ class UserCourseRepository
         return $userCourses;
     }
 
+    public function countAll(): int
+    {
+        $sql = "
+            SELECT COUNT(*)
+            FROM user_courses
+        ";
+
+        return (int) $this->db
+            ->query($sql)
+            ->fetchColumn();
+    }
+
     private function mapToUserCourse(array $data): UserCourse
     {
         return new UserCourse(
