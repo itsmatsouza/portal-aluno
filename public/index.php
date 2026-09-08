@@ -17,6 +17,8 @@ use Leilabrito\PortalAluno\Repositories\UserCourseRepository;
 use Leilabrito\PortalAluno\Services\CourseAccessService;
 use Leilabrito\PortalAluno\Controllers\DashboardController;
 use Leilabrito\PortalAluno\Controllers\AdminController;
+use Leilabrito\PortalAluno\Repositories\ToolRepository;
+use Leilabrito\PortalAluno\Services\CourseToolService;
 
 $router = new Router();
 
@@ -40,13 +42,20 @@ $courseRepository = new CourseRepository();
 
 $userCourseRepository = new UserCourseRepository();
 
+$toolRepository = new ToolRepository();
+
 $courseAccessService = new CourseAccessService(
     $userCourseRepository,
     $courseRepository
 );
 
+$courseToolService = new CourseToolService(
+    $toolRepository
+);
+
 $courseController = new CourseController(
-    $courseAccessService
+    $courseAccessService,
+    $courseToolService
 );
 
 $dashboardController = new DashboardController(
