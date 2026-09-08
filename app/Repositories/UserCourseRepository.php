@@ -198,6 +198,38 @@ class UserCourseRepository
             ->fetchColumn();
     }
 
+    public function countByStatus(string $status): int
+    {
+        $allowedStatuses = [
+            'ACTIVE',
+            'CANCELLED',
+            'REFUNDED',
+            'CHARGEBACK',
+            'EXPIRED',
+            'SUSPENDED',
+        ];
+
+        if (!in_array($status, $allowedStatuses, true)) {
+            throw new \InvalidArgumentException(
+                'Status de vínculo inválido.'
+            );
+        }
+
+        $sql = "
+            SELECT COUNT(*)
+            FROM user_courses
+            WHERE status = :status
+        ";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->execute([
+            'status' => $status,
+        ]);
+
+        return (int) $stmt->fetchColumn();
+    }
+
     private function mapToUserCourse(array $data): UserCourse
     {
         return new UserCourse(
