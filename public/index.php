@@ -69,7 +69,8 @@ $adminMiddleware = new AdminMiddleware(
  */
 $adminController = new AdminController(
     $userRepository,
-    $courseRepository
+    $courseRepository,
+    $userCourseRepository
 );
 
 /*

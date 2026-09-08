@@ -6,6 +6,8 @@ namespace Leilabrito\PortalAluno\Core;
 
 class Request
 {
+    private ?array $jsonData = null;
+
     public function method(): string
     {
         return $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -18,7 +20,13 @@ class Request
 
     public function input(string $key, mixed $default = null): mixed
     {
-        return $_POST[$key] ?? $default;
+        if (isset($_POST[$key])) {
+            return $_POST[$key];
+        }
+
+        $json = $this->json();
+
+        return $json[$key] ?? $default;
     }
 
     public function query(string $key, mixed $default = null): mixed
@@ -28,6 +36,46 @@ class Request
 
     public function all(): array
     {
-        return $_POST;
+        return array_merge($_POST, $this->json());
+    }
+
+    private function json(): array
+    {
+        if ($this->jsonData !== null) {
+            return $this->jsonData;
+        }
+
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+
+        if (
+            stripos(
+                $contentType,
+                'application/json'
+            ) === false
+        ) {
+            $this->jsonData = [];
+
+            return $this->jsonData;
+        }
+
+        $raw = file_get_contents('php://input');
+
+        if ($raw === false || trim($raw) === '') {
+            $this->jsonData = [];
+
+            return $this->jsonData;
+        }
+
+        $data = json_decode($raw, true);
+
+        if (!is_array($data)) {
+            $this->jsonData = [];
+
+            return $this->jsonData;
+        }
+
+        $this->jsonData = $data;
+
+        return $this->jsonData;
     }
 }
