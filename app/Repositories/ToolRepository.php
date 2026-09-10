@@ -183,6 +183,36 @@ class ToolRepository
         return $tools;
     }
 
+    public function hasActiveAccessForUser(
+        int $userId,
+        int $toolId
+    ): bool {
+        $sql = "
+            SELECT 1
+            FROM user_courses uc
+            INNER JOIN course_tools ct
+                ON ct.course_id = uc.course_id
+            INNER JOIN tools t
+                ON t.id = ct.tool_id
+            WHERE uc.user_id = :user_id
+            AND uc.status = 'ACTIVE'
+            AND ct.tool_id = :tool_id
+            AND ct.is_active = 1
+            AND t.is_active = 1
+            AND t.deleted_at IS NULL
+            LIMIT 1
+        ";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->execute([
+            'user_id' => $userId,
+            'tool_id' => $toolId,
+        ]);
+
+        return $stmt->fetchColumn() !== false;
+    }
+
     private function mapToTool(array $data): Tool
     {
         return new Tool(

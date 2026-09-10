@@ -38,4 +38,14 @@ class CourseToolService
 
         return $result;
     }
+
+    public function userCanAccessTool(
+        int $userId,
+        int $toolId
+    ): bool {
+        return $this->tools->hasActiveAccessForUser(
+            $userId,
+            $toolId
+        );
+    }
 }
