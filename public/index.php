@@ -20,6 +20,11 @@ use Leilabrito\PortalAluno\Controllers\AdminController;
 use Leilabrito\PortalAluno\Repositories\ToolRepository;
 use Leilabrito\PortalAluno\Services\CourseToolService;
 use Leilabrito\PortalAluno\Controllers\ToolController;
+use Leilabrito\PortalAluno\Controllers\PasswordResetController;
+use Leilabrito\PortalAluno\Repositories\AuthTokenRepository;
+use Leilabrito\PortalAluno\Services\MailService;
+use Leilabrito\PortalAluno\Services\PasswordResetService;
+use Leilabrito\PortalAluno\Core\Database;
 
 $router = new Router();
 
@@ -34,6 +39,25 @@ $authService = new AuthService(
 
 $authController = new AuthController(
     $authService
+);
+
+/*
+ * Dependências da recuperação de senha.
+ */
+$authTokenRepository = new AuthTokenRepository(
+    Database::getConnection()
+);
+
+$mailService = new MailService();
+
+$passwordResetService = new PasswordResetService(
+    $userRepository,
+    $authTokenRepository,
+    $mailService
+);
+
+$passwordResetController = new PasswordResetController(
+    $passwordResetService
 );
 
 /*
@@ -99,6 +123,16 @@ $router->get('/', function (): void {
 $router->post('/login', [
     $authController,
     'login'
+]);
+
+$router->post('/password/forgot', [
+    $passwordResetController,
+    'forgot'
+]);
+
+$router->post('/password/reset', [
+    $passwordResetController,
+    'reset'
 ]);
 
 $router->post('/logout', [
