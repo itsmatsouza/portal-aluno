@@ -105,6 +105,26 @@ class UserRepository
         ]);
     }
 
+    public function updatePassword(
+        int $userId,
+        string $passwordHash
+    ): void {
+        $sql = "
+            UPDATE users
+            SET
+                password_hash = :password_hash,
+                updated_at = NOW()
+            WHERE id = :id
+        ";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->execute([
+            'password_hash' => $passwordHash,
+            'id' => $userId,
+        ]);
+    }
+
     public function countAll(): int
     {
         $sql = "
