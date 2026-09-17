@@ -1,0 +1,230 @@
+.tool-page {
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: 30px 34px 48px;
+}
+
+.tool-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #6c7c90;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 22px;
+    transition: color .2s ease;
+}
+
+.tool-back-link:hover {
+    color: #0a1931;
+}
+
+.tool-alert {
+    display: none;
+    background: #fff1f1;
+    border: 1px solid #efcaca;
+    color: #a33b3b;
+    border-radius: 10px;
+    padding: 13px 16px;
+    margin-bottom: 18px;
+    font-size: 13px;
+}
+
+.tool-alert.is-visible {
+    display: block;
+}
+
+.tool-hero {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    background:
+        radial-gradient(
+            circle at 95% 10%,
+            rgba(148, 181, 222, .18),
+            transparent 32%
+        ),
+        #0a1931;
+    color: #fff;
+    border-radius: 18px;
+    padding: 32px 34px;
+    margin-bottom: 22px;
+}
+
+.tool-hero .section-kicker {
+    color: #94b5de;
+}
+
+.tool-hero h1 {
+    margin: 10px 0 8px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(26px, 3vw, 40px);
+    font-weight: 500;
+    line-height: 1.15;
+}
+
+.tool-hero p {
+    max-width: 760px;
+    margin: 0;
+    color: #d6dfeb;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.tool-hero-actions {
+    flex: 0 0 auto;
+}
+
+.tool-secondary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 17px;
+    border: 1px solid rgba(255, 255, 255, .25);
+    border-radius: 9px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    transition: background .2s ease, border-color .2s ease;
+}
+
+.tool-secondary-button:hover {
+    background: rgba(255, 255, 255, .1);
+    border-color: rgba(255, 255, 255, .45);
+}
+
+.tool-content-card {
+    background: #fff;
+    border: 1px solid #e3e8ef;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 10px 35px rgba(10, 25, 49, .05);
+}
+
+.tool-content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 22px 26px;
+    border-bottom: 1px solid #e8edf3;
+}
+
+.tool-content-header h2 {
+    margin: 7px 0 0;
+    color: #0a1931;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 24px;
+    font-weight: 500;
+}
+
+.tool-access-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: #edf7f1;
+    color: #28734d;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.tool-frame-wrapper {
+    position: relative;
+    min-height: 900px;
+    background: #f4f6f9;
+}
+
+.tool-frame-loading {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c7c90;
+    font-size: 14px;
+    pointer-events: none;
+    transition: opacity .2s ease;
+}
+
+.tool-frame-loading.is-hidden {
+    opacity: 0;
+}
+
+.tool-frame {
+    display: block;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    min-height: 900px;
+    height: 1400px;
+    border: 0;
+    background: #f4f6f9;
+}
+
+@media (max-width: 900px) {
+    .tool-page {
+        padding: 24px 20px 36px;
+    }
+
+    .tool-hero {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 26px 24px;
+    }
+
+    .tool-content-header {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    .tool-frame-wrapper {
+        min-height: 1000px;
+    }
+
+    .tool-frame {
+        min-height: 1000px;
+        height: 1600px;
+    }
+}
+
+@media (max-width: 600px) {
+    .tool-page {
+        padding: 20px 14px 30px;
+    }
+
+    .tool-hero {
+        border-radius: 14px;
+        padding: 24px 20px;
+    }
+
+    .tool-hero h1 {
+        font-size: 28px;
+    }
+
+    .tool-content-card {
+        border-radius: 14px;
+    }
+
+    .tool-content-header h2 {
+        font-size: 21px;
+    }
+
+    .tool-frame-wrapper {
+        min-height: 1100px;
+    }
+
+    .tool-frame {
+        min-height: 1100px;
+        height: 1800px;
+    }
+}

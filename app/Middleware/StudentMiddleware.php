@@ -7,23 +7,29 @@ namespace Leilabrito\PortalAluno\Middleware;
 use Leilabrito\PortalAluno\Core\Response;
 use Leilabrito\PortalAluno\Services\AuthService;
 
-class AuthMiddleware
+class StudentMiddleware
 {
     public function __construct(
-        private AuthService $authService
+        private AuthService $auth
     ) {
     }
 
     public function handle(): void
     {
-        if (!$this->authService->check()) {
+        $user = $this->auth->user();
+
+        if ($user === null) {
             Response::viewError(
                 '401',
                 401,
                 [
-                    'message' => 'Sua sessão expirou. Faça login novamente.'
+                    'message' => 'Você precisa estar autenticado para acessar esta página.'
                 ]
             );
+        }
+
+        if ($user->isAdmin()) {
+            Response::redirect('/admin');
         }
     }
 }

@@ -190,12 +190,16 @@ class ToolRepository
         $sql = "
             SELECT 1
             FROM user_courses uc
+            INNER JOIN courses c
+                ON c.id = uc.course_id
             INNER JOIN course_tools ct
                 ON ct.course_id = uc.course_id
             INNER JOIN tools t
                 ON t.id = ct.tool_id
             WHERE uc.user_id = :user_id
             AND uc.status = 'ACTIVE'
+            AND c.is_active = 1
+            AND c.deleted_at IS NULL
             AND ct.tool_id = :tool_id
             AND ct.is_active = 1
             AND t.is_active = 1

@@ -45,4 +45,18 @@ class Response
 
         exit;
     }
+
+    public static function viewError(
+        string $view,
+        int $status = 500,
+        array $data = []
+    ): never {
+        http_response_code($status);
+
+        extract($data, EXTR_SKIP);
+
+        require dirname(__DIR__) . '/Views/errors/' . $view . '.php';
+
+        exit;
+    }
 }

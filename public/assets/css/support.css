@@ -1,0 +1,279 @@
+/*
+ * Elementos exclusivos da tela de suporte.
+ * A estrutura geral do portal vem de dashboard.css.
+ */
+
+.support-content {
+    display: flex;
+    flex-direction: column;
+    gap: 42px;
+}
+
+.support-intro {
+    max-width: 720px;
+    animation: portalEntrance 650ms ease both;
+}
+
+.support-intro h1 {
+    margin: 14px 0 12px;
+
+    color: var(--navy);
+
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(36px, 4vw, 52px);
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -0.04em;
+}
+
+.support-intro p {
+    max-width: 620px;
+    margin: 0;
+
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.support-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.support-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    min-height: 250px;
+    padding: 26px;
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+
+    background: var(--white);
+
+    box-shadow: 0 8px 24px rgba(10, 25, 49, 0.035);
+
+    animation: cardEntrance 500ms ease both;
+
+    transition:
+        transform 200ms ease,
+        box-shadow 200ms ease,
+        border-color 200ms ease;
+}
+
+.support-card:hover {
+    border-color: rgba(148, 181, 222, 0.8);
+    box-shadow: 0 16px 36px rgba(10, 25, 49, 0.07);
+    transform: translateY(-3px);
+}
+
+.support-card-icon {
+    display: grid;
+    place-items: center;
+
+    width: 46px;
+    height: 46px;
+    margin-bottom: 22px;
+
+    border-radius: 13px;
+
+    background: rgba(148, 181, 222, 0.16);
+    color: var(--slate);
+}
+
+.support-card:nth-child(2n) .support-card-icon {
+    background: rgba(139, 116, 90, 0.11);
+    color: var(--gold);
+}
+
+.support-card-icon svg {
+    width: 22px;
+    height: 22px;
+
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.7;
+}
+
+.support-card h2 {
+    margin: 0 0 10px;
+
+    color: var(--navy);
+
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.2;
+}
+
+.support-card p {
+    margin: 0;
+
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.support-contact-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 42px;
+    margin-top: 22px;
+    padding: 0 17px;
+
+    border: 1px solid var(--navy);
+    border-radius: 10px;
+
+    background: var(--navy);
+    color: var(--white);
+
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: none;
+
+    transition:
+        background 180ms ease,
+        border-color 180ms ease,
+        transform 180ms ease;
+}
+
+.support-contact-button:hover {
+    border-color: var(--gold);
+    background: var(--gold);
+    transform: translateY(-1px);
+}
+
+.support-contact-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+
+    padding: 30px;
+
+    border-radius: var(--radius);
+
+    position: relative;
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(10, 25, 49, 1),
+            rgba(24, 48, 82, 1)
+        );
+
+    color: var(--white);
+
+    box-shadow: 0 18px 45px rgba(10, 25, 49, 0.12);
+}
+
+.support-contact-panel::after {
+    content: '';
+
+    position: absolute;
+    right: -100px;
+    bottom: -130px;
+
+    width: 340px;
+    height: 340px;
+
+    border: 1px solid rgba(148, 181, 222, 0.2);
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 0 45px rgba(148, 181, 222, 0.025),
+        0 0 0 90px rgba(148, 181, 222, 0.025);
+
+    pointer-events: none;
+}
+
+.support-contact-panel > div,
+.support-contact-panel > a {
+    position: relative;
+    z-index: 1;
+}
+
+.support-contact-panel .section-kicker {
+    color: var(--blue);
+}
+
+.support-contact-panel h2 {
+    margin: 10px 0 10px;
+
+    color: var(--white);
+
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(25px, 3vw, 34px);
+    font-weight: 400;
+    line-height: 1.15;
+}
+
+.support-contact-panel p {
+    max-width: 620px;
+    margin: 0;
+
+    color: rgba(235, 236, 240, 0.72);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.support-contact-button-light {
+    flex-shrink: 0;
+
+    border-color: var(--white);
+    background: var(--white);
+    color: var(--navy);
+}
+
+.support-contact-button-light:hover {
+    border-color: var(--blue);
+    background: var(--blue);
+    color: var(--navy);
+}
+
+@media (max-width: 760px) {
+    .support-content {
+        gap: 34px;
+    }
+
+    .support-intro h1 {
+        font-size: 39px;
+    }
+
+    .support-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .support-card {
+        min-height: auto;
+        padding: 22px;
+    }
+
+    .support-contact-panel {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 22px;
+    }
+
+    .support-contact-button-light {
+        width: 100%;
+    }
+}
+
+@media (max-width: 420px) {
+    .support-intro h1 {
+        font-size: 35px;
+    }
+
+    .support-card h2 {
+        font-size: 22px;
+    }
+}   

@@ -34,9 +34,29 @@ class AuthController
             ], 401);
         }
 
+        $user = $this->auth->user();
+
+        if ($user === null) {
+            Response::json([
+                'success' => false,
+                'message' => 'Não foi possível recuperar os dados do usuário.'
+            ], 500);
+        }
+
+        $redirect = $user->isAdmin()
+            ? '/admin'
+            : '/portal';
+
         Response::json([
             'success' => true,
-            'message' => 'Login realizado com sucesso.'
+            'message' => 'Login realizado com sucesso.',
+            'redirect' => $redirect,
+            'user' => [
+                'id' => $user->getId(),
+                'name' => $user->getName(),
+                'email' => $user->getEmail(),
+                'role' => $user->getRole(),
+            ]
         ]);
     }
 

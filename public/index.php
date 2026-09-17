@@ -7,8 +7,10 @@ require_once __DIR__ . '/../app/Core/Bootstrap.php';
 
 use Leilabrito\PortalAluno\Middleware\AdminMiddleware;
 use Leilabrito\PortalAluno\Middleware\AuthMiddleware;
+use Leilabrito\PortalAluno\Middleware\StudentMiddleware;
 use Leilabrito\PortalAluno\Controllers\AuthController;
 use Leilabrito\PortalAluno\Core\Router;
+use Leilabrito\PortalAluno\Core\Response;
 use Leilabrito\PortalAluno\Repositories\UserRepository;
 use Leilabrito\PortalAluno\Services\AuthService;
 use Leilabrito\PortalAluno\Controllers\CourseController;
@@ -21,6 +23,7 @@ use Leilabrito\PortalAluno\Repositories\ToolRepository;
 use Leilabrito\PortalAluno\Services\CourseToolService;
 use Leilabrito\PortalAluno\Controllers\ToolController;
 use Leilabrito\PortalAluno\Controllers\PasswordResetController;
+use Leilabrito\PortalAluno\Controllers\SupportController;
 use Leilabrito\PortalAluno\Repositories\AuthTokenRepository;
 use Leilabrito\PortalAluno\Services\MailService;
 use Leilabrito\PortalAluno\Services\PasswordResetService;
@@ -93,6 +96,10 @@ $dashboardController = new DashboardController(
     $courseToolService
 );
 
+$supportController = new SupportController(
+    $authService
+);
+
 /*
  * Middlewares.
  */
@@ -101,6 +108,10 @@ $authMiddleware = new AuthMiddleware(
 );
 
 $adminMiddleware = new AdminMiddleware(
+    $authService
+);
+
+$studentMiddleware = new StudentMiddleware(
     $authService
 );
 
@@ -118,6 +129,24 @@ $adminController = new AdminController(
  */
 $router->get('/', function (): void {
     echo 'Portal do aluno funcionando.';
+});
+
+$router->get('/login', function (): void {
+    require dirname(__DIR__) . '/app/Views/login.php';
+});
+
+$router->get('/password/forgot', function (): void {
+    $mode = 'request';
+    $token = '';
+
+    require dirname(__DIR__) . '/app/Views/password-reset.php';
+});
+
+$router->get('/password/reset', function (): void {
+    $mode = 'reset';
+    $token = (string) ($_GET['token'] ?? '');
+
+    require dirname(__DIR__) . '/app/Views/password-reset.php';
 });
 
 $router->post('/login', [
@@ -158,7 +187,20 @@ $router->get(
         'show'
     ],
     [
-        $authMiddleware
+        $authMiddleware,
+        $studentMiddleware
+    ]
+);
+
+$router->get(
+    '/tool/{slug}/view',
+    [
+        $toolController,
+        'view'
+    ],
+    [
+        $authMiddleware,
+        $studentMiddleware
     ]
 );
 
@@ -169,15 +211,39 @@ $router->get(
         'show'
     ],
     [
-        $authMiddleware
+        $authMiddleware,
+        $studentMiddleware
     ]
 );
+
+$router->get('/course/{courseId}/view', function (): void {
+    require dirname(__DIR__) . '/app/Views/course.php';
+}, [
+    $authMiddleware,
+    $studentMiddleware
+]);
+
+$router->get('/portal', function (): void {
+    require dirname(__DIR__) . '/app/Views/dashboard.php';
+}, [
+    $authMiddleware,
+    $studentMiddleware
+]);
+
+$router->get('/support', [
+    $supportController,
+    'index'
+], [
+    $authMiddleware,
+    $studentMiddleware
+]);
 
 $router->get('/dashboard', [
     $dashboardController,
     'index'
 ], [
-    $authMiddleware
+    $authMiddleware,
+    $studentMiddleware
 ]);
 
 $router->get('/admin', [
@@ -187,6 +253,12 @@ $router->get('/admin', [
     $authMiddleware,
     $adminMiddleware
 ]);
+
+$router->get(
+    '/admin/users',
+    [$adminController, 'users'],
+    [$authMiddleware, $adminMiddleware]
+);
 
 /*
  * Executa a rota atual.
@@ -199,13 +271,14 @@ try {
     );
 
 } catch (Throwable $e) {
+    error_log($e->getMessage());
+    error_log($e->getTraceAsString());
 
-    http_response_code(500);
-
-    header('Content-Type: application/json; charset=utf-8');
-
-    echo json_encode([
-        'success' => false,
-        'message' => 'Erro interno do servidor.'
-    ]);
+    Response::viewError(
+        '500',
+        500,
+        [
+            'message' => 'Ocorreu um erro interno. Tente novamente mais tarde.'
+        ]
+    );
 }

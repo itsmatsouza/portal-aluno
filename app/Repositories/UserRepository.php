@@ -166,6 +166,116 @@ class UserRepository
             ->fetchColumn();
     }
 
+    public function findPaginated(
+        int $page = 1,
+        int $perPage = 20,
+        ?string $search = null,
+        ?string $status = null,
+        ?string $role = null
+    ): array {
+        $page = max(1, $page);
+        $perPage = max(1, min(100, $perPage));
+
+        $offset = ($page - 1) * $perPage;
+
+        $where = [
+            'deleted_at IS NULL',
+        ];
+
+        $params = [];
+
+        if ($search !== null && trim($search) !== '') {
+            $where[] = '(name LIKE :search OR email LIKE :search)';
+
+            $params['search'] = '%' . trim($search) . '%';
+        }
+
+        if ($status === 'active') {
+            $where[] = 'is_active = 1';
+        }
+
+        if ($status === 'inactive') {
+            $where[] = 'is_active = 0';
+        }
+
+        if ($role === 'ADMIN' || $role === 'ALUNO') {
+            $where[] = 'role = :role';
+
+            $params['role'] = $role;
+        }
+
+        $whereSql = implode(' AND ', $where);
+
+        $countSql = "
+            SELECT COUNT(*)
+            FROM users
+            WHERE {$whereSql}
+        ";
+
+        $countStmt = $this->db->prepare($countSql);
+        $countStmt->execute($params);
+
+        $total = (int) $countStmt->fetchColumn();
+
+        $sql = "
+            SELECT
+                id,
+                name,
+                email,
+                password_hash,
+                role,
+                hotmart_buyer_id,
+                hotmart_email,
+                is_active,
+                deleted_at,
+                last_login_at,
+                created_at,
+                updated_at
+            FROM users
+            WHERE {$whereSql}
+            ORDER BY created_at DESC
+            LIMIT :limit OFFSET :offset
+        ";
+
+        $stmt = $this->db->prepare($sql);
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(
+                ':' . $key,
+                $value,
+                PDO::PARAM_STR
+            );
+        }
+
+        $stmt->bindValue(
+            ':limit',
+            $perPage,
+            PDO::PARAM_INT
+        );
+
+        $stmt->bindValue(
+            ':offset',
+            $offset,
+            PDO::PARAM_INT
+        );
+
+        $stmt->execute();
+
+        $users = [];
+
+        while ($data = $stmt->fetch()) {
+            $users[] = $this->mapToUser($data);
+        }
+
+        return [
+            'items' => $users,
+            'total' => $total,
+            'page' => $page,
+            'per_page' => $perPage,
+            'total_pages' => max(1, (int) ceil($total / $perPage)),
+        ];
+    }
+
     private function mapToUser(array $data): User
     {
         return new User(

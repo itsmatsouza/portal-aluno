@@ -19,17 +19,23 @@ class AdminMiddleware
         $user = $this->auth->user();
 
         if ($user === null) {
-            Response::json([
-                'success' => false,
-                'message' => 'Não autenticado.'
-            ], 401);
+            Response::viewError(
+                '401',
+                401,
+                [
+                    'message' => 'Você precisa estar autenticado para acessar esta página.'
+                ]
+            );
         }
 
         if (!$user->isAdmin()) {
-            Response::json([
-                'success' => false,
-                'message' => 'Acesso não autorizado.'
-            ], 403);
+            Response::viewError(
+                '403',
+                403,
+                [
+                    'message' => 'Você não possui permissão para acessar esta área.'
+                ]
+            );
         }
     }
 }

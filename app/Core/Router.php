@@ -101,10 +101,13 @@ class Router
         }
 
         if ($route === null) {
-            Response::json([
-                'success' => false,
-                'message' => 'Página não encontrada.'
-            ], 404);
+            Response::viewError(
+                '404',
+                404,
+                [
+                    'message' => 'Página não encontrada.'
+                ]
+            );
         }
 
         foreach ($route['middleware'] as $middleware) {
@@ -112,14 +115,6 @@ class Router
         }
 
         $handler = $route['handler'];
-
-        if ($handler instanceof Closure) {
-            return $handler();
-        }
-
-        [$controller, $action] = $handler;
-
-        $instance = $controller;
 
         $args = array_values($params);
 
@@ -129,6 +124,14 @@ class Router
             }
         }
 
+        if ($handler instanceof Closure) {
+            return $handler(...$args);
+        }
+
+        [$controller, $action] = $handler;
+
+        $instance = $controller;
+
         return $instance->$action(...$args);
-            }
+    }
 }

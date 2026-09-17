@@ -1,0 +1,128 @@
+:root {
+    --error-background: #ebecf0;
+    --error-card-background: #ffffff;
+    --error-text: #0a1931;
+    --error-muted: #6c7c90;
+    --error-primary: #0a1931;
+    --error-primary-hover: #172b4d;
+    --error-border: #d8dde5;
+    --error-accent: #94b5de;
+    --error-detail: #8b745a;
+    --error-shadow: 0 18px 45px rgba(10, 25, 49, 0.12);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family:
+        "Nunito Sans",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    background: var(--error-background);
+    color: var(--error-text);
+}
+
+.error-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.error-card {
+    width: min(100%, 520px);
+    padding: 48px 40px;
+    text-align: center;
+    background: var(--error-card-background);
+    border: 1px solid var(--error-border);
+    border-radius: 20px;
+    box-shadow: var(--error-shadow);
+}
+
+.error-code {
+    color: var(--error-primary);
+    font-size: clamp(3.5rem, 12vw, 6rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.06em;
+}
+
+.error-divider {
+    width: 56px;
+    height: 4px;
+    margin: 24px auto;
+    border-radius: 999px;
+    background: var(--error-primary);
+}
+
+.error-card h1 {
+    margin: 0;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    line-height: 1.25;
+    font-weight: 700;
+}
+
+.error-message {
+    max-width: 400px;
+    margin: 16px auto 30px;
+    color: var(--error-muted);
+    font-size: 1rem;
+    line-height: 1.65;
+}
+
+.error-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    padding: 0 24px;
+    border-radius: 10px;
+    background: var(--error-primary);
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.error-button:hover {
+    background: var(--error-primary-hover);
+    transform: translateY(-1px);
+}
+
+.error-button:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.3);
+    outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+    .error-page {
+        padding: 16px;
+    }
+
+    .error-card {
+        padding: 36px 24px;
+        border-radius: 16px;
+    }
+
+    .error-message {
+        font-size: 0.95rem;
+    }
+
+    .error-button {
+        width: 100%;
+    }
+}
