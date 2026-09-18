@@ -17,8 +17,10 @@ if ($currentPath === '') {
 }
 
 $isDashboardActive = $currentPath === '/admin';
-$isUsersActive = $currentPath === '/admin/users';
-$isCoursesActive = $currentPath === '/admin/courses';
+$isUsersActive = $currentPath === '/admin/users'
+    || str_starts_with($currentPath, '/admin/users/');
+$isCoursesActive = $currentPath === '/admin/courses'
+    || str_starts_with($currentPath, '/admin/courses/');
 $isToolsActive = $currentPath === '/admin/tools';
 $isAccessActive = $currentPath === '/admin/access';
 

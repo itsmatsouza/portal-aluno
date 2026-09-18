@@ -156,6 +156,67 @@ class CourseRepository
             ->fetchColumn();
     }
 
+    public function findPaginated(int $page = 1, int $perPage = 20, string $search = '', string $status = ''): array
+    {
+        $perPage = max(1, min(100, $perPage));
+        $where = ['deleted_at IS NULL'];
+        $params = [];
+        if ($search !== '') {
+            $where[] = '(name LIKE :name OR hotmart_product_ucode LIKE :ucode)';
+            $params = ['name' => '%' . $search . '%', 'ucode' => '%' . $search . '%'];
+        }
+        if (in_array($status, ['active', 'inactive'], true)) {
+            $where[] = 'is_active = :active';
+            $params['active'] = $status === 'active' ? 1 : 0;
+        }
+        $whereSql = implode(' AND ', $where);
+        $count = $this->db->prepare("SELECT COUNT(*) FROM courses WHERE {$whereSql}");
+        $count->execute($params);
+        $total = (int) $count->fetchColumn();
+        $totalPages = max(1, (int) ceil($total / $perPage));
+        $page = max(1, min($page, $totalPages));
+        $stmt = $this->db->prepare("SELECT * FROM courses WHERE {$whereSql}
+            ORDER BY created_at DESC, id DESC LIMIT :limit OFFSET :offset");
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(':' . $key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', ($page - 1) * $perPage, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return [
+            'items' => array_map($this->mapToCourse(...), $stmt->fetchAll()),
+            'total' => $total,
+            'page' => $page,
+            'total_pages' => $totalPages,
+        ];
+    }
+
+    public function create(string $name, ?string $description, ?string $ucode, bool $active): int
+    {
+        $stmt = $this->db->prepare('INSERT INTO courses
+            (name, description, hotmart_product_ucode, is_active)
+            VALUES (:name, :description, :ucode, :active)');
+        $stmt->execute(['name' => $name, 'description' => $description, 'ucode' => $ucode, 'active' => (int) $active]);
+
+        return (int) $this->db->lastInsertId();
+    }
+
+    public function update(int $id, string $name, ?string $description, ?string $ucode, bool $active): void
+    {
+        $stmt = $this->db->prepare('UPDATE courses SET name = :name, description = :description,
+            hotmart_product_ucode = :ucode, is_active = :active, updated_at = NOW()
+            WHERE id = :id AND deleted_at IS NULL');
+        $stmt->execute(['id' => $id, 'name' => $name, 'description' => $description, 'ucode' => $ucode, 'active' => (int) $active]);
+    }
+
+    public function setActive(int $id, bool $active): void
+    {
+        $stmt = $this->db->prepare('UPDATE courses SET is_active = :active, updated_at = NOW()
+            WHERE id = :id AND deleted_at IS NULL');
+        $stmt->execute(['id' => $id, 'active' => (int) $active]);
+    }
+
     private function mapToCourse(array $data): Course
     {
         return new Course(

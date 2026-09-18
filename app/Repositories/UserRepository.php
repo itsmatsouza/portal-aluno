@@ -176,8 +176,6 @@ class UserRepository
         $page = max(1, $page);
         $perPage = max(1, min(100, $perPage));
 
-        $offset = ($page - 1) * $perPage;
-
         $where = [
             'deleted_at IS NULL',
         ];
@@ -185,9 +183,10 @@ class UserRepository
         $params = [];
 
         if ($search !== null && trim($search) !== '') {
-            $where[] = '(name LIKE :search OR email LIKE :search)';
+            $where[] = '(name LIKE :search_name OR email LIKE :search_email)';
 
-            $params['search'] = '%' . trim($search) . '%';
+            $params['search_name'] = '%' . trim($search) . '%';
+            $params['search_email'] = $params['search_name'];
         }
 
         if ($status === 'active') {
@@ -216,6 +215,9 @@ class UserRepository
         $countStmt->execute($params);
 
         $total = (int) $countStmt->fetchColumn();
+        $totalPages = max(1, (int) ceil($total / $perPage));
+        $page = min($page, $totalPages);
+        $offset = ($page - 1) * $perPage;
 
         $sql = "
             SELECT
@@ -233,7 +235,7 @@ class UserRepository
                 updated_at
             FROM users
             WHERE {$whereSql}
-            ORDER BY created_at DESC
+            ORDER BY created_at DESC, id DESC
             LIMIT :limit OFFSET :offset
         ";
 
@@ -272,7 +274,7 @@ class UserRepository
             'total' => $total,
             'page' => $page,
             'per_page' => $perPage,
-            'total_pages' => max(1, (int) ceil($total / $perPage)),
+            'total_pages' => $totalPages,
         ];
     }
 

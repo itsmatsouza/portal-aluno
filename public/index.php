@@ -19,6 +19,8 @@ use Leilabrito\PortalAluno\Repositories\UserCourseRepository;
 use Leilabrito\PortalAluno\Services\CourseAccessService;
 use Leilabrito\PortalAluno\Controllers\DashboardController;
 use Leilabrito\PortalAluno\Controllers\AdminController;
+use Leilabrito\PortalAluno\Controllers\AdminCourseController;
+use Leilabrito\PortalAluno\Services\AdminCourseService;
 use Leilabrito\PortalAluno\Repositories\ToolRepository;
 use Leilabrito\PortalAluno\Services\CourseToolService;
 use Leilabrito\PortalAluno\Controllers\ToolController;
@@ -259,6 +261,25 @@ $router->get(
     [$adminController, 'users'],
     [$authMiddleware, $adminMiddleware]
 );
+
+$router->get(
+    '/admin/users/{id}',
+    [$adminController, 'userDetails'],
+    [$authMiddleware, $adminMiddleware]
+);
+
+$adminCourseController = new AdminCourseController(
+    $courseRepository,
+    $userRepository,
+    new AdminCourseService($courseRepository)
+);
+$adminCourseMiddleware = [$authMiddleware, $adminMiddleware];
+$router->get('/admin/courses', [$adminCourseController, 'index'], $adminCourseMiddleware);
+$router->get('/admin/courses/new', [$adminCourseController, 'create'], $adminCourseMiddleware);
+$router->post('/admin/courses', [$adminCourseController, 'store'], $adminCourseMiddleware);
+$router->get('/admin/courses/{id}/edit', [$adminCourseController, 'edit'], $adminCourseMiddleware);
+$router->post('/admin/courses/{id}', [$adminCourseController, 'update'], $adminCourseMiddleware);
+$router->post('/admin/courses/{id}/status', [$adminCourseController, 'status'], $adminCourseMiddleware);
 
 /*
  * Executa a rota atual.

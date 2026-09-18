@@ -16,28 +16,26 @@ declare(strict_types=1);
 $adminName = (string) ($admin['name'] ?? 'Administrador');
 $adminEmail = (string) ($admin['email'] ?? '');
 
-$adminInitial = strtoupper(
-    substr(trim($adminName), 0, 1)
-);
+$adminInitial = adminUsersInitial($adminName);
 
 $adminInitial = $adminInitial !== ''
     ? $adminInitial
     : 'A';
 
 $search = htmlspecialchars(
-    (string) ($_GET['search'] ?? ''),
+    $search ?? '',
     ENT_QUOTES,
     'UTF-8'
 );
 
 $status = htmlspecialchars(
-    (string) ($_GET['status'] ?? ''),
+    $status ?? '',
     ENT_QUOTES,
     'UTF-8'
 );
 
 $role = htmlspecialchars(
-    (string) ($_GET['role'] ?? ''),
+    $role ?? '',
     ENT_QUOTES,
     'UTF-8'
 );
@@ -54,13 +52,14 @@ function adminUsersQuery(array $changes = []): string
     foreach ($changes as $key => $value) {
         $params[$key] = $value;
     }
+    $params = array_filter($params, 'is_scalar');
 
     $params = array_filter(
         $params,
         static fn ($value) => $value !== null && $value !== ''
     );
 
-    return '/admin/users?' . http_build_query($params);
+    return htmlspecialchars('/admin/users?' . http_build_query($params), ENT_QUOTES, 'UTF-8');
 }
 
 function adminUsersFormatDate(?string $date): string
@@ -112,9 +111,12 @@ function adminUsersInitial(string $name): string
         return 'U';
     }
 
-    return strtoupper(
-        substr($name, 0, 1)
-    );
+    preg_match('/^./us', $name, $matches);
+    $initial = $matches[0] ?? 'U';
+
+    return function_exists('mb_strtoupper')
+        ? mb_strtoupper($initial, 'UTF-8')
+        : strtoupper($initial);
 }
 ?>
 <!DOCTYPE html>
@@ -228,11 +230,11 @@ function adminUsersInitial(string $name): string
                     </span>
 
                     <h1>
-                        Usuários
+                        <?= isset($detailUser) ? 'Detalhes do usuário' : 'Usuários' ?>
                     </h1>
 
                     <p>
-                        Consulte os usuários sincronizados com a Hotmart.
+                        Consulte os dados cadastrais e os vínculos registrados no portal.
                     </p>
 
                 </div>
@@ -246,12 +248,14 @@ function adminUsersInitial(string $name): string
                 </strong>
 
                 <span>
-                    Os dados cadastrais, status de acesso e matrículas são
-                    controlados pela integração com a Hotmart.
+                    Dados cadastrais e matrículas disponíveis para consulta.
                 </span>
 
             </section>
 
+            <?php if (isset($detailUser)): ?>
+                <?php require __DIR__ . '/partials/user-details.php'; ?>
+            <?php else: ?>
             <section class="content-section">
 
                 <div class="section-heading">
@@ -405,7 +409,7 @@ function adminUsersInitial(string $name): string
 
                 <div class="admin-panel">
 
-                    <div class="admin-table-wrapper">
+                    <div class="admin-table-wrapper" tabindex="0" role="region" aria-label="Usuários cadastrados">
 
                         <table class="admin-table">
 
@@ -557,7 +561,7 @@ function adminUsersInitial(string $name): string
 
                     <?php if ($totalPages > 1): ?>
 
-                        <div class="admin-pagination">
+                        <nav class="admin-pagination" aria-label="Paginação de usuários">
 
                             <div class="admin-pagination-info">
 
@@ -610,6 +614,7 @@ function adminUsersInitial(string $name): string
                                             'page' => $page
                                         ]) ?>"
                                         class="admin-pagination-link <?= $page === $currentPage ? 'is-active' : '' ?>"
+                                        <?= $page === $currentPage ? 'aria-current="page"' : '' ?>
                                     >
                                         <?= $page ?>
                                     </a>
@@ -631,7 +636,7 @@ function adminUsersInitial(string $name): string
 
                             </div>
 
-                        </div>
+                        </nav>
 
                     <?php endif; ?>
 
@@ -639,6 +644,7 @@ function adminUsersInitial(string $name): string
 
             </section>
 
+            <?php endif; ?>
         </div>
 
         <footer class="portal-footer">

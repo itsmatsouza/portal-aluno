@@ -74,35 +74,25 @@ class AdminController
     {
         $page = max(
             1,
-            (int) ($_GET['page'] ?? 1)
+            (int) (is_scalar($_GET['page'] ?? 1) ? ($_GET['page'] ?? 1) : 1)
         );
 
         $search = trim(
-            (string) ($_GET['search'] ?? '')
+            is_string($_GET['search'] ?? '') ? ($_GET['search'] ?? '') : ''
         );
 
-        $status = (string) (
-            $_GET['status'] ?? ''
-        );
+        $status = is_string($_GET['status'] ?? '') ? ($_GET['status'] ?? '') : '';
 
-        $role = (string) (
-            $_GET['role'] ?? ''
-        );
+        $role = is_string($_GET['role'] ?? '') ? ($_GET['role'] ?? '') : '';
+        $status = in_array($status, ['active', 'inactive'], true) ? $status : '';
+        $role = in_array($role, ['ADMIN', 'ALUNO'], true) ? $role : '';
 
         $result = $this->users->findPaginated(
             page: $page,
             perPage: 20,
             search: $search !== '' ? $search : null,
-            status: in_array(
-                $status,
-                ['active', 'inactive'],
-                true
-            ) ? $status : null,
-            role: in_array(
-                $role,
-                ['ADMIN', 'ALUNO'],
-                true
-            ) ? $role : null
+            status: $status !== '' ? $status : null,
+            role: $role !== '' ? $role : null
         );
 
         $adminId = (int) SessionManager::get('user_id');
@@ -133,6 +123,30 @@ class AdminController
 
         require dirname(__DIR__) . '/Views/admin/users.php';
 
+        exit;
+    }
+
+    public function userDetails(int|string $id): never
+    {
+        $userId = filter_var($id, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        $detailUser = $userId === false ? null : $this->users->findById($userId);
+
+        if ($detailUser === null || $detailUser->isDeleted()) {
+            Response::viewError('404', 404, ['message' => 'Usuário não encontrado.']);
+        }
+
+        $adminUser = $this->users->findById((int) SessionManager::get('user_id'));
+        if ($adminUser === null) {
+            Response::viewError('404', 404, ['message' => 'Administrador não encontrado.']);
+        }
+
+        $admin = [
+            'name' => $adminUser->getName(),
+            'email' => $adminUser->getEmail(),
+        ];
+        $enrollments = $this->userCourses->findDetailsByUserId($userId);
+
+        require dirname(__DIR__) . '/Views/admin/users.php';
         exit;
     }
 }

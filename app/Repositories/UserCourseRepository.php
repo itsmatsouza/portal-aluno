@@ -89,6 +89,21 @@ class UserCourseRepository
         return $userCourses;
     }
 
+    public function findDetailsByUserId(int $userId): array
+    {
+        $stmt = $this->db->prepare('
+            SELECT c.name AS course_name, uc.status, uc.hotmart_transaction_id,
+                   uc.purchased_at, uc.access_expires_at
+            FROM user_courses uc
+            LEFT JOIN courses c ON c.id = uc.course_id
+            WHERE uc.user_id = :user_id
+            ORDER BY uc.created_at DESC, uc.id DESC
+        ');
+        $stmt->execute(['user_id' => $userId]);
+
+        return $stmt->fetchAll();
+    }
+
     public function findByUserAndCourse(
         int $userId,
         int $courseId
