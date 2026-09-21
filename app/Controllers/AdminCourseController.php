@@ -10,13 +10,15 @@ use Leilabrito\PortalAluno\Models\Course;
 use Leilabrito\PortalAluno\Repositories\CourseRepository;
 use Leilabrito\PortalAluno\Repositories\UserRepository;
 use Leilabrito\PortalAluno\Services\AdminCourseService;
+use Leilabrito\PortalAluno\Services\CourseToolService;
 
 class AdminCourseController
 {
     public function __construct(
         private CourseRepository $courses,
         private UserRepository $users,
-        private AdminCourseService $service
+        private AdminCourseService $service,
+        private CourseToolService $courseTools
     ) {
     }
 
@@ -31,7 +33,7 @@ class AdminCourseController
 
     public function create(): never
     {
-        $this->render(['form' => true, 'course' => null, 'values' => ['name' => '', 'description' => '', 'ucode' => '', 'active' => true], 'errors' => []]);
+        $this->render(['form' => true, 'course' => null, 'values' => ['name' => '', 'description' => '', 'ucode' => '', 'access_days' => '', 'active' => true], 'errors' => []]);
     }
 
     public function edit(int|string $id): never
@@ -42,7 +44,42 @@ class AdminCourseController
             'description' => $course->getDescription() ?? '',
             'ucode' => $course->getHotmartProductUcode() ?? '',
             'active' => $course->isActive(),
+            'access_days' => (string) ($this->courses->accessDays($course->getId()) ?? ''),
         ], 'errors' => []]);
+    }
+
+    public function tools(int|string $id): never
+    {
+        $course = $this->findCourse($id);
+        $this->renderTools($course);
+    }
+
+    public function updateTools(int|string $id): never
+    {
+        $this->verifyToken();
+        $course = $this->findCourse($id);
+        try {
+            if (($_POST['selection_complete'] ?? null) !== '1') {
+                throw new \InvalidArgumentException('Formulário incompleto. Recarregue a página e tente novamente.');
+            }
+            $this->courseTools->saveCourseTools($course->getId(), $_POST['tools'] ?? []);
+        } catch (\InvalidArgumentException $error) {
+            http_response_code(422);
+            $this->renderTools($course, $error->getMessage());
+        }
+        SessionManager::set('admin_course_message', 'Ferramentas do curso atualizadas.');
+        Response::redirect('/admin/courses/' . $course->getId() . '/tools');
+    }
+
+    private function renderTools(Course $course, ?string $toolsError = null): never
+    {
+        $this->render([
+            'form' => true,
+            'toolsTab' => true,
+            'course' => $course,
+            'tools' => $this->courseTools->getToolsForAdministration($course->getId()),
+            'toolsError' => $toolsError,
+        ]);
     }
 
     public function store(): never

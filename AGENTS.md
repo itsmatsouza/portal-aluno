@@ -35,3 +35,5 @@ Recent history uses `feat:`, `fix:`, `refactor:`, and `perf:` prefixes with shor
 ## Security & Configuration
 
 Create a local `.env` for bootstrap configuration, including `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD`. Never commit credentials. Keep protected tools outside `public/` and preserve authentication, role, and course-access checks.
+
+@RTK.md

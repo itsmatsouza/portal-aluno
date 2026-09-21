@@ -90,7 +90,7 @@ class MigrationRunner
         }
 
         try {
-            $this->db->beginTransaction();
+            // DDL no MySQL realiza commit implícito; não abra uma transação fictícia.
 
             /*
              * As migrations atuais podem conter mais de uma
@@ -117,8 +117,6 @@ class MigrationRunner
             $stmt->execute([
                 'migration' => $migration
             ]);
-
-            $this->db->commit();
 
         } catch (\Throwable $e) {
 

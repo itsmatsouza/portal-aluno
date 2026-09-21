@@ -13,6 +13,71 @@
     margin-top: 28px;
 }
 
+.admin-course-name {
+    overflow-wrap: anywhere;
+    color: var(--text);
+}
+
+.admin-course-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+}
+
+.admin-course-tabs a {
+    padding: 12px 0;
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 3px solid transparent;
+}
+
+.admin-course-tabs [aria-current="page"] {
+    border-color: var(--navy);
+    font-weight: 700;
+}
+
+.admin-course-tools {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.admin-course-tools legend {
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+.admin-course-tool {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 12px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+}
+
+.admin-course-tool[hidden],
+#courseToolSearchField[hidden] {
+    display: none;
+}
+
+.admin-course-tool input {
+    width: 18px;
+    height: 18px;
+    margin: 3px 0;
+    accent-color: var(--navy);
+}
+
+.admin-course-tool-copy {
+    display: grid;
+    gap: 5px;
+    overflow-wrap: anywhere;
+}
+
 .admin-course-form textarea {
     width: 100%;
     padding: 12px;

@@ -29,6 +29,9 @@ class Database
                 ]
             );
 
+            // DATETIME e NOW() devem usar o mesmo fuso das datas calculadas pelo PHP.
+            self::$connection->exec('SET time_zone = ' . self::$connection->quote(date('P')));
+
             return self::$connection;
 
         } catch (PDOException $e) {

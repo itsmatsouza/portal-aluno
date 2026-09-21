@@ -19,6 +19,9 @@ use Leilabrito\PortalAluno\Repositories\UserCourseRepository;
 use Leilabrito\PortalAluno\Services\CourseAccessService;
 use Leilabrito\PortalAluno\Controllers\DashboardController;
 use Leilabrito\PortalAluno\Controllers\AdminController;
+use Leilabrito\PortalAluno\Controllers\AdminAccessController;
+use Leilabrito\PortalAluno\Controllers\AdminToolController;
+use Leilabrito\PortalAluno\Services\AdminToolService;
 use Leilabrito\PortalAluno\Controllers\AdminCourseController;
 use Leilabrito\PortalAluno\Services\AdminCourseService;
 use Leilabrito\PortalAluno\Repositories\ToolRepository;
@@ -32,6 +35,15 @@ use Leilabrito\PortalAluno\Services\PasswordResetService;
 use Leilabrito\PortalAluno\Core\Database;
 
 $router = new Router();
+
+$hotmartWebhook = new \Leilabrito\PortalAluno\Controllers\HotmartWebhookController(
+    new \Leilabrito\PortalAluno\Services\HotmartWebhookService(
+        Database::getConnection(),
+        new \Leilabrito\PortalAluno\Repositories\HotmartRepository(Database::getConnection())
+    )
+);
+$router->post('/webhooks/hotmart', [$hotmartWebhook, 'receive']);
+
 
 /*
  * Dependências da autenticação.
@@ -271,7 +283,8 @@ $router->get(
 $adminCourseController = new AdminCourseController(
     $courseRepository,
     $userRepository,
-    new AdminCourseService($courseRepository)
+    new AdminCourseService($courseRepository),
+    $courseToolService
 );
 $adminCourseMiddleware = [$authMiddleware, $adminMiddleware];
 $router->get('/admin/courses', [$adminCourseController, 'index'], $adminCourseMiddleware);
@@ -280,6 +293,20 @@ $router->post('/admin/courses', [$adminCourseController, 'store'], $adminCourseM
 $router->get('/admin/courses/{id}/edit', [$adminCourseController, 'edit'], $adminCourseMiddleware);
 $router->post('/admin/courses/{id}', [$adminCourseController, 'update'], $adminCourseMiddleware);
 $router->post('/admin/courses/{id}/status', [$adminCourseController, 'status'], $adminCourseMiddleware);
+$router->get('/admin/courses/{id}/tools', [$adminCourseController, 'tools'], $adminCourseMiddleware);
+$router->post('/admin/courses/{id}/tools', [$adminCourseController, 'updateTools'], $adminCourseMiddleware);
+
+$adminToolController = new AdminToolController($toolRepository, $userRepository, new AdminToolService($toolRepository));
+$adminToolMiddleware = [$authMiddleware, $adminMiddleware];
+$router->get('/admin/tools', [$adminToolController, 'index'], $adminToolMiddleware);
+$router->get('/admin/tools/{id}/edit', [$adminToolController, 'edit'], $adminToolMiddleware);
+$router->post('/admin/tools/{id}', [$adminToolController, 'update'], $adminToolMiddleware);
+$router->post('/admin/tools/{id}/status', [$adminToolController, 'status'], $adminToolMiddleware);
+
+$adminAccessController = new AdminAccessController($userCourseRepository, $userRepository);
+$adminAccessMiddleware = [$authMiddleware, $adminMiddleware];
+$router->get('/admin/access', [$adminAccessController, 'index'], $adminAccessMiddleware);
+$router->get('/admin/access/{id}', [$adminAccessController, 'details'], $adminAccessMiddleware);
 
 /*
  * Executa a rota atual.

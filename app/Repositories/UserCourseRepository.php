@@ -151,6 +151,7 @@ class UserCourseRepository
             WHERE user_id = :user_id
               AND course_id = :course_id
               AND status = 'ACTIVE'
+              AND (access_expires_at IS NULL OR access_expires_at > NOW())
             LIMIT 1
         ";
 
@@ -183,6 +184,7 @@ class UserCourseRepository
             FROM user_courses
             WHERE user_id = :user_id
               AND status = 'ACTIVE'
+              AND (access_expires_at IS NULL OR access_expires_at > NOW())
             ORDER BY created_at DESC
         ";
 
@@ -245,6 +247,62 @@ class UserCourseRepository
         return (int) $stmt->fetchColumn();
     }
 
+    public function findAdminPaginated(int $page = 1, string $search = '', string $status = '', ?int $courseId = null): array
+    {
+        $where = ['1 = 1'];
+        $params = [];
+        if ($search !== '') {
+            $where[] = '(u.name LIKE :name OR u.email LIKE :email OR uc.hotmart_transaction_id LIKE :transaction)';
+            $params = ['name' => '%' . $search . '%', 'email' => '%' . $search . '%', 'transaction' => '%' . $search . '%'];
+        }
+        if ($status !== '') {
+            $where[] = 'uc.status = :status';
+            $params['status'] = $status;
+        }
+        if ($courseId !== null) {
+            $where[] = 'uc.course_id = :course_id';
+            $params['course_id'] = $courseId;
+        }
+        $whereSql = implode(' AND ', $where);
+        $joins = 'FROM user_courses uc LEFT JOIN users u ON u.id = uc.user_id LEFT JOIN courses c ON c.id = uc.course_id';
+        $count = $this->db->prepare("SELECT COUNT(*) {$joins} WHERE {$whereSql}");
+        $count->execute($params);
+        $total = (int) $count->fetchColumn();
+        $totalPages = max(1, (int) ceil($total / 20));
+        $page = max(1, min($page, $totalPages));
+        $stmt = $this->db->prepare("SELECT uc.*, u.name AS user_name, u.email AS user_email,
+            u.deleted_at AS user_deleted_at, u.is_active AS user_active,
+            c.name AS course_name, c.deleted_at AS course_deleted_at, c.is_active AS course_active
+            {$joins} WHERE {$whereSql} ORDER BY uc.created_at DESC, uc.id DESC LIMIT 20 OFFSET :offset");
+        foreach ($params as $key => $value) {
+            $stmt->bindValue(':' . $key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $stmt->bindValue(':offset', ($page - 1) * 20, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return ['items' => $stmt->fetchAll(), 'total' => $total, 'page' => $page, 'total_pages' => $totalPages];
+    }
+
+    public function findAdminDetails(int $id): ?array
+    {
+        $stmt = $this->db->prepare('SELECT uc.*, u.name AS user_name, u.email AS user_email,
+            u.deleted_at AS user_deleted_at, u.is_active AS user_active,
+            c.name AS course_name, c.deleted_at AS course_deleted_at, c.is_active AS course_active
+            FROM user_courses uc LEFT JOIN users u ON u.id = uc.user_id
+            LEFT JOIN courses c ON c.id = uc.course_id WHERE uc.id = :id LIMIT 1');
+        $stmt->execute(['id' => $id]);
+        $result = $stmt->fetch();
+
+        return $result === false ? null : $result;
+    }
+
+    public function findAdminCourseOptions(): array
+    {
+        return $this->db->query('SELECT c.id, c.name, c.deleted_at FROM courses c
+            WHERE EXISTS (SELECT 1 FROM user_courses uc WHERE uc.course_id = c.id)
+            ORDER BY c.name ASC, c.id ASC')->fetchAll();
+    }
+
     private function mapToUserCourse(array $data): UserCourse
     {
         return new UserCourse(
@@ -277,6 +335,7 @@ class UserCourseRepository
             ON c.id = uc.course_id
         WHERE uc.user_id = :user_id
           AND uc.status = 'ACTIVE'
+          AND (uc.access_expires_at IS NULL OR uc.access_expires_at > NOW())
           AND c.is_active = 1
           AND c.deleted_at IS NULL
         ORDER BY c.name ASC

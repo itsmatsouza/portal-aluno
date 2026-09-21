@@ -26,6 +26,12 @@ class AdminCourseService
                 $errors[$field] = 'Texto inválido.';
             }
         }
+        $values['access_days'] = is_string($input['access_days'] ?? null) ? trim($input['access_days']) : '';
+        $accessDays = $values['access_days'] === '' ? null : filter_var($values['access_days'], FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1, 'max_range' => 36500]]);
+        if ($accessDays === false || (isset($input['access_days']) && !is_string($input['access_days']))) {
+            $errors['access_days'] = 'Informe de 1 a 36500 dias ou deixe vazio para acesso vitalício.';
+        }
         $values['active'] = ($input['active'] ?? '') === '1';
         if (isset($input['active']) && $input['active'] !== '1') {
             $errors['active'] = 'Status inválido.';
@@ -47,7 +53,7 @@ class AdminCourseService
         }
         if ($errors === []) {
             try {
-                $arguments = [$values['name'], $values['description'] === '' ? null : $values['description'], $values['ucode'] === '' ? null : $values['ucode'], $values['active']];
+                $arguments = [$values['name'], $values['description'] === '' ? null : $values['description'], $values['ucode'] === '' ? null : $values['ucode'], $values['active'], $accessDays];
                 if ($id === null) {
                     $id = $this->courses->create(...$arguments);
                 } else {

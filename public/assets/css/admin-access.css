@@ -1,0 +1,34 @@
+.admin-access-filters {
+    margin-bottom: 40px;
+}
+
+.admin-access-filters .admin-field {
+    min-width: 0;
+}
+
+.admin-access-filters select {
+    text-overflow: ellipsis;
+}
+
+.admin-access-transaction {
+    font-family: monospace;
+    overflow-wrap: anywhere;
+}
+
+.admin-access-details {
+    margin-top: 28px;
+}
+
+.admin-access-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+@media (max-width: 600px) {
+    .admin-access-links {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

@@ -14,6 +14,13 @@
             <?php if (isset($errors[$field])): ?><span class="admin-field-error" id="<?= $field ?>-error"><?= $escape($errors[$field]) ?></span><?php endif; ?>
         </div>
     <?php endforeach; ?>
+    <div class="admin-field">
+        <label for="access_days">Duração do acesso em dias</label>
+        <input id="access_days" name="access_days" type="number" min="1" max="36500" value="<?= $escape($values['access_days'] ?? '') ?>" aria-describedby="access-days-help">
+        <p id="access-days-help" class="admin-muted">Vazio significa vitalício. O prazo começa na aprovação da compra Hotmart. Alterações valem para novas transações.</p>
+        <?php if (isset($errors['access_days'])): ?><span class="admin-field-error"><?= $escape($errors['access_days']) ?></span><?php endif; ?>
+        <p class="admin-muted">No identificador Hotmart, informe o product.ucode recebido no webhook, não o ID numérico.</p>
+    </div>
     <div>
         <label class="admin-course-checkbox"><input type="checkbox" name="active" value="1" <?= $values['active'] ? 'checked' : '' ?> aria-describedby="active-help<?= isset($errors['active']) ? ' active-error' : '' ?>"> Curso ativo</label>
         <p id="active-help" class="admin-muted">Cursos inativos ficam indisponíveis aos alunos, inclusive aos já matriculados.</p>
