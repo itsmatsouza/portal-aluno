@@ -142,7 +142,8 @@ $adminController = new AdminController(
  * Rotas.
  */
 $router->get('/', function (): void {
-    echo 'Portal do aluno funcionando.';
+    header('Location: /login');
+    exit;
 });
 
 $router->get('/login', function (): void {
