@@ -141,8 +141,12 @@ $adminController = new AdminController(
 /*
  * Rotas.
  */
-$router->get('/', function (): void {
-    header('Location: /login');
+$router->get('/', function () use ($authService): void {
+    if ($authService->check()) {
+        header('Location: /portal');
+    } else {
+        header('Location: /login');
+    }
     exit;
 });
 
