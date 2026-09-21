@@ -1,0 +1,76 @@
+name: Publicar portal na Hostinger
+
+on:
+  workflow_dispatch:
+    inputs:
+      migrate:
+        description: Aplicar migrations pendentes (faça backup do banco antes)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portal-hostinger
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DEPLOY_HOST: 185.245.180.134
+      DEPLOY_PORT: '65002'
+      DEPLOY_USER: u454601756
+      DEPLOY_ROOT: /home/u454601756/domains/aluno.leilabrito.com.br
+      RELEASE_ID: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+      RUN_MIGRATIONS: ${{ inputs.migrate && 'yes' || 'no' }}
+    steps:
+      - name: Obter código
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Configurar SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.HOSTINGER_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          test -n "$SSH_PRIVATE_KEY"
+          test -n "$SSH_KNOWN_HOSTS"
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/hostinger
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/hostinger ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host portal-hostinger
+            HostName $DEPLOY_HOST
+            Port $DEPLOY_PORT
+            User $DEPLOY_USER
+            IdentityFile ~/.ssh/hostinger
+            IdentitiesOnly yes
+            BatchMode yes
+            StrictHostKeyChecking yes
+          EOF
+
+      - name: Preparar pacote de publicação
+        run: |
+          set -euo pipefail
+          tar -czf "$RUNNER_TEMP/portal.tar.gz" \
+            app config database bin public storage/tools \
+            composer.json composer.lock deploy/hostinger-release.sh
+
+      - name: Enviar e publicar versão
+        run: |
+          set -euo pipefail
+          ssh portal-hostinger "umask 077; mkdir -p '$DEPLOY_ROOT/.deploy/$RELEASE_ID'"
+          scp "$RUNNER_TEMP/portal.tar.gz" "portal-hostinger:$DEPLOY_ROOT/.deploy/$RELEASE_ID/portal.tar.gz"
+          scp deploy/hostinger-release.sh "portal-hostinger:$DEPLOY_ROOT/.deploy/$RELEASE_ID/publish.sh"
+          ssh portal-hostinger "bash '$DEPLOY_ROOT/.deploy/$RELEASE_ID/publish.sh' '$RELEASE_ID' '$RUN_MIGRATIONS'"
+
+      - name: Remover credencial temporária
+        if: always()
+        run: rm -f ~/.ssh/hostinger

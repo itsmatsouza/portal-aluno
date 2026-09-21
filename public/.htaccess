@@ -1,0 +1,11 @@
+Options -Indexes
+DirectoryIndex index.php
+
+RewriteEngine On
+
+# Bloqueia arquivos ocultos, preservando o diretório usado na emissão de SSL.
+RewriteRule (^|/)\.(?!well-known(?:/|$)) - [F,L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
