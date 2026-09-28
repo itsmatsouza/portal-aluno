@@ -7,3 +7,5 @@
 /storage/uploads/*
 
 !.gitkeep
+
+/storage/backups/

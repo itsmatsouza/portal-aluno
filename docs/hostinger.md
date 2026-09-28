@@ -120,3 +120,17 @@ Essa operação troca apenas o código. Não desfaz migrations, compras ou conta
 - [Composer e PHP no terminal da Hostinger](https://www.hostinger.com/support/5792082-how-to-solve-common-composer-issues-at-hostinger/)
 
 Durante a preparação local, nenhum deploy, migration ou teste de integração foi executado.
+
+## Ferramentas locais
+
+Antes de publicar ferramentas novas ou alterar seus cadastros, execute localmente:
+
+```bash
+php bin/sync-tools.php export
+```
+
+Inclua `database/tools-catalog.json` e os arquivos de `storage/tools/` no commit e publique normalmente. O deploy importa o catálogo automaticamente, mesmo sem migrations pendentes. O catálogo inclui somente ferramentas não removidas com `storage/tools/SLUG/index.html`. Links externos fictícios não entram.
+
+A importação identifica ferramentas pelo slug e cursos pelo identificador Hotmart, preservando IDs de produção. Cria cursos ausentes necessários aos vínculos; não transfere usuários ou matrículas. Cursos existentes e vínculos fora do catálogo permanecem intactos. Ferramentas ou cursos removidos em produção interrompem a importação. Cada importação guarda os registros anteriores em JSON privado em `backups/` na raiz do subdomínio e executa as alterações em transação. Em caso de erro, a transação é revertida. Para desfazer uma importação concluída, use o backup para restaurar somente registros afetados; não substitua tabelas inteiras, pois podem existir alterações posteriores.
+
+A ferramenta de diagnóstico salva respostas no localStorage do navegador. Essas respostas não estão no MySQL e não acompanham a publicação.

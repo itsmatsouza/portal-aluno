@@ -51,6 +51,8 @@ if [[ "$run_migrations" == yes ]]; then
     "$php_bin" bin/migrate.php
 fi
 
+"$php_bin" bin/sync-tools.php import "$deploy_root/backups"
+
 # Detecta configuração/banco incompletos antes de substituir a versão pública.
 "$php_bin" bin/check-deployment.php
 
