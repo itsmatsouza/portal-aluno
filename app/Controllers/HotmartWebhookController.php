@@ -18,6 +18,19 @@ class HotmartWebhookController
 
     public function receive(): never
     {
+        $this->handle(false);
+    }
+
+    public function preview(): never
+    {
+        if (($_ENV['HOTMART_PREVIEW_ENABLED'] ?? '') !== 'true') {
+            Response::json(['error' => 'Receptor de teste desativado.'], 404);
+        }
+        $this->handle(true);
+    }
+
+    private function handle(bool $preview): never
+    {
         $secret = $_ENV['HOTMART_HOTTOK'] ?? '';
         if ($secret === '') {
             Response::json(['error' => 'Integração não configurada.'], 503);
@@ -34,6 +47,10 @@ class HotmartWebhookController
             $event = json_decode($body, true, 64, JSON_THROW_ON_ERROR);
             if (!is_array($event)) {
                 throw new InvalidArgumentException('Objeto JSON obrigatório.');
+            }
+            if ($preview) {
+                // Consulte o payload no histórico da Hotmart. Não persiste nem processa acessos.
+                Response::json(['status' => 'preview_received', 'processed' => false]);
             }
             $outcome = $this->service->process($event);
         } catch (JsonException | InvalidArgumentException $error) {

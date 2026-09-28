@@ -107,3 +107,29 @@ Os registros mínimos ficam em `hotmart_events` e `hotmart_purchases`; não arma
 - [Webhook de compras 2.0.0](https://developers.hotmart.com/docs/pt-BR/2.0.0/webhook/purchase-webhook/)
 - [Autenticação OAuth](https://developers.hotmart.com/docs/pt-BR/start/app-auth/)
 - [Histórico de vendas](https://developers.hotmart.com/docs/es/v1/sales/sales-history)
+
+
+## Inspeção do payload sem processar compras
+
+Para conferir os dados enviados, publique a rota `POST /webhooks/hotmart/preview`.
+No `.env` do servidor, configure `HOTMART_HOTTOK` com o segredo da Hotmart e
+`HOTMART_PREVIEW_ENABLED=true`. Essa rota é separada do processamento normal.
+Ela valida o Hottok, o limite do corpo e o JSON, mas não cadastra alunos, não
+registra transações, não envia e-mails e não altera acessos. A infraestrutura
+normal do portal ainda precisa estar disponível.
+
+Crie uma configuração Hotmart de teste usando a URL
+`https://aluno.leilabrito.com.br/webhooks/hotmart/preview`, versão 2.0.0.
+Não use a URL `/webhooks/hotmart` para essa inspeção: ela processa compras.
+Envie um teste pela Hotmart e confira o payload nos detalhes da notificação,
+na aba Histórico. A resposta esperada é HTTP 200 com
+`{"status":"preview_received","processed":false}`.
+O portal não armazena nem disponibiliza uma cópia do payload. Se o teste não
+aparecer no Histórico, confira os detalhes do resultado do teste na Hotmart.
+
+O teste serve para conhecer a estrutura do JSON; valores fictícios não comprovam
+configurações reais de vencimento do produto. Não publique Hottok ou dados de
+compradores ao compartilhar o JSON. Depois da inspeção, desative essa configuração
+na Hotmart e defina `HOTMART_PREVIEW_ENABLED=false`. Eventos enviados ao preview
+não serão processados automaticamente depois: precisam ser reenviados para a
+rota normal quando a integração estiver configurada.

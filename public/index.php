@@ -43,6 +43,7 @@ $hotmartWebhook = new \Leilabrito\PortalAluno\Controllers\HotmartWebhookControll
     )
 );
 $router->post('/webhooks/hotmart', [$hotmartWebhook, 'receive']);
+$router->post('/webhooks/hotmart/preview', [$hotmartWebhook, 'preview']);
 
 
 /*
