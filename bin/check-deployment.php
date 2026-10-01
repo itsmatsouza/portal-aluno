@@ -18,10 +18,10 @@ try {
     }
     $db = Leilabrito\PortalAluno\Core\Database::getConnection();
     // Somente leitura. As migrations continuam sendo uma etapa explícita do deploy.
-    foreach (['users', 'courses', 'user_courses', 'tools', 'course_tools', 'auth_tokens', 'hotmart_events', 'hotmart_purchases'] as $table) {
+    foreach (['users', 'courses', 'user_courses', 'tools', 'course_classes', 'class_tools', 'enrollment_access', 'auth_tokens', 'hotmart_events', 'hotmart_purchases'] as $table) {
         $db->query('SELECT 1 FROM `' . $table . '` LIMIT 0');
     }
-    $db->query('SELECT access_days FROM courses LIMIT 0');
+    $db->query('SELECT class_id, sync_pending, sync_version FROM user_courses LIMIT 0');
     echo "Configuração e esquema do banco disponíveis.\n";
 } catch (Throwable $error) {
     fwrite(STDERR, "Publicação interrompida. Confira .env, conexão e migrations do banco.\n");

@@ -157,6 +157,11 @@ $isAccessActive = $currentPath === '/admin/access'
                 Cursos
             </a>
 
+            <a href="/admin/classes" class="sidebar-nav-link<?= str_starts_with($currentPath, '/admin/classes') ? ' is-active' : '' ?>">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5h16v14H4zM4 10h16M10 10v9" stroke="currentColor" stroke-width="1.7" /></svg>
+                Turmas
+            </a>
+
             <a
                 href="/admin/tools"
                 class="sidebar-nav-link<?= $isToolsActive ? ' is-active' : '' ?>"

@@ -192,37 +192,10 @@ class CourseRepository
         ];
     }
 
-    public function create(string $name, ?string $description, ?string $ucode, bool $active, ?int $accessDays = null): int
+    public function updateDescription(int $id, ?string $description): void
     {
-        $stmt = $this->db->prepare('INSERT INTO courses
-            (name, description, hotmart_product_ucode, is_active, access_days)
-            VALUES (:name, :description, :ucode, :active, :access_days)');
-        $stmt->execute(['name' => $name, 'description' => $description, 'ucode' => $ucode, 'active' => (int) $active, 'access_days' => $accessDays]);
-
-        return (int) $this->db->lastInsertId();
-    }
-
-    public function update(int $id, string $name, ?string $description, ?string $ucode, bool $active, ?int $accessDays = null): void
-    {
-        $stmt = $this->db->prepare('UPDATE courses SET name = :name, description = :description,
-            hotmart_product_ucode = :ucode, is_active = :active, access_days = :access_days, updated_at = NOW()
-            WHERE id = :id AND deleted_at IS NULL');
-        $stmt->execute(['id' => $id, 'name' => $name, 'description' => $description, 'ucode' => $ucode, 'active' => (int) $active, 'access_days' => $accessDays]);
-    }
-
-    public function accessDays(int $id): ?int
-    {
-        $stmt = $this->db->prepare('SELECT access_days FROM courses WHERE id = ?');
-        $stmt->execute([$id]);
-        $days = $stmt->fetchColumn();
-        return $days === null || $days === false ? null : (int) $days;
-    }
-
-    public function setActive(int $id, bool $active): void
-    {
-        $stmt = $this->db->prepare('UPDATE courses SET is_active = :active, updated_at = NOW()
-            WHERE id = :id AND deleted_at IS NULL');
-        $stmt->execute(['id' => $id, 'active' => (int) $active]);
+        $stmt = $this->db->prepare('UPDATE courses SET description = ? WHERE id = ? AND deleted_at IS NULL');
+        $stmt->execute([$description, $id]);
     }
 
     private function mapToCourse(array $data): Course

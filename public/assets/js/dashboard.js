@@ -97,6 +97,7 @@ function renderCourses(courses) {
             </div>
 
             <h3>${escapeHtml(course.name)}</h3>
+            <p>Turma: ${escapeHtml(course.class_name)} · ${course.is_lifetime ? 'Vitalício' : `Acesso até ${escapeHtml(course.expires_on)}`}</p>
 
             <p>${escapeHtml(description)}</p>
 
@@ -279,6 +280,9 @@ async function loadDashboard() {
     }
 
     const data = await response.json();
+    if (data.pending_enrollments > 0) {
+        showAlert('Existe matrícula aguardando confirmação da turma. Se persistir, entre em contato com o suporte.');
+    }
     const courses = Array.isArray(data.courses)
         ? data.courses
         : [];

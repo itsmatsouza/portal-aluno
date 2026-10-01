@@ -34,7 +34,7 @@ class CourseController
         }
 
         $tools = $this->courseTools->getToolsForCourse(
-            $courseId
+            $userId, $courseId
         );
 
         $toolsResult = [];

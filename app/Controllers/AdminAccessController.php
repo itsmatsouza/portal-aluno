@@ -13,6 +13,7 @@ class AdminAccessController
 {
     private const STATUS_LABELS = [
         'ACTIVE' => 'Ativa',
+        'PENDING' => 'Pendente de turma/sincronização',
         'CANCELLED' => 'Cancelada',
         'REFUNDED' => 'Reembolsada',
         'CHARGEBACK' => 'Contestada',

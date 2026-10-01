@@ -78,7 +78,7 @@ preg_match('/^./us', trim($admin['name']), $initial);
                     <div class="section-heading"><div><h2>Matrículas</h2><p><?= number_format($result['total'], 0, ',', '.') ?> registro(s) encontrado(s).</p></div></div>
                     <div class="admin-table-wrapper" tabindex="0" role="region" aria-label="Matrículas registradas">
                         <table class="admin-table">
-                            <thead><tr><th scope="col">Aluno</th><th scope="col">Curso</th><th scope="col">Situação</th><th scope="col">Compra</th><th scope="col">Vencimento</th><th scope="col">Transação Hotmart</th><th scope="col">Ação</th></tr></thead>
+                            <thead><tr><th scope="col">Aluno</th><th scope="col">Curso / Turma</th><th scope="col">Situação</th><th scope="col">Compra</th><th scope="col">Vencimento</th><th scope="col">Transação Hotmart</th><th scope="col">Ação</th></tr></thead>
                             <tbody>
                                 <?php if ($result['items'] === []): ?><tr><td colspan="7" class="admin-table-empty">Nenhuma matrícula encontrada.</td></tr><?php endif; ?>
                                 <?php foreach ($result['items'] as $item): ?>
@@ -86,12 +86,12 @@ preg_match('/^./us', trim($admin['name']), $initial);
                                         <td><div class="admin-user-data"><strong><?= $escape($item['user_name'] ?? 'Usuário indisponível') ?></strong><span><?= $escape($item['user_email']) ?></span>
                                             <?php if ($item['user_deleted_at'] !== null): ?><span class="admin-muted">Conta excluída</span><?php elseif ($item['user_name'] !== null && !$item['user_active']): ?><span class="admin-muted">Conta inativa</span><?php endif; ?>
                                         </div></td>
-                                        <td><div class="admin-user-data"><strong><?= $escape($item['course_name'] ?? 'Curso indisponível') ?></strong>
+                                        <td><div class="admin-user-data"><strong><?= $escape($item['course_name'] ?? 'Curso indisponível') ?></strong><span><?= $escape($item['class_name'] ?? 'Turma pendente') ?></span>
                                             <?php if ($item['course_deleted_at'] !== null): ?><span class="admin-muted">Curso excluído</span><?php elseif ($item['course_name'] !== null && !$item['course_active']): ?><span class="admin-muted">Curso inativo</span><?php endif; ?>
                                         </div></td>
                                         <td><span class="admin-status <?= $item['status'] === 'ACTIVE' ? 'status-active' : 'status-inactive' ?>"><?= $escape($statusLabels[$item['status']] ?? $item['status']) ?></span></td>
                                         <td><?= $formatDate($item['purchased_at']) ?></td>
-                                        <td><?= $formatDate($item['access_expires_at'], 'Sem vencimento') ?></td>
+                                        <td><?= $item['class_id'] === null ? 'Pendente' : ($item['is_lifetime'] ? 'Vitalício' : ($item['access_expires_at'] === null ? 'Prazo pendente' : date('d/m/Y H:i', strtotime($item['access_expires_at'])))) ?></td>
                                         <td class="admin-access-transaction"><?= $escape($item['hotmart_transaction_id'] ?? 'Não informada') ?></td>
                                         <td><a class="admin-table-link" href="/admin/access/<?= (int) $item['id'] ?>">Ver detalhes</a></td>
                                     </tr>

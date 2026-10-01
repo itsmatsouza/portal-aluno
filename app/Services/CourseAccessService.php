@@ -26,7 +26,7 @@ class CourseAccessService
             return false;
         }
 
-        if (!$course->isAvailable()) {
+        if ($course->isDeleted()) {
             return false;
         }
 

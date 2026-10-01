@@ -369,6 +369,19 @@ function adminEscape(string $value): string
                 </div>
 
                 <div class="admin-actions-grid">
+                    <a 
+                        href="/admin/classes" 
+                        class="admin-action-card"
+                    >
+                            <span class="admin-action-icon">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5h16v14H4zM4 10h16M10 10v9" stroke="currentColor" stroke-width="1.7"></path></svg>
+                            </span>
+                            <span class="admin-action-content">
+                                <strong>Gerenciar turmas</strong>
+                                <span>Definir ferramentas e expiração por turma.</span>
+                            </span>
+                            <span class="admin-action-arrow">→</span>
+                    </a>
 
                     <a
                         href="/admin/users"
@@ -440,7 +453,7 @@ function adminEscape(string $value): string
                         <span class="admin-action-content">
                             <strong>Gerenciar cursos</strong>
                             <span>
-                                Criar, editar e controlar cursos.
+                                Consultar cursos e editar descrições.
                             </span>
                         </span>
 

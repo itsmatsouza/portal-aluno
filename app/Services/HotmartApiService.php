@@ -35,6 +35,39 @@ class HotmartApiService
         throw new RuntimeException('Falha na autenticação Hotmart.');
     }
 
+    public function clubUsers(string $subdomain, string $email, ?string $pageToken = null): array
+    {
+        $filters = ['subdomain' => $subdomain, 'email' => $email];
+        if ($pageToken !== null) {
+            $filters['page_token'] = $pageToken;
+        }
+        return $this->get('/club/api/v1/users', $filters);
+    }
+
+    public function products(?string $pageToken = null): array
+    {
+        return $this->get('/products/api/v1/products', $pageToken === null ? [] : ['page_token' => $pageToken]);
+    }
+
+    private function get(string $path, array $filters): array
+    {
+        $environment = $_ENV['HOTMART_API_ENV'] ?? 'production';
+        if (!in_array($environment, ['production', 'sandbox'], true)) {
+            throw new RuntimeException('HOTMART_API_ENV deve ser production ou sandbox.');
+        }
+        $host = $environment === 'sandbox' ? 'https://sandbox.hotmart.com' : 'https://developers.hotmart.com';
+        for ($attempt = 0; $attempt < 2; $attempt++) {
+            [$status, $body] = $this->request($host . $path . '?' . http_build_query($filters),
+                ['Authorization: Bearer ' . $this->accessToken()]);
+            if ($status === 401 && $attempt === 0) {
+                $this->token = null;
+                continue;
+            }
+            return $this->decode($status, $body);
+        }
+        throw new RuntimeException('Falha na autenticação Hotmart.');
+    }
+
     private function accessToken(): string
     {
         if ($this->token !== null && time() < $this->expiresAt) {

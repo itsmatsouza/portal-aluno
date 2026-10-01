@@ -12,7 +12,7 @@ class User
         private string $email,
         private string $passwordHash,
         private string $role,
-        private ?string $hotmartBuyerId,
+        private ?string $hotmartBuyerUcode,
         private ?string $hotmartEmail,
         private bool $isActive,
         private ?string $deletedAt,
@@ -47,9 +47,9 @@ class User
         return $this->role;
     }
 
-    public function getHotmartBuyerId(): ?string
+    public function getHotmartBuyerUcode(): ?string
     {
-        return $this->hotmartBuyerId;
+        return $this->hotmartBuyerUcode;
     }
 
     public function getHotmartEmail(): ?string

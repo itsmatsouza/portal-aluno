@@ -21,15 +21,7 @@ try {
             if (!preg_match('/^[a-z0-9-]+$/D', $tool['slug']) || !is_file(dirname(__DIR__) . '/storage/tools/' . $tool['slug'] . '/index.html')) {
                 continue;
             }
-            $query = $db->prepare('SELECT c.name, c.description, c.hotmart_product_ucode, c.is_active, ct.is_active AS link_active FROM courses c JOIN course_tools ct ON ct.course_id = c.id WHERE ct.tool_id = ? AND c.deleted_at IS NULL');
-            $query->execute([$tool['id']]);
-            $courses = $query->fetchAll();
-            foreach ($courses as $course) {
-                if (empty($course['hotmart_product_ucode'])) {
-                    throw new RuntimeException('Curso sem identificador Hotmart: ' . $course['name']);
-                }
-            }
-            $entries[] = ['name' => $tool['name'], 'description' => $tool['description'], 'slug' => $tool['slug'], 'url' => '/tool/' . $tool['slug'], 'is_active' => (int) $tool['is_active'], 'courses' => $courses];
+            $entries[] = ['name' => $tool['name'], 'description' => $tool['description'], 'slug' => $tool['slug'], 'url' => '/tool/' . $tool['slug'], 'is_active' => (int) $tool['is_active']];
         }
         if (file_put_contents($catalog, json_encode($entries, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . PHP_EOL) === false) {
             throw new RuntimeException('Falha ao gravar catálogo.');
@@ -47,7 +39,7 @@ try {
     }
     $db->beginTransaction();
     $backup = [];
-    foreach (['tools', 'courses', 'course_tools'] as $table) {
+    foreach (['tools', 'course_classes', 'class_tools'] as $table) {
         $backup[$table] = $db->query('SELECT * FROM ' . $table)->fetchAll();
     }
     $backupPath = $backupDir . '/tools-' . date('Ymd-His') . '-' . bin2hex(random_bytes(4)) . '.json';
@@ -70,24 +62,6 @@ try {
         } else {
             $db->prepare('INSERT INTO tools (name, description, slug, url, is_active) VALUES (?, ?, ?, ?, ?)')->execute([$tool['name'], $tool['description'], $tool['slug'], $tool['url'], $tool['is_active']]);
             $toolId = $db->lastInsertId();
-        }
-        foreach ($tool['courses'] as $course) {
-            if (empty($course['hotmart_product_ucode'])) {
-                throw new RuntimeException('Curso sem identificador Hotmart.');
-            }
-            $query = $db->prepare('SELECT id, deleted_at FROM courses WHERE hotmart_product_ucode = ?');
-            $query->execute([$course['hotmart_product_ucode']]);
-            $existingCourse = $query->fetch();
-            if ($existingCourse && $existingCourse['deleted_at'] !== null) {
-                throw new RuntimeException('Curso removido em produção: ' . $course['name']);
-            }
-            if ($existingCourse) {
-                $courseId = $existingCourse['id'];
-            } else {
-                $db->prepare('INSERT INTO courses (name, description, hotmart_product_ucode, is_active) VALUES (?, ?, ?, ?)')->execute([$course['name'], $course['description'], $course['hotmart_product_ucode'], $course['is_active']]);
-                $courseId = $db->lastInsertId();
-            }
-            $db->prepare('INSERT INTO course_tools (course_id, tool_id, is_active) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE is_active = VALUES(is_active)')->execute([$courseId, $toolId, $course['link_active']]);
         }
     }
     $db->commit();

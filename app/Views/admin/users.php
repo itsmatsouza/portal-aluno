@@ -419,7 +419,7 @@ function adminUsersInitial(string $name): string
                                     <th>Usuário</th>
                                     <th>Perfil</th>
                                     <th>Status</th>
-                                    <th>Hotmart</th>
+                                    <th>Ucode do comprador Hotmart</th>
                                     <th>Último acesso</th>
                                     <th>Cadastro</th>
                                     <th>Ação</th>
@@ -506,11 +506,11 @@ function adminUsersInitial(string $name): string
 
                                         <td>
 
-                                            <?php if ($user->getHotmartBuyerId()): ?>
+                                            <?php if ($user->getHotmartBuyerUcode()): ?>
 
-                                                <span class="admin-hotmart-id">
+                                                <span class="admin-hotmart-ucode">
                                                     <?= adminUsersEscape(
-                                                        $user->getHotmartBuyerId()
+                                                        $user->getHotmartBuyerUcode()
                                                     ) ?>
                                                 </span>
 

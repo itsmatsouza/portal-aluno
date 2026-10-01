@@ -31,7 +31,7 @@ class UserCourseRepository
                 access_expires_at,
                 created_at,
                 updated_at
-            FROM user_courses
+            FROM enrollment_access
             WHERE id = :id
             LIMIT 1
         ";
@@ -69,7 +69,7 @@ class UserCourseRepository
                 access_expires_at,
                 created_at,
                 updated_at
-            FROM user_courses
+            FROM enrollment_access
             WHERE user_id = :user_id
             ORDER BY created_at DESC
         ";
@@ -92,9 +92,9 @@ class UserCourseRepository
     public function findDetailsByUserId(int $userId): array
     {
         $stmt = $this->db->prepare('
-            SELECT c.name AS course_name, uc.status, uc.hotmart_transaction_id,
-                   uc.purchased_at, uc.access_expires_at
-            FROM user_courses uc
+            SELECT uc.course_id, c.name AS course_name, uc.status, uc.hotmart_transaction_id,
+                   uc.purchased_at, uc.access_expires_at, uc.class_id, uc.class_name, uc.is_lifetime
+            FROM enrollment_access uc
             LEFT JOIN courses c ON c.id = uc.course_id
             WHERE uc.user_id = :user_id
             ORDER BY uc.created_at DESC, uc.id DESC
@@ -119,7 +119,7 @@ class UserCourseRepository
                 access_expires_at,
                 created_at,
                 updated_at
-            FROM user_courses
+            FROM enrollment_access
             WHERE user_id = :user_id
               AND course_id = :course_id
             LIMIT 1
@@ -147,7 +147,7 @@ class UserCourseRepository
     ): bool {
         $sql = "
             SELECT 1
-            FROM user_courses
+            FROM enrollment_access
             WHERE user_id = :user_id
               AND course_id = :course_id
               AND status = 'ACTIVE'
@@ -181,7 +181,7 @@ class UserCourseRepository
                 access_expires_at,
                 created_at,
                 updated_at
-            FROM user_courses
+            FROM enrollment_access
             WHERE user_id = :user_id
               AND status = 'ACTIVE'
               AND (access_expires_at IS NULL OR access_expires_at > NOW())
@@ -207,7 +207,7 @@ class UserCourseRepository
     {
         $sql = "
             SELECT COUNT(*)
-            FROM user_courses
+            FROM enrollment_access
         ";
 
         return (int) $this->db
@@ -224,6 +224,7 @@ class UserCourseRepository
             'CHARGEBACK',
             'EXPIRED',
             'SUSPENDED',
+            'PENDING',
         ];
 
         if (!in_array($status, $allowedStatuses, true)) {
@@ -234,7 +235,7 @@ class UserCourseRepository
 
         $sql = "
             SELECT COUNT(*)
-            FROM user_courses
+            FROM enrollment_access
             WHERE status = :status
         ";
 
@@ -264,7 +265,7 @@ class UserCourseRepository
             $params['course_id'] = $courseId;
         }
         $whereSql = implode(' AND ', $where);
-        $joins = 'FROM user_courses uc LEFT JOIN users u ON u.id = uc.user_id LEFT JOIN courses c ON c.id = uc.course_id';
+        $joins = 'FROM enrollment_access uc LEFT JOIN users u ON u.id = uc.user_id LEFT JOIN courses c ON c.id = uc.course_id';
         $count = $this->db->prepare("SELECT COUNT(*) {$joins} WHERE {$whereSql}");
         $count->execute($params);
         $total = (int) $count->fetchColumn();
@@ -288,7 +289,7 @@ class UserCourseRepository
         $stmt = $this->db->prepare('SELECT uc.*, u.name AS user_name, u.email AS user_email,
             u.deleted_at AS user_deleted_at, u.is_active AS user_active,
             c.name AS course_name, c.deleted_at AS course_deleted_at, c.is_active AS course_active
-            FROM user_courses uc LEFT JOIN users u ON u.id = uc.user_id
+            FROM enrollment_access uc LEFT JOIN users u ON u.id = uc.user_id
             LEFT JOIN courses c ON c.id = uc.course_id WHERE uc.id = :id LIMIT 1');
         $stmt->execute(['id' => $id]);
         $result = $stmt->fetch();
@@ -299,7 +300,7 @@ class UserCourseRepository
     public function findAdminCourseOptions(): array
     {
         return $this->db->query('SELECT c.id, c.name, c.deleted_at FROM courses c
-            WHERE EXISTS (SELECT 1 FROM user_courses uc WHERE uc.course_id = c.id)
+            WHERE EXISTS (SELECT 1 FROM enrollment_access uc WHERE uc.course_id = c.id)
             ORDER BY c.name ASC, c.id ASC')->fetchAll();
     }
 
@@ -330,13 +331,12 @@ class UserCourseRepository
             c.deleted_at,
             c.created_at,
             c.updated_at
-        FROM user_courses uc
+        FROM enrollment_access uc
         INNER JOIN courses c
             ON c.id = uc.course_id
         WHERE uc.user_id = :user_id
           AND uc.status = 'ACTIVE'
           AND (uc.access_expires_at IS NULL OR uc.access_expires_at > NOW())
-          AND c.is_active = 1
           AND c.deleted_at IS NULL
         ORDER BY c.name ASC
     ";

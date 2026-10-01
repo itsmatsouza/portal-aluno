@@ -65,6 +65,6 @@ class Course
 
     public function isAvailable(): bool
     {
-        return $this->isActive && !$this->isDeleted();
+        return !$this->isDeleted();
     }
 }

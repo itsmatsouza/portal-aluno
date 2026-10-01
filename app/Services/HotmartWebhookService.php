@@ -49,7 +49,7 @@ class HotmartWebhookService
             // Serializa compras do mesmo curso, inclusive transações diferentes do mesmo aluno.
             $course = $this->repository->lockCourse($ucode);
             if ($course === null) {
-                throw new RuntimeException('Produto Hotmart sem curso correspondente.');
+                throw new RuntimeException('Produto Hotmart sem curso correspondente. Sincronize o catálogo antes de reenviar o evento.');
             }
             $courseId = (int) $course['id'];
             if (!$this->repository->recordEvent($event, $transaction)) {
@@ -75,14 +75,15 @@ class HotmartWebhookService
             }
             $userId = $previous['user_id'] ?? $legacy['user_id'] ?? null;
             $purchasedAt = $previous['purchased_at'] ?? $legacy['purchased_at'] ?? null;
-            $expiresAt = $previous['access_expires_at'] ?? $legacy['access_expires_at'] ?? null;
+            $expiresAt = null;
             if ($status === 'ACTIVE') {
                 $email = strtolower($this->string($data['buyer']['email'] ?? null, 255));
                 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     throw new InvalidArgumentException('E-mail do comprador inválido.');
                 }
                 $name = $this->string($data['buyer']['name'] ?? null, 150);
-                $buyerId = $this->repository->buyer($email, $name);
+                $buyerUcode = isset($data['buyer']['ucode']) ? $this->string($data['buyer']['ucode'], 100) : null;
+                $buyerId = $this->repository->buyer($email, $name, $buyerUcode);
                 if ($userId !== null && (int) $userId !== $buyerId) {
                     throw new RuntimeException('Comprador da transação divergente.');
                 }
@@ -92,10 +93,6 @@ class HotmartWebhookService
                     throw new InvalidArgumentException('Data da compra inválida.');
                 }
                 $purchasedAt ??= date('Y-m-d H:i:s', intdiv($approvedAt, 1000));
-                if ($legacy === null && ($previous === null || $previous['purchased_at'] === null)) {
-                    $expiresAt = $course['access_days'] === null ? null
-                        : (new \DateTimeImmutable($purchasedAt))->modify('+' . (int) $course['access_days'] . ' days')->format('Y-m-d H:i:s');
-                }
             }
             $this->repository->savePurchase($transaction, $courseId, $userId === null ? null : (int) $userId, $status, $time, $purchasedAt, $expiresAt);
             if ($userId !== null) {
@@ -114,15 +111,9 @@ class HotmartWebhookService
     private function updateAccess(int $userId, int $courseId, string $transaction, string $status, ?string $purchasedAt, ?string $expiresAt): void
     {
         $access = $this->repository->access($userId, $courseId);
-        // Preserva concessões manuais e vínculos anteriores ainda não conciliados.
-        if ($access !== null && ($access['hotmart_transaction_id'] === null
-            || ($access['hotmart_transaction_id'] !== $transaction
-                && $this->repository->purchase($access['hotmart_transaction_id']) === null))) {
-            return;
-        }
         $active = $this->repository->activePurchase($userId, $courseId);
         if ($active !== null) {
-            $this->repository->saveAccess($userId, $courseId, $active['transaction_id'], 'ACTIVE', $active['purchased_at'], $active['access_expires_at']);
+            $this->repository->saveAccess($userId, $courseId, $active['transaction_id'], 'ACTIVE', $active['purchased_at'], null);
         } elseif ($access !== null || $status === 'ACTIVE') {
             if ($status === 'ACTIVE') {
                 $status = 'EXPIRED';

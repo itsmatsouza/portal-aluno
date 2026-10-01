@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 $escape = static fn (?string $value): string => htmlspecialchars($value ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 $form = $form ?? false;
-$toolsTab = $toolsTab ?? false;
 $heading = $form ? ($course === null ? 'Novo curso' : 'Editar curso') : 'Cursos';
-if ($toolsTab) {
-    $heading = 'Ferramentas do curso';
-}
 preg_match('/^./us', trim($admin['name']), $initial);
 ?>
 <!DOCTYPE html>
@@ -43,19 +39,17 @@ preg_match('/^./us', trim($admin['name']), $initial);
         <div class="portal-content">
             <section class="admin-welcome-section">
                 <div class="welcome-copy"><span class="section-kicker">ADMINISTRAÇÃO</span><h1><?= $heading ?></h1></div>
-                <?php if (!$form): ?><a class="admin-button admin-button-primary" href="/admin/courses/new">Novo curso</a><?php endif; ?>
+                <a class="admin-button admin-button-secondary" href="/admin/classes">Turmas</a>
             </section>
             <?php if (is_string($message)): ?><div class="admin-course-feedback" role="status"><?= $escape($message) ?></div><?php endif; ?>
             <?php if ($form && $course !== null): ?>
                 <p class="admin-course-name"><?= $escape($course->getName()) ?></p>
                 <nav class="admin-course-tabs" aria-label="Seções do curso">
-                    <a href="/admin/courses/<?= $course->getId() ?>/edit" <?= !$toolsTab ? 'aria-current="page"' : '' ?>>Dados do curso</a>
-                    <a href="/admin/courses/<?= $course->getId() ?>/tools" <?= $toolsTab ? 'aria-current="page"' : '' ?>>Ferramentas</a>
+                    <a href="/admin/courses/<?= $course->getId() ?>/edit" aria-current="page">Dados do curso</a>
+
                 </nav>
             <?php endif; ?>
-            <?php if ($toolsTab): ?>
-                <?php require __DIR__ . '/partials/course-tools.php'; ?>
-            <?php elseif ($form): ?>
+            <?php if ($form): ?>
                 <?php require __DIR__ . '/partials/course-form.php'; ?>
             <?php else: ?>
                 <form method="GET" action="/admin/courses" class="admin-course-filters">
@@ -82,12 +76,6 @@ preg_match('/^./us', trim($admin['name']), $initial);
                                         <td><?= date('d/m/Y', strtotime($item->getCreatedAt())) ?></td>
                                         <td><div class="admin-course-actions">
                                             <a class="admin-table-link" href="/admin/courses/<?= $item->getId() ?>/edit">Editar</a>
-                                            <a class="admin-table-link" href="/admin/courses/<?= $item->getId() ?>/tools">Ferramentas</a>
-                                            <form method="POST" action="/admin/courses/<?= $item->getId() ?>/status" <?= $item->isActive() ? 'data-confirm-inactive' : '' ?>>
-                                                <input type="hidden" name="csrf_token" value="<?= $escape($token) ?>">
-                                                <input type="hidden" name="active" value="<?= $item->isActive() ? '0' : '1' ?>">
-                                                <button type="submit" class="admin-course-status-button"><?= $item->isActive() ? 'Inativar' : 'Ativar' ?></button>
-                                            </form>
                                         </div></td>
                                     </tr>
                                 <?php endforeach; ?>

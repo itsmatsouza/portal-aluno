@@ -23,24 +23,24 @@
         <div><dt>Arquivo</dt><dd><?= $hasFile ? 'Disponível' : 'Ausente ou inacessível' ?></dd></div>
         <div><dt>Status global</dt><dd><?= $tool->isActive() ? 'Ativa' : 'Inativa' ?></dd></div>
     </dl>
-    <p class="admin-muted">A presença do arquivo não confirma revisão técnica. Inativar bloqueia a ferramenta em todos os cursos vinculados.</p>
-    <form method="POST" action="/admin/tools/<?= $tool->getId() ?>/status" <?= $tool->isActive() ? 'data-confirm-tool-inactive' : '' ?> data-course-count="<?= count($courses) ?>">
+    <p class="admin-muted">A presença do arquivo não confirma revisão técnica. Inativar bloqueia a ferramenta em todas as turmas vinculadas.</p>
+    <form method="POST" action="/admin/tools/<?= $tool->getId() ?>/status" <?= $tool->isActive() ? 'data-confirm-tool-inactive' : '' ?> data-class-count="<?= count($classes) ?>">
         <input type="hidden" name="csrf_token" value="<?= $escape($token) ?>">
         <input type="hidden" name="active" value="<?= $tool->isActive() ? '0' : '1' ?>">
         <button class="admin-button admin-button-secondary" type="submit" <?= !$tool->isActive() && !$hasFile ? 'disabled title="Arquivo ausente ou inacessível"' : '' ?>><?= $tool->isActive() ? 'Inativar ferramenta' : 'Ativar ferramenta' ?></button>
     </form>
 </section>
-<section class="content-section" id="linkedCourses">
-    <div class="section-heading"><div><h2>Cursos vinculados</h2><p><?= count($courses) ?> curso(s).</p></div></div>
-    <?php if ($courses === []): ?>
-        <p class="admin-muted">Nenhum curso vinculado.</p>
-        <a href="/admin/courses" class="admin-table-link">Ir para cursos</a>
+<section class="content-section" id="linkedClasses">
+    <div class="section-heading"><div><h2>Turmas vinculadas</h2><p><?= count($classes) ?> turma(s).</p></div></div>
+    <?php if ($classes === []): ?>
+        <p class="admin-muted">Nenhuma turma vinculada.</p>
+        <a href="/admin/classes" class="admin-table-link">Ir para turmas</a>
     <?php else: ?>
         <ul class="admin-tool-courses">
-            <?php foreach ($courses as $linkedCourse): ?>
+            <?php foreach ($classes as $linkedClass): ?>
                 <li>
-                    <a class="admin-table-link" href="/admin/courses/<?= (int) $linkedCourse['id'] ?>/tools"><?= $escape($linkedCourse['name']) ?></a>
-                    <span class="admin-status <?= $linkedCourse['is_active'] ? 'status-active' : 'status-inactive' ?>"><?= $linkedCourse['is_active'] ? 'Ativo' : 'Inativo' ?></span>
+                    <a class="admin-table-link" href="/admin/classes/<?= (int) $linkedClass['id'] ?>/edit"><?= $escape($linkedClass['name']) ?></a>
+                    <span class="admin-muted"><?= $escape($linkedClass['course_name']) ?></span>
                 </li>
             <?php endforeach; ?>
         </ul>

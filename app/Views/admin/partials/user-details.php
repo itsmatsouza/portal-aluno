@@ -7,7 +7,7 @@ $fields = [
     'E-mail' => $detailUser->getEmail(),
     'Perfil' => adminUsersRoleLabel($detailUser->getRole()),
     'Status da conta' => adminUsersStatusLabel($detailUser->isActive()),
-    'Identificador Hotmart' => $detailUser->getHotmartBuyerId() ?? 'Não vinculado',
+    'Ucode do comprador Hotmart' => $detailUser->getHotmartBuyerUcode() ?? 'Não vinculado',
     'E-mail Hotmart' => $detailUser->getHotmartEmail() ?? 'Não informado',
     'Último acesso' => adminUsersFormatDate($detailUser->getLastLoginAt()),
     'Cadastro' => adminUsersFormatDate($detailUser->getCreatedAt()),
@@ -15,6 +15,7 @@ $fields = [
 ];
 $statusLabels = [
     'ACTIVE' => 'Ativa',
+    'PENDING' => 'Pendente de turma/sincronização',
     'CANCELLED' => 'Cancelada',
     'REFUNDED' => 'Reembolsada',
     'CHARGEBACK' => 'Contestada',
@@ -55,11 +56,11 @@ $statusLabels = [
                 <?php endif; ?>
                 <?php foreach ($enrollments as $enrollment): ?>
                     <tr>
-                        <td><?= adminUsersEscape($enrollment['course_name'] ?? 'Curso indisponível') ?></td>
+                        <td><?= adminUsersEscape($enrollment['course_name'] ?? 'Curso indisponível') ?><br><span class="admin-muted"><?= adminUsersEscape($enrollment['class_name'] ?? 'Turma pendente') ?></span></td>
                         <td><?= adminUsersEscape($statusLabels[$enrollment['status']] ?? $enrollment['status']) ?></td>
                         <td><?= adminUsersEscape($enrollment['hotmart_transaction_id'] ?? 'Não informada') ?></td>
                         <td><?= $enrollment['purchased_at'] ? adminUsersFormatDate($enrollment['purchased_at']) : 'Não informada' ?></td>
-                        <td><?= $enrollment['access_expires_at'] ? adminUsersFormatDate($enrollment['access_expires_at']) : 'Sem vencimento' ?></td>
+                        <td><?= $enrollment['class_id'] === null ? 'Pendente' : ($enrollment['is_lifetime'] ? 'Vitalício' : ($enrollment['access_expires_at'] === null ? 'Prazo pendente' : date('d/m/Y H:i', strtotime($enrollment['access_expires_at'])))) ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

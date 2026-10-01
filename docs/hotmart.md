@@ -1,26 +1,18 @@
 # Integração Hotmart
 
-A integração usa o webhook 2.0.0 para atualizar alunos e acessos. O cliente OAuth consulta vendas pela API. As credenciais da API são independentes do Hottok e não são necessárias para receber webhooks.
+A integração usa o webhook 2.0.0 para atualizar alunos e acessos. O cliente OAuth consulta vendas, produtos e alunos do Club. As credenciais da API são independentes do Hottok: o webhook registra a compra, mas a liberação exige reconciliação pelo Club.
 
 ## Instalação
 
 1. Faça backup do banco e publique os arquivos. A raiz pública do servidor deve ser `public/`.
 2. Copie as variáveis de `config/hotmart.env.example` para o `.env` existente, sem substituir as demais configurações.
-3. Execute `php bin/migrate.php` na raiz do projeto. Isso aplica as migrations pendentes, incluindo `005_create_hotmart_events.sql`. Não execute simultaneamente em dois processos. A migration não foi executada durante a implementação.
+3. Execute `php bin/migrate.php` na raiz do projeto. Isso aplica as migrations pendentes, incluindo as migrations 005–011. Não execute simultaneamente em dois processos. A migration não foi executada durante a implementação.
 4. Se o banco foi criado manualmente, confira a tabela `migrations` antes de executar: as migrations 001 a 004 já aplicadas precisam estar registradas pelo nome completo. Não registre migrations que ainda não foram aplicadas. DDL do MySQL não é transacional; após falha parcial, confira o esquema antes de repetir.
 5. Configure `APP_URL` com a URL HTTPS do portal e mantenha as configurações SMTP existentes (`MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_ENCRYPTION`, `MAIL_FROM_ADDRESS`).
 
-## Cursos e duração
+## Cursos, turmas e expiração
 
-Em **Administração > Cursos**, edite cada curso:
-
-- Informe o `data.product.ucode` no identificador Hotmart. Não use o ID numérico do produto.
-- Informe a duração em dias, por exemplo `365`. Deixe vazia para acesso vitalício.
-- Ative o curso e associe suas ferramentas normalmente.
-
-O prazo começa em `data.purchase.approved_date`. Na ausência desse campo, utiliza a data do evento. Alterar a duração do curso só afeta novas transações. O evento `PURCHASE_COMPLETE` e o reenvio de uma aprovação não reiniciam o prazo. A data de garantia/reembolso da Hotmart não é usada como vencimento do acesso.
-
-O prazo configurado é único por curso. Ofertas com durações diferentes para o mesmo produto, vencimento em data fixa, combos e ciclo de cancelamento de assinaturas precisam de regras adicionais; não estão automatizados nesta versão. Compras recorrentes recebidas como aprovação seguem o prazo do curso por transação. Não configure curso recorrente como vitalício esperando bloqueio por cancelamento da assinatura.
+Siga [Acesso por turma](turmas.md) para cadastrar turmas, configurar os subdomínios e agendar reconciliação. Cursos vêm do catálogo Hotmart: apenas `ACTIVE` cria cursos; demais status inativam existentes. Curso inativo bloqueia somente novas turmas, não o acesso de alunos. Apenas a descrição é editável no admin. Ferramentas e expiração são definidos nas turmas, com uma turma atual por aluno e curso. A data de garantia da compra não define vencimento do acesso.
 
 ## Webhook na Hotmart
 
@@ -33,7 +25,7 @@ Em Ferramentas > Webhook, crie uma configuração para cada produto integrado:
 
 | Evento | Efeito na transação |
 | --- | --- |
-| `PURCHASE_APPROVED`, `PURCHASE_COMPLETE` | Libera acesso |
+| `PURCHASE_APPROVED`, `PURCHASE_COMPLETE` | Registra compra ativa e solicita reconciliação da turma |
 | `PURCHASE_REFUNDED` | Reembolso; bloqueia a transação |
 | `PURCHASE_CHARGEBACK` | Chargeback; bloqueia a transação |
 | `PURCHASE_CANCELED` | Cancela a transação |
@@ -44,7 +36,7 @@ Eventos não listados retornam `ignored_event` e não alteram acesso. Boleto emi
 
 O processamento grava evento, compra, aluno e acesso na mesma transação do banco. O ID do evento evita duplicação. Eventos anteriores ao estado registrado são ignorados. Reembolso e chargeback impedem reativação posterior da mesma transação. Uma nova compra pode liberar acesso novamente.
 
-Se houver outra compra válida para o mesmo aluno e curso, um reembolso não remove esse acesso. Acesso manual, sem transação Hotmart, é preservado. Vínculos anteriores à integração com outra transação ainda não registrada são preservados e precisam de conciliação manual. Bloqueios e exclusões de usuários e cursos continuam valendo.
+Se houver outra compra ativa do mesmo aluno e curso, um reembolso não elimina esse direito de compra. A matrícula aguarda reconciliação do Club e só libera ferramentas com turma cadastrada e dentro do prazo. Bloqueios de usuários e exclusões continuam valendo. A inativação de um curso bloqueia somente novas turmas.
 
 ## Primeiro acesso do aluno
 
@@ -78,25 +70,16 @@ Esse comando apenas consulta; não importa vendas nem modifica acessos. A respos
 
 Nenhum teste automatizado foi executado. Use banco de homologação e endereço HTTPS acessível pela Hotmart. `localhost` precisa de um túnel HTTPS para receber eventos externos.
 
-1. Configure curso com o ucode do produto de homologação e duração de um dia.
-2. Envie uma aprovação pela ferramenta de teste da Hotmart. O e-mail do comprador precisa ser acessível por você. Se o teste usa produto fictício, cadastre o ucode desse payload no curso de homologação.
-3. Confira HTTP 200 com `processed`, o aluno em `/admin/users` e o acesso em `/admin/access`.
-4. Solicite recuperação de senha e entre no portal. Abra curso e ferramenta associada.
-5. Reenvie o mesmo evento. Espere `duplicate`, sem novo aluno, vínculo ou alteração de vencimento.
-6. Envie reembolso com novo ID de evento, data posterior e a mesma transação. O curso e suas ferramentas devem ficar indisponíveis.
-7. Reenvie a aprovação antiga com outro ID. Espere `ignored_stale`, sem reativação.
-8. Aprove outra transação para o mesmo comprador. O acesso deve voltar. Reembolsar a transação antiga não deve bloquear a nova.
-9. Para conferir vencimento sem esperar, altere `access_expires_at` do vínculo de homologação em `user_courses` para uma data passada. Recarregue portal, curso e ferramenta: acesso deve ser negado. A expiração é verificada na consulta; não depende de cron, nem muda automaticamente o status armazenado para `EXPIRED`.
-10. Repita com outro curso de duração vazia. Acesso deve ficar sem vencimento.
-11. Envie uma requisição com Hottok incorreto. Espere HTTP 401, sem alteração no banco.
-12. Execute a consulta da API com credenciais sandbox e confira a transação retornada.
+Use o roteiro de [validação manual de turmas](turmas.md#validação-manual). Webhooks fictícios não identificam necessariamente um aluno real no Club; nesses casos, a matrícula deve permanecer pendente.
+
+Confira também Hottok incorreto (HTTP 401), reenvio do evento (`duplicate`), evento antigo (`ignored_stale`) e consulta de vendas com credenciais do ambiente correto.
 
 ## Diagnóstico
 
 - `401`: cabeçalho Hottok ausente ou incorreto.
 - `400`: JSON, versão ou campos obrigatórios inválidos.
 - `413`: corpo maior que 1 MiB.
-- `503`: integração sem segredo, produto não cadastrado, migrations pendentes ou falha de processamento. Corrija e reenvie pela Hotmart; eventos com falha não são marcados como concluídos.
+- `503`: integração sem segredo, migrations pendentes ou falha de processamento. Corrija e reenvie pela Hotmart; eventos com falha não são marcados como concluídos.
 - `200 ignored_event`: tipo sem regra nesta versão.
 - `200 ignored_stale`: evento antigo ou tentativa de reativar uma transação reembolsada.
 
@@ -133,3 +116,10 @@ compradores ao compartilhar o JSON. Depois da inspeção, desative essa configur
 na Hotmart e defina `HOTMART_PREVIEW_ENABLED=false`. Eventos enviados ao preview
 não serão processados automaticamente depois: precisam ser reenviados para a
 rota normal quando a integração estiver configurada.
+
+
+## Identificador do comprador
+
+O campo `users.hotmart_buyer_ucode` armazena `data.buyer.ucode` dos webhooks de compra, equivalente ao `buyer.ucode` da API de vendas. Não use o `user_id` do Club nesse campo. O cadastro preenche o ucode quando disponível, inclusive em contas existentes cujo campo está vazio. Eventos sem ucode não apagam um valor já conhecido. Divergências e identificadores associados a outra conta interrompem a operação, sem fundir contas ou substituir identidade.
+
+A migration 011 renomeia `hotmart_buyer_id` e seu índice único, preservando valores. Publique código e migration em uma janela sem processos antigos: consultas da versão anterior usam a coluna antiga. Na Hostinger, execute `php bin/migrate.php` antes de reabrir o portal. Para rollback, interrompa tráfego e jobs e restaure código e banco da mesma versão a partir do backup. Não preencha dados antigos com identificadores presumidos; obtenha o ucode de uma resposta de compra verificada.

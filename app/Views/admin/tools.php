@@ -58,7 +58,7 @@ preg_match('/^./us', trim($admin['name']), $initial);
                     <div class="section-heading"><div><h2>Ferramentas cadastradas</h2><p><?= $result['total'] ?> registro(s) encontrado(s).</p></div></div>
                     <div class="admin-table-wrapper" tabindex="0" role="region" aria-label="Ferramentas cadastradas">
                         <table class="admin-table">
-                            <thead><tr><th scope="col">Ferramenta</th><th scope="col">Status global</th><th scope="col">Arquivo</th><th scope="col">Cursos vinculados</th><th scope="col">Ações</th></tr></thead>
+                            <thead><tr><th scope="col">Ferramenta</th><th scope="col">Status global</th><th scope="col">Arquivo</th><th scope="col">Turmas vinculadas</th><th scope="col">Ações</th></tr></thead>
                             <tbody>
                                 <?php if ($result['items'] === []): ?><tr><td colspan="5" class="admin-table-empty">Nenhuma ferramenta encontrada.</td></tr><?php endif; ?>
                                 <?php foreach ($result['items'] as $item): ?>
@@ -67,10 +67,10 @@ preg_match('/^./us', trim($admin['name']), $initial);
                                         <td><div class="admin-user-data"><strong><?= $escape($entry->getName()) ?></strong><span><?= $escape($entry->getSlug()) ?></span></div></td>
                                         <td><span class="admin-status <?= $entry->isActive() ? 'status-active' : 'status-inactive' ?>"><?= $entry->isActive() ? 'Ativa' : 'Inativa' ?></span></td>
                                         <td><?= $item['has_file'] ? 'Disponível' : 'Ausente ou inacessível' ?></td>
-                                        <td><a class="admin-table-link" href="/admin/tools/<?= $entry->getId() ?>/edit#linkedCourses"><?= $item['course_count'] ?> curso(s)</a></td>
+                                        <td><a class="admin-table-link" href="/admin/tools/<?= $entry->getId() ?>/edit#linkedClasses"><?= $item['class_count'] ?> turma(s)</a></td>
                                         <td><div class="admin-course-actions">
                                             <a class="admin-table-link" href="/admin/tools/<?= $entry->getId() ?>/edit">Editar</a>
-                                            <form method="POST" action="/admin/tools/<?= $entry->getId() ?>/status" <?= $entry->isActive() ? 'data-confirm-tool-inactive' : '' ?> data-course-count="<?= $item['course_count'] ?>">
+                                            <form method="POST" action="/admin/tools/<?= $entry->getId() ?>/status" <?= $entry->isActive() ? 'data-confirm-tool-inactive' : '' ?> data-class-count="<?= $item['class_count'] ?>">
                                                 <input type="hidden" name="csrf_token" value="<?= $escape($token) ?>">
                                                 <input type="hidden" name="active" value="<?= $entry->isActive() ? '0' : '1' ?>">
                                                 <button type="submit" class="admin-course-status-button" <?= !$entry->isActive() && !$item['has_file'] ? 'disabled title="Arquivo ausente ou inacessível"' : '' ?>><?= $entry->isActive() ? 'Inativar' : 'Ativar' ?></button>

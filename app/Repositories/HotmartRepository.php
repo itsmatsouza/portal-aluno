@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Leilabrito\PortalAluno\Repositories;
 
 use PDO;
+use Leilabrito\PortalAluno\Services\PersonNameFormatter;
 
 class HotmartRepository
 {
@@ -12,9 +13,22 @@ class HotmartRepository
     {
     }
 
+    public function syncCourse(string $ucode, string $name, bool $active): void
+    {
+        if (!$active) {
+            $stmt = $this->db->prepare('UPDATE courses SET name = ?, is_active = 0
+                WHERE hotmart_product_ucode = ? AND deleted_at IS NULL');
+            $stmt->execute([$name, $ucode]);
+            return;
+        }
+        $stmt = $this->db->prepare('INSERT INTO courses (name, hotmart_product_ucode, is_active) VALUES (?, ?, 1)
+            ON DUPLICATE KEY UPDATE name = VALUES(name), is_active = IF(deleted_at IS NULL, 1, is_active)');
+        $stmt->execute([$name, $ucode]);
+    }
+
     public function lockCourse(string $ucode): ?array
     {
-        $stmt = $this->db->prepare('SELECT id, access_days FROM courses WHERE hotmart_product_ucode = ? FOR UPDATE');
+        $stmt = $this->db->prepare('SELECT id FROM courses WHERE hotmart_product_ucode = ? FOR UPDATE');
         $stmt->execute([$ucode]);
         $course = $stmt->fetch();
         return $course === false ? null : $course;
@@ -41,13 +55,43 @@ class HotmartRepository
         return $stmt->fetch() ?: null;
     }
 
-    public function buyer(string $email, string $name): int
+    public function buyer(string $email, string $name, ?string $ucode = null): int
     {
-        // Nunca altere senha, papel ou bloqueio de uma conta existente.
-        $stmt = $this->db->prepare("INSERT INTO users (name, email, password_hash, role, hotmart_email)
-            VALUES (?, ?, ?, 'ALUNO', ?) ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)");
-        $stmt->execute([$name, $email, password_hash(bin2hex(random_bytes(32)), PASSWORD_DEFAULT), $email]);
-        return (int) $this->db->lastInsertId();
+        $name = PersonNameFormatter::format($name);
+        if ($ucode !== null && !preg_match('/^[A-Za-z0-9_-]{1,100}$/D', $ucode)) {
+            throw new \InvalidArgumentException('Ucode do comprador Hotmart inválido.');
+        }
+        $ownsTransaction = !$this->db->inTransaction();
+        if ($ownsTransaction) {
+            $this->db->beginTransaction();
+        }
+        try {
+            // Resolve pelo e-mail, nunca pelo ucode de outra conta.
+            // Preserva nome, senha, papel e bloqueios das contas existentes.
+            $stmt = $this->db->prepare("INSERT INTO users (name, email, password_hash, role, hotmart_email)
+                VALUES (?, ?, ?, 'ALUNO', ?) ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)");
+            $stmt->execute([$name, $email, password_hash(bin2hex(random_bytes(32)), PASSWORD_DEFAULT), $email]);
+            $userId = (int) $this->db->lastInsertId();
+            if ($ucode !== null) {
+                $stmt = $this->db->prepare('SELECT hotmart_buyer_ucode FROM users WHERE id = ? FOR UPDATE');
+                $stmt->execute([$userId]);
+                $existing = $stmt->fetchColumn();
+                if ($existing !== null && $existing !== $ucode) {
+                    throw new \RuntimeException('Ucode do comprador diverge do vínculo existente.');
+                }
+                $stmt = $this->db->prepare('UPDATE users SET hotmart_buyer_ucode = ? WHERE id = ?');
+                $stmt->execute([$ucode, $userId]);
+            }
+            if ($ownsTransaction) {
+                $this->db->commit();
+            }
+            return $userId;
+        } catch (\Throwable $error) {
+            if ($ownsTransaction && $this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $error;
+        }
     }
 
     public function legacyAccess(string $transaction): ?array
@@ -69,9 +113,8 @@ class HotmartRepository
     public function activePurchase(int $userId, int $courseId): ?array
     {
         $stmt = $this->db->prepare("SELECT * FROM hotmart_purchases WHERE user_id = :user_id AND course_id = :course_id
-            AND status = 'ACTIVE' AND (access_expires_at IS NULL OR access_expires_at > :now)
-            ORDER BY (access_expires_at IS NULL) DESC, access_expires_at DESC, occurred_at DESC LIMIT 1");
-        $stmt->execute(['user_id' => $userId, 'course_id' => $courseId, 'now' => date('Y-m-d H:i:s')]);
+            AND status = 'ACTIVE' ORDER BY purchased_at DESC, occurred_at DESC, transaction_id DESC LIMIT 1");
+        $stmt->execute(['user_id' => $userId, 'course_id' => $courseId]);
         return $stmt->fetch() ?: null;
     }
 
@@ -87,7 +130,8 @@ class HotmartRepository
         $stmt = $this->db->prepare('INSERT INTO user_courses
             (user_id, course_id, hotmart_transaction_id, status, purchased_at, access_expires_at) VALUES (?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE hotmart_transaction_id = VALUES(hotmart_transaction_id),
-                status = VALUES(status), purchased_at = VALUES(purchased_at), access_expires_at = VALUES(access_expires_at)');
+                status = VALUES(status), purchased_at = VALUES(purchased_at), access_expires_at = NULL,
+                class_id = NULL, club_status = NULL, sync_pending = 1, sync_version = sync_version + 1');
         $stmt->execute([$userId, $courseId, $transaction, $status, $purchasedAt, $expiresAt]);
     }
 }

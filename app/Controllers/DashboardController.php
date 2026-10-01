@@ -32,9 +32,10 @@ class DashboardController
         }
 
         $toolsByCourse = $this->courseTools->getToolsForCourses(
-            $courseIds
+            $userId, $courseIds
         );
 
+        $enrollments = array_column($this->userCourses->findDetailsByUserId($userId), null, 'course_id');
         $result = [];
 
         foreach ($courses as $course) {
@@ -58,6 +59,10 @@ class DashboardController
                 'id' => $courseId,
                 'name' => $course->getName(),
                 'description' => $course->getDescription(),
+                'class_name' => $enrollments[$courseId]['class_name'] ?? null,
+                'is_lifetime' => (bool) ($enrollments[$courseId]['is_lifetime'] ?? false),
+                'expires_on' => empty($enrollments[$courseId]['access_expires_at']) ? null
+                    : (new \DateTimeImmutable($enrollments[$courseId]['access_expires_at']))->format('d/m/Y H:i'),
                 'tools' => $toolsResult,
             ];
         }
@@ -65,6 +70,7 @@ class DashboardController
         Response::json([
             'success' => true,
             'courses' => $result,
+            'pending_enrollments' => count(array_filter($enrollments, static fn (array $row): bool => $row['status'] === 'PENDING')),
         ]);
     }
 }

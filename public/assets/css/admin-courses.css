@@ -154,3 +154,5 @@
         grid-template-columns: minmax(0, 1fr);
     }
 }
+
+.admin-class-tools { display: grid; gap: 12px; padding: 20px; border: 1px solid #dbe2e8; border-radius: 12px; }

@@ -13,53 +13,17 @@ class CourseToolService
     ) {
     }
 
-    public function getToolsForAdministration(int $courseId): array
+    public function getToolsForCourse(int $userId, int $courseId): array
     {
-        return $this->tools->findForCourseAdmin($courseId);
+        return array_column($this->tools->findActiveForUser($userId, [$courseId]), 'tool');
     }
 
-    public function saveCourseTools(int $courseId, mixed $selection): void
+    public function getToolsForCourses(int $userId, array $courseIds): array
     {
-        if (!is_array($selection)) {
-            throw new \InvalidArgumentException('Seleção de ferramentas inválida.');
-        }
-        $ids = [];
-        foreach ($selection as $value) {
-            if (!is_int($value) && !is_string($value)) {
-                throw new \InvalidArgumentException('Seleção de ferramentas inválida.');
-            }
-            $id = filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-            if ($id === false) {
-                throw new \InvalidArgumentException('Seleção de ferramentas inválida.');
-            }
-            $ids[$id] = $id;
-        }
-        $this->tools->syncCourseTools($courseId, array_values($ids));
-    }
-
-    public function getToolsForCourse(int $courseId): array
-    {
-        return $this->tools->findActiveByCourseId($courseId);
-    }
-
-    public function getToolsForCourses(array $courseIds): array
-    {
-        $tools = $this->tools->findActiveByCourseIds(
-            $courseIds
-        );
-
         $result = [];
-
-        foreach ($tools as $item) {
-            $courseId = $item['course_id'];
-
-            if (!isset($result[$courseId])) {
-                $result[$courseId] = [];
-            }
-
-            $result[$courseId][] = $item['tool'];
+        foreach ($this->tools->findActiveForUser($userId, $courseIds) as $item) {
+            $result[$item['course_id']][] = $item['tool'];
         }
-
         return $result;
     }
 

@@ -289,18 +289,23 @@ $router->get(
 $adminCourseController = new AdminCourseController(
     $courseRepository,
     $userRepository,
-    new AdminCourseService($courseRepository),
-    $courseToolService
+    new AdminCourseService($courseRepository)
 );
 $adminCourseMiddleware = [$authMiddleware, $adminMiddleware];
 $router->get('/admin/courses', [$adminCourseController, 'index'], $adminCourseMiddleware);
-$router->get('/admin/courses/new', [$adminCourseController, 'create'], $adminCourseMiddleware);
-$router->post('/admin/courses', [$adminCourseController, 'store'], $adminCourseMiddleware);
 $router->get('/admin/courses/{id}/edit', [$adminCourseController, 'edit'], $adminCourseMiddleware);
 $router->post('/admin/courses/{id}', [$adminCourseController, 'update'], $adminCourseMiddleware);
-$router->post('/admin/courses/{id}/status', [$adminCourseController, 'status'], $adminCourseMiddleware);
-$router->get('/admin/courses/{id}/tools', [$adminCourseController, 'tools'], $adminCourseMiddleware);
-$router->post('/admin/courses/{id}/tools', [$adminCourseController, 'updateTools'], $adminCourseMiddleware);
+
+$classRepository = new \Leilabrito\PortalAluno\Repositories\ClassRepository(Database::getConnection());
+$adminClassController = new \Leilabrito\PortalAluno\Controllers\AdminClassController(
+    $classRepository, $courseRepository, $userRepository,
+    new \Leilabrito\PortalAluno\Services\AdminClassService($classRepository)
+);
+$router->get('/admin/classes', [$adminClassController, 'index'], $adminCourseMiddleware);
+$router->get('/admin/classes/new', [$adminClassController, 'create'], $adminCourseMiddleware);
+$router->post('/admin/classes', [$adminClassController, 'store'], $adminCourseMiddleware);
+$router->get('/admin/classes/{id}/edit', [$adminClassController, 'edit'], $adminCourseMiddleware);
+$router->post('/admin/classes/{id}', [$adminClassController, 'update'], $adminCourseMiddleware);
 
 $adminToolController = new AdminToolController($toolRepository, $userRepository, new AdminToolService($toolRepository));
 $adminToolMiddleware = [$authMiddleware, $adminMiddleware];

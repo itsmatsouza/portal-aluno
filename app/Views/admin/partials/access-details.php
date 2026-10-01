@@ -13,10 +13,15 @@ $fields = [
     'Situação da conta' => $userState,
     'Curso' => $enrollment['course_name'] ?? 'Curso indisponível',
     'Situação do curso' => $courseState,
+    'Turma' => $enrollment['class_name'] ?? 'Pendente',
+    'ID da turma Hotmart' => $enrollment['hotmart_class_id'] ?? 'Ainda não consultado',
+    'Status no Club' => $enrollment['club_status'] ?? 'Pendente',
+    'Última sincronização' => $formatDate($enrollment['synced_at']),
+    'Pendência de sincronização' => $enrollment['sync_error'] ?? 'Nenhuma',
     'Situação da matrícula' => $statusLabels[$enrollment['status']] ?? $enrollment['status'],
     'Transação Hotmart' => $enrollment['hotmart_transaction_id'] ?? 'Não informada',
     'Compra' => $formatDate($enrollment['purchased_at']),
-    'Vencimento' => $formatDate($enrollment['access_expires_at'], 'Sem vencimento'),
+    'Vencimento' => $enrollment['class_id'] === null ? 'Pendente' : ($enrollment['is_lifetime'] ? 'Vitalício' : ($enrollment['access_expires_at'] === null ? 'Prazo pendente' : date('d/m/Y H:i', strtotime($enrollment['access_expires_at'])))),
     'Cadastro' => $formatDate($enrollment['created_at']),
     'Atualização' => $formatDate($enrollment['updated_at']),
 ];
@@ -29,14 +34,14 @@ $fields = [
             <div><dt><?= $escape($label) ?></dt><dd><?= $escape($value) ?></dd></div>
         <?php endforeach; ?>
     </dl>
-    <p class="admin-muted">Matrícula ativa não libera acesso quando a conta ou o curso está inativo ou excluído.</p>
+    <p class="admin-muted">O acesso exige conta ativa, confirmação no Club e turma dentro do prazo. Curso inativo impede apenas novas turmas.</p>
     <div class="admin-access-links">
         <?php if ($enrollment['user_name'] !== null && $enrollment['user_deleted_at'] === null): ?>
             <a href="/admin/users/<?= (int) $enrollment['user_id'] ?>" class="admin-button admin-button-secondary">Ver aluno</a>
         <?php endif; ?>
         <?php if ($enrollment['course_name'] !== null && $enrollment['course_deleted_at'] === null): ?>
             <a href="/admin/courses/<?= (int) $enrollment['course_id'] ?>/edit" class="admin-button admin-button-secondary">Ver curso</a>
-            <a href="/admin/courses/<?= (int) $enrollment['course_id'] ?>/tools" class="admin-button admin-button-secondary">Ferramentas do curso</a>
+            <?php if ($enrollment['class_id'] !== null): ?><a href="/admin/classes/<?= (int) $enrollment['class_id'] ?>/edit" class="admin-button admin-button-secondary">Ver turma e ferramentas</a><?php endif; ?>
         <?php endif; ?>
     </div>
 </section>

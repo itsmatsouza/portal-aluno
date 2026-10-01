@@ -3,8 +3,8 @@
 document.querySelectorAll('form[method="POST"]').forEach((form) => {
     form.addEventListener('submit', (event) => {
         if (form.hasAttribute('data-confirm-tool-inactive')) {
-            const count = form.dataset.courseCount;
-            if (!window.confirm(`Inativar esta ferramenta? O bloqueio vale para todos os ${count} curso(s) vinculados.`)) {
+            const count = form.dataset.classCount;
+            if (!window.confirm(`Inativar esta ferramenta? O bloqueio vale para todas as ${count} turma(s) vinculadas.`)) {
                 event.preventDefault();
                 return;
             }

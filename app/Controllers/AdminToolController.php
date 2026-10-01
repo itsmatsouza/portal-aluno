@@ -87,7 +87,7 @@ class AdminToolController
         $this->render($data + [
             'tool' => $tool,
             'hasFile' => $this->service->hasFile($tool),
-            'courses' => $this->tools->findLinkedCourses($tool->getId()),
+            'classes' => $this->tools->findLinkedClasses($tool->getId()),
             'values' => ['name' => $tool->getName(), 'description' => $tool->getDescription() ?? ''],
             'errors' => [],
             'statusError' => null,
