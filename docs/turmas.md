@@ -21,7 +21,7 @@ HOTMART_COURSE_SUBDOMAINS='{"UCODE_DO_CURSO":"formacaoestrategistalegaldeobr"}'
 
 Acrescente uma entrada por curso, usando seu contexto correto no Club. Não use o ID numérico do produto ou o nome público do produtor como substituto do subdomínio.
 
-O catálogo valida `items`, `name`, `ucode` e paginação. Os documentos fornecidos ainda não contêm captura real desse endpoint; valide essa consulta na conta. Contratos inesperados interrompem a importação sem inventar identificadores. A importação é repetível e não cria turmas. `hotmart-sales.php` continua sendo uma consulta de vendas; não importa matrículas históricas.
+O catálogo valida `items`, `name`, `ucode` e paginação. Os documentos fornecidos ainda não contêm captura real desse endpoint; valide essa consulta na conta. Contratos inesperados interrompem a importação sem inventar identificadores. A importação é repetível e não cria turmas. `hotmart-sales.php` continua sendo uma consulta. Para cadastrar alunos antigos, use [Importação inicial de alunos](importacao-alunos.md).
 
 ## Reconciliação
 

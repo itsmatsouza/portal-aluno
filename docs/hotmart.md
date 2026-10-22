@@ -64,7 +64,7 @@ php bin/hotmart-sales.php --product_id=1234567 --transaction_status=APPROVED --m
 
 Para continuar, repita os filtros com `--page_token=TOKEN` usando `page_info.next_page_token` da resposta. Também são aceitos `buyer_email`, `start_date` e `end_date` (datas em milissegundos Unix). Sem filtro de status ou transação, a API retorna vendas aprovadas e completas por padrão.
 
-Esse comando apenas consulta; não importa vendas nem modifica acessos. A resposta contém dados pessoais: não a publique. Para compras antigas, use o reenvio dos eventos na Hotmart após cadastrar o produto. Uma importação em massa exige conciliação própria, porque a API de vendas identifica produto pelo ID numérico e o portal usa ucode.
+Esse comando apenas consulta; não importa vendas nem modifica acessos. A resposta contém dados pessoais: não a publique. Para cadastrar compradores antigos, use `hotmart-import-students.php`, conforme [Importação inicial de alunos](importacao-alunos.md). O importador relaciona ID numérico ao ucode pelo catálogo e mantém a confirmação de turma separada, pelo Club.
 
 ## Validação manual
 
