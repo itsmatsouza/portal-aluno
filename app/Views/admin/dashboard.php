@@ -25,6 +25,13 @@ $accessTotal = (int) ($stats['user_courses']['total'] ?? 0);
 $accessActive = (int) ($stats['user_courses']['active'] ?? 0);
 $accessCancelled = (int) ($stats['user_courses']['cancelled'] ?? 0);
 
+$adminTools = [];
+foreach ($accessibleTools as $item) {
+    $adminTools[$item['tool']->getId()] = $item['tool'];
+}
+$adminTools = array_values($adminTools);
+$toolCount = count($adminTools);
+
 function adminEscape(string $value): string
 {
     return htmlspecialchars(
@@ -153,23 +160,44 @@ function adminEscape(string $value): string
 
             </section>
 
-            <section class="tools-section" aria-labelledby="adminToolsTitle">
+            <section class="content-section tools-section" aria-labelledby="adminToolsTitle">
                 <div class="section-heading">
-                    <h2 id="adminToolsTitle">Minhas ferramentas</h2>
+                    <div>
+                        <span class="section-kicker">RECURSOS EXCLUSIVOS</span>
+                        <h2 id="adminToolsTitle">Minhas ferramentas</h2>
+                    </div>
+                    <span class="section-counter">
+                        <?= $toolCount ?> <?= $toolCount === 1 ? 'ferramenta' : 'ferramentas' ?>
+                    </span>
                 </div>
-                <?php if ($accessibleTools === []): ?>
-                    <p class="admin-muted">Nenhuma ferramenta disponível. Selecione as ferramentas na turma Admin para liberar o acesso aos administradores.</p>
-                <?php else: ?>
-                    <div class="tools-grid">
-                        <?php foreach ($accessibleTools as $item): $tool = $item['tool']; ?>
-                            <article class="tool-card">
+                <div class="tools-grid">
+                    <?php if ($adminTools === []): ?>
+                        <div class="content-loading">Nenhuma ferramenta liberada encontrada.</div>
+                    <?php else: ?>
+                        <?php foreach ($adminTools as $index => $tool): ?>
+                            <article class="tool-card" style="animation-delay: <?= $index * 70 ?>ms;">
+                                <div class="tool-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="m14.5 6.5 3-3 3 3-3 3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="m17.5 6.5-7 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+                                        <path d="M14 14 6.5 21.5H3v-3.5L10.5 10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </div>
                                 <h3><?= adminEscape($tool->getName()) ?></h3>
-                                <p><?= adminEscape($tool->getDescription() ?? '') ?></p>
-                                <a class="tool-button" href="/tool/<?= adminEscape($tool->getSlug()) ?>/view">Abrir ferramenta</a>
+                                <p><?= adminEscape($tool->getDescription() ?: 'Acesse este recurso exclusivo do Portal ELO.') ?></p>
+                                <div class="tool-card-footer">
+                                    <span>Recurso exclusivo</span>
+                                    <a class="tool-button" href="/tool/<?= adminEscape(rawurlencode($tool->getSlug())) ?>/view">
+                                        Acessar
+                                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </a>
+                                </div>
                             </article>
                         <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
+                    <?php endif; ?>
+                </div>
             </section>
 
             <div
