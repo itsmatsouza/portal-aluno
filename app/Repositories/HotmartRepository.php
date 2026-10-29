@@ -127,6 +127,11 @@ class HotmartRepository
 
     public function saveAccess(int $userId, int $courseId, string $transaction, string $status, ?string $purchasedAt, ?string $expiresAt): void
     {
+        // Matrículas concedidas manualmente não são substituídas por eventos de compra.
+        $access = $this->access($userId, $courseId);
+        if ($access !== null && (bool) $access['is_manual']) {
+            return;
+        }
         $stmt = $this->db->prepare('INSERT INTO user_courses
             (user_id, course_id, hotmart_transaction_id, status, purchased_at, access_expires_at) VALUES (?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE hotmart_transaction_id = VALUES(hotmart_transaction_id),

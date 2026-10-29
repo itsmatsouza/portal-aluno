@@ -57,7 +57,7 @@ class HotmartStudentImportService
             $access = $this->repository->access($userId, $courseId);
             $active = $this->repository->activePurchase($userId, $courseId);
             $outcome = 'imported';
-            if ($access !== null && ($access['hotmart_transaction_id'] === null
+            if ($access !== null && ((bool) $access['is_manual'] || $access['hotmart_transaction_id'] === null
                 || ($access['hotmart_transaction_id'] !== $transaction
                     && $this->repository->purchase($access['hotmart_transaction_id']) === null))) {
                 $outcome = 'preserved_access';

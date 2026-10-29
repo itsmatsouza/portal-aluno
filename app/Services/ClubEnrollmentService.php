@@ -16,7 +16,7 @@ class ClubEnrollmentService
     public function reconcile(int $userId, int $courseId): bool
     {
         $snapshot = $this->enrollments->snapshot($userId, $courseId);
-        if ($snapshot === null) {
+        if ($snapshot === null || (bool) $snapshot['is_manual']) {
             return true;
         }
         try {

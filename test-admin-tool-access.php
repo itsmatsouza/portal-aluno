@@ -66,6 +66,26 @@ try {
     check(!$tools->hasActiveAccessForUser(2, 2), 'Bloqueio do Club precisa continuar valendo.');
     $db->exec("UPDATE user_courses SET class_id=1,club_status='ACTIVE' WHERE user_id=2");
     check(!$tools->hasActiveAccessForUser(2, 1), 'Matrícula comercial não pode contornar a turma reservada.');
+    $clubRepository = new Leilabrito\PortalAluno\Repositories\ClubEnrollmentRepository($db);
+    $oldSnapshot = $clubRepository->snapshot(2, 1);
+    $db->exec("UPDATE user_courses SET is_manual=1,club_status=NULL,sync_pending=0 WHERE user_id=2");
+    check($tools->hasActiveAccessForUser(2, 1), 'Aluno com concessão manual explícita pode acessar a turma admin.');
+    check($clubRepository->batch(0, false) === [], 'Cron deve ignorar matrícula manual.');
+    check(!$clubRepository->apply($oldSnapshot, 'students', 'ACTIVE', null), 'Resposta antiga do Club não pode substituir concessão manual.');
+    $club = new Leilabrito\PortalAluno\Services\ClubEnrollmentService($clubRepository,
+        new class extends Leilabrito\PortalAluno\Services\HotmartApiService {
+            public function clubUsers(string $subdomain, string $email, ?string $pageToken = null): array
+            {
+                throw new RuntimeException('Não deve consultar o Club para matrícula manual.');
+            }
+        });
+    check($club->reconcile(2, 1), 'Reconciliação individual deve preservar matrícula manual.');
+    $db->beginTransaction();
+    (new Leilabrito\PortalAluno\Repositories\HotmartRepository($db))->saveAccess(2, 1, 'FAKE', 'REFUNDED', null, null);
+    $db->commit();
+    check($tools->hasActiveAccessForUser(2, 1), 'Webhook não deve substituir concessão manual.');
+    $db->exec("UPDATE user_courses SET status='SUSPENDED' WHERE user_id=2");
+    check(!$tools->hasActiveAccessForUser(2, 1), 'Suspensão manual ainda revoga acesso.');
     $db->exec('UPDATE courses SET deleted_at=NOW() WHERE id=1');
     check(!$tools->hasActiveAccessForUser(1, 1), 'Curso excluído revoga ferramentas administrativas.');
     $db->exec('UPDATE courses SET deleted_at=NULL WHERE id=1');

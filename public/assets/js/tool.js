@@ -189,3 +189,46 @@ document.addEventListener('DOMContentLoaded', async () => {
         toolFrameLoading.classList.add('is-hidden');
     }
 });
+
+
+const toolContentCard = document.getElementById('toolContentCard');
+const toolFullscreenButton = document.getElementById('toolFullscreenButton');
+
+function updateFullscreenButton() {
+    const expanded = document.fullscreenElement === toolContentCard
+        || toolContentCard.classList.contains('is-expanded');
+    toolFullscreenButton.textContent = expanded ? 'Sair da tela cheia' : 'Tela cheia';
+    toolFullscreenButton.setAttribute('aria-pressed', String(expanded));
+}
+
+function closeExpandedTool() {
+    toolContentCard.classList.remove('is-expanded');
+    document.body.classList.remove('tool-expanded');
+    updateFullscreenButton();
+    toolFullscreenButton.focus();
+}
+
+toolFullscreenButton.addEventListener('click', async () => {
+    try {
+        if (document.fullscreenElement === toolContentCard) {
+            await document.exitFullscreen();
+        } else if (toolContentCard.classList.contains('is-expanded')) {
+            closeExpandedTool();
+        } else if (document.fullscreenEnabled && toolContentCard.requestFullscreen) {
+            await toolContentCard.requestFullscreen();
+        } else {
+            toolContentCard.classList.add('is-expanded');
+            document.body.classList.add('tool-expanded');
+        }
+        updateFullscreenButton();
+    } catch {
+        showAlert('Não foi possível abrir em tela cheia. Tente novamente.');
+    }
+});
+
+document.addEventListener('fullscreenchange', updateFullscreenButton);
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && toolContentCard.classList.contains('is-expanded')) {
+        closeExpandedTool();
+    }
+});

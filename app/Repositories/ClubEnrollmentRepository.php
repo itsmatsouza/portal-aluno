@@ -24,7 +24,7 @@ class ClubEnrollmentRepository
     public function batch(int $afterId, bool $pendingOnly, ?string $email = null): array
     {
         $sql = 'SELECT uc.id, uc.user_id, uc.course_id FROM user_courses uc
-            JOIN users u ON u.id = uc.user_id WHERE uc.id > ?';
+            JOIN users u ON u.id = uc.user_id WHERE uc.id > ? AND uc.is_manual = 0';
         $params = [$afterId];
         if ($pendingOnly) {
             $sql .= ' AND (uc.sync_pending = 1 OR uc.class_id IS NULL)';
@@ -45,9 +45,11 @@ class ClubEnrollmentRepository
             // Mesma ordem de bloqueio do webhook e do cadastro de turmas.
             $stmt = $this->db->prepare('SELECT id FROM courses WHERE id = ? FOR UPDATE');
             $stmt->execute([$snapshot['course_id']]);
-            $stmt = $this->db->prepare('SELECT sync_version FROM user_courses WHERE id = ? FOR UPDATE');
+            $stmt = $this->db->prepare('SELECT sync_version, is_manual FROM user_courses WHERE id = ? FOR UPDATE');
             $stmt->execute([$snapshot['id']]);
-            if ((int) $stmt->fetchColumn() !== (int) $snapshot['sync_version']) {
+            $current = $stmt->fetch();
+            if (!$current || (bool) $current['is_manual']
+                || (int) $current['sync_version'] !== (int) $snapshot['sync_version']) {
                 $this->db->rollBack();
                 return false;
             }

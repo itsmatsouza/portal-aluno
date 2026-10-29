@@ -97,3 +97,11 @@ Aplique a migration `013_admin_tool_class_access.sql` antes de ativar este códi
 A associação administrativa não aparece como uma compra na tela **Acessos**. O ID `admin` é reservado: uma matrícula do Club nesse identificador não concede ferramentas a usuários com papel `ALUNO`.
 
 Validação: `php test-admin-tool-access.php` cria e remove um banco descartável com as credenciais locais; requer permissão de criação de bancos. Para uma instância MariaDB isolada, informe `PORTAL_TEST_SOCKET=/caminho/server.sock`. O teste recusa configuração de produção e não modifica o banco configurado do portal.
+
+## Matrícula manual de demonstração
+
+A migration `014_manual_enrollments.sql` acrescenta `user_courses.is_manual`, com padrão zero. Uma concessão manual explícita usa a turma, o status e a duração locais, sem depender de confirmação do Club. Ela pode liberar a turma reservada `admin` a uma conta `ALUNO`, sem conceder privilégios administrativos. O vínculo do Aluno Exemplo é desse tipo.
+
+O cron ignora essas matrículas. Respostas de sincronização iniciadas antes da concessão e webhooks não substituem o vínculo manual. Compras continuam registradas separadamente; a importação preserva o acesso manual. Bloquear a conta, suspender a matrícula ou retirar ferramentas da turma continua revogando acesso.
+
+Publique a migration e os repositórios/serviços correspondentes antes de criar concessões manuais, evitando cron antigo em execução durante a transição. Para rollback, restaure código e backup anterior da matrícula e das views em conjunto: a versão antiga não reconhece essa concessão. Os dados comerciais não devem ser apagados.

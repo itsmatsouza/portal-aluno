@@ -132,7 +132,7 @@ if (!is_string($slug) || $slug === '') {
 
                 </section>
 
-                <section class="tool-content-card">
+                <section class="tool-content-card" id="toolContentCard">
 
                     <div class="tool-content-header">
                         <div>
@@ -143,9 +143,12 @@ if (!is_string($slug) || $slug === '') {
                             <h2>Utilize sua ferramenta</h2>
                         </div>
 
-                        <span class="tool-access-badge">
-                            Acesso autorizado
-                        </span>
+                        <div class="tool-content-actions">
+                            <span class="tool-access-badge">Acesso autorizado</span>
+                            <button type="button" id="toolFullscreenButton" class="tool-fullscreen-button" aria-controls="toolContentCard" aria-pressed="false">
+                                Tela cheia
+                            </button>
+                        </div>
                     </div>
 
                     <div class="tool-frame-wrapper">
@@ -163,6 +166,8 @@ if (!is_string($slug) || $slug === '') {
                             title="Ferramenta exclusiva"
                             src=""
                             loading="eager"
+                            allow="fullscreen"
+                            allowfullscreen
                         ></iframe>
 
                     </div>
