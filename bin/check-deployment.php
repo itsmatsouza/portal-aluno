@@ -18,7 +18,7 @@ try {
     }
     $db = Leilabrito\PortalAluno\Core\Database::getConnection();
     // Somente leitura. As migrations continuam sendo uma etapa explícita do deploy.
-    foreach (['users', 'courses', 'user_courses', 'tools', 'course_classes', 'class_tools', 'enrollment_access', 'auth_tokens', 'hotmart_events', 'hotmart_purchases'] as $table) {
+    foreach (['users', 'courses', 'user_courses', 'tools', 'course_classes', 'class_tools', 'enrollment_access', 'tool_class_access', 'auth_tokens', 'hotmart_events', 'hotmart_purchases'] as $table) {
         $db->query('SELECT 1 FROM `' . $table . '` LIMIT 0');
     }
     $db->query('SELECT class_id, sync_pending, sync_version FROM user_courses LIMIT 0');

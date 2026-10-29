@@ -85,3 +85,15 @@ Produtos `TEST_UCODE_001` e `TEST_UCODE_002` e turma `teste` não representam v�
 Execute `php bin/hotmart-courses.php` periodicamente para refletir mudanças de status. Curso inativo impede somente novas turmas, inclusive em requisições POST diretas. Turmas existentes continuam editáveis e os alunos mantêm acesso conforme matrícula, status do Club e duração individual. A inativação não altera data de compra, prazo ou ferramentas. Exclusão lógica continua sendo uma condição diferente de inativação.
 
 Webhooks não informam o status do catálogo e não criam ou reativam cursos. Se o curso ainda não existe, sincronize o catálogo e reenvie o evento. Cursos existentes inativos continuam recebendo eventos de compra e reconciliação normalmente. Respostas com status ausente ou inválido interrompem a importação.
+
+## Turma administrativa
+
+O identificador reservado `admin` associa automaticamente todos os usuários com papel `ADMIN` e conta ativa à turma, incluindo contas anteriores à publicação e novos administradores. A associação é calculada pela view `tool_class_access`: não cria matrículas comerciais, não substitui turmas compradas e não depende do cron ou do status no Club. A duração de compras não se aplica a essa associação; ela existe enquanto a conta estiver ativa e mantiver o papel administrativo.
+
+Selecione as ferramentas na turma **Admin**. Elas aparecem em **Minhas ferramentas**, no painel administrativo. O papel de administrador não libera ferramentas de outras turmas indiscriminadamente. Ferramentas inativas ou excluídas e cursos excluídos continuam bloqueados. A remoção do papel, o bloqueio da conta ou a retirada de uma ferramenta da turma revogam o acesso administrativo na próxima requisição. Direitos comerciais independentes continuam seguindo as regras normais.
+
+Aplique a migration `013_admin_tool_class_access.sql` antes de ativar este código. Ela apenas cria uma view e pode ser reaplicada. O verificador de publicação exige a view. Para rollback, restaure o código anterior; a view adicional pode permanecer sem afetá-lo. Não é necessário alterar contas ou compras para reverter.
+
+A associação administrativa não aparece como uma compra na tela **Acessos**. O ID `admin` é reservado: uma matrícula do Club nesse identificador não concede ferramentas a usuários com papel `ALUNO`.
+
+Validação: `php test-admin-tool-access.php` cria e remove um banco descartável com as credenciais locais; requer permissão de criação de bancos. Para uma instância MariaDB isolada, informe `PORTAL_TEST_SOCKET=/caminho/server.sock`. O teste recusa configuração de produção e não modifica o banco configurado do portal.

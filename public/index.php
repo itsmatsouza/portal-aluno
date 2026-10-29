@@ -98,7 +98,8 @@ $courseToolService = new CourseToolService(
 
 $toolController = new ToolController(
     $toolRepository,
-    $courseToolService
+    $courseToolService,
+    $userRepository
 );
 
 $courseController = new CourseController(
@@ -136,7 +137,8 @@ $studentMiddleware = new StudentMiddleware(
 $adminController = new AdminController(
     $userRepository,
     $courseRepository,
-    $userCourseRepository
+    $userCourseRepository,
+    $toolRepository
 );
 
 /*
@@ -219,8 +221,7 @@ $router->get(
         'view'
     ],
     [
-        $authMiddleware,
-        $studentMiddleware
+        $authMiddleware
     ]
 );
 
@@ -231,8 +232,7 @@ $router->get(
         'show'
     ],
     [
-        $authMiddleware,
-        $studentMiddleware
+        $authMiddleware
     ]
 );
 

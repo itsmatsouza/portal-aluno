@@ -9,13 +9,15 @@ use Leilabrito\PortalAluno\Core\SessionManager;
 use Leilabrito\PortalAluno\Repositories\CourseRepository;
 use Leilabrito\PortalAluno\Repositories\UserCourseRepository;
 use Leilabrito\PortalAluno\Repositories\UserRepository;
+use Leilabrito\PortalAluno\Repositories\ToolRepository;
 
 class AdminController
 {
     public function __construct(
         private UserRepository $users,
         private CourseRepository $courses,
-        private UserCourseRepository $userCourses
+        private UserCourseRepository $userCourses,
+        private ToolRepository $tools
     ) {
     }
 
@@ -64,6 +66,8 @@ class AdminController
             'name' => $user->getName(),
             'email' => $user->getEmail(),
         ];
+
+        $accessibleTools = $this->tools->findActiveForUser($userId);
 
         require dirname(__DIR__) . '/Views/admin/dashboard.php';
 

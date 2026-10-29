@@ -153,6 +153,25 @@ function adminEscape(string $value): string
 
             </section>
 
+            <section class="tools-section" aria-labelledby="adminToolsTitle">
+                <div class="section-heading">
+                    <h2 id="adminToolsTitle">Minhas ferramentas</h2>
+                </div>
+                <?php if ($accessibleTools === []): ?>
+                    <p class="admin-muted">Nenhuma ferramenta disponível. Selecione as ferramentas na turma Admin para liberar o acesso aos administradores.</p>
+                <?php else: ?>
+                    <div class="tools-grid">
+                        <?php foreach ($accessibleTools as $item): $tool = $item['tool']; ?>
+                            <article class="tool-card">
+                                <h3><?= adminEscape($tool->getName()) ?></h3>
+                                <p><?= adminEscape($tool->getDescription() ?? '') ?></p>
+                                <a class="tool-button" href="/tool/<?= adminEscape($tool->getSlug()) ?>/view">Abrir ferramenta</a>
+                            </article>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </section>
+
             <div
                 class="portal-alert"
                 id="portalAlert"

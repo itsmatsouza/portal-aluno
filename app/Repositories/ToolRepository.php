@@ -12,9 +12,9 @@ class ToolRepository
 {
     private PDO $db;
 
-    public function __construct()
+    public function __construct(?PDO $db = null)
     {
-        $this->db = Database::getConnection();
+        $this->db = $db ?? Database::getConnection();
     }
 
     public function findById(int $id): ?Tool
@@ -83,21 +83,23 @@ class ToolRepository
         return $this->mapToTool($data);
     }
 
-    public function findActiveForUser(int $userId, array $courseIds): array
+    public function findActiveForUser(int $userId, ?array $courseIds = null): array
     {
         if ($courseIds === []) {
             return [];
         }
-        $ids = array_values(array_unique(array_map('intval', $courseIds)));
+        $ids = $courseIds === null ? [] : array_values(array_unique(array_map('intval', $courseIds)));
+        $courseFilter = $courseIds === null ? ''
+            : ' AND uc.course_id IN (' . implode(',', array_fill(0, count($ids), '?')) . ')';
         $stmt = $this->db->prepare("SELECT DISTINCT uc.course_id, t.*
-            FROM enrollment_access uc
+            FROM tool_class_access uc
             JOIN courses c ON c.id = uc.course_id
             JOIN class_tools ct ON ct.class_id = uc.class_id
             JOIN tools t ON t.id = ct.tool_id
-            WHERE uc.user_id = ? AND uc.status = 'ACTIVE'
+            WHERE uc.user_id = ?
                 AND c.deleted_at IS NULL
                 AND t.is_active = 1 AND t.deleted_at IS NULL
-                AND uc.course_id IN (" . implode(',', array_fill(0, count($ids), '?')) . ")
+                {$courseFilter}
             ORDER BY uc.course_id, t.name");
         $stmt->execute([$userId, ...$ids]);
         $result = [];
@@ -109,11 +111,11 @@ class ToolRepository
 
     public function hasActiveAccessForUser(int $userId, int $toolId): bool
     {
-        $stmt = $this->db->prepare("SELECT 1 FROM enrollment_access uc
+        $stmt = $this->db->prepare("SELECT 1 FROM tool_class_access uc
             JOIN courses c ON c.id = uc.course_id
             JOIN class_tools ct ON ct.class_id = uc.class_id
             JOIN tools t ON t.id = ct.tool_id
-            WHERE uc.user_id = ? AND ct.tool_id = ? AND uc.status = 'ACTIVE'
+            WHERE uc.user_id = ? AND ct.tool_id = ?
                 AND c.deleted_at IS NULL
                 AND t.is_active = 1 AND t.deleted_at IS NULL LIMIT 1");
         $stmt->execute([$userId, $toolId]);

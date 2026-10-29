@@ -18,6 +18,9 @@
     </div>
     <div class="admin-field"><label for="hotmart_class_id">ID da turma Hotmart (class_id) *</label><input id="hotmart_class_id" name="hotmart_class_id" value="<?= $escape($values['hotmart_class_id']) ?>" maxlength="100" required <?= $class !== null ? 'readonly' : '' ?>></div>
     <p class="admin-muted">Curso e ID Hotmart identificam a turma e ficam fixos após o cadastro. O ID interno é gerado automaticamente.</p>
+    <?php if (($values['hotmart_class_id'] ?? '') === 'admin'): ?>
+        <p class="admin-muted">Esta turma reúne automaticamente todos os administradores ativos. As ferramentas selecionadas ficam disponíveis enquanto a conta mantiver esse papel, sem depender de compra ou sincronização da Hotmart.</p>
+    <?php endif; ?>
     <div class="admin-field"><label for="expiration">Duração do acesso *</label><select id="expiration" name="expiration" required>
         <option value="">Selecione</option><option value="days" <?= $values['expiration'] === 'days' ? 'selected' : '' ?>>Dias desde a compra</option><option value="lifetime" <?= $values['expiration'] === 'lifetime' ? 'selected' : '' ?>>Vitalício</option>
     </select></div>

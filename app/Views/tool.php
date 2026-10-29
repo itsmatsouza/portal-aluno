@@ -40,7 +40,7 @@ if (!is_string($slug) || $slug === '') {
 
     <div class="portal-shell">
 
-        <?php require __DIR__ . '/partials/sidebar.php'; ?>
+        <?php require __DIR__ . (!empty($isAdmin) ? '/admin/partials/sidebar.php' : '/partials/sidebar.php'); ?>
 
         <main class="portal-main">
 

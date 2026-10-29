@@ -7,13 +7,15 @@ namespace Leilabrito\PortalAluno\Controllers;
 use Leilabrito\PortalAluno\Core\Response;
 use Leilabrito\PortalAluno\Core\SessionManager;
 use Leilabrito\PortalAluno\Repositories\ToolRepository;
+use Leilabrito\PortalAluno\Repositories\UserRepository;
 use Leilabrito\PortalAluno\Services\CourseToolService;
 
 class ToolController
 {
     public function __construct(
         private ToolRepository $tools,
-        private CourseToolService $courseTools
+        private CourseToolService $courseTools,
+        private UserRepository $users
     ) {
     }
 
@@ -152,6 +154,7 @@ class ToolController
 
         $this->getToolFilePath($tool);
 
+        $isAdmin = $this->users->findById($userId)?->isAdmin() ?? false;
         $_GET['slug'] = $tool->getSlug();
 
         require dirname(__DIR__) . '/Views/tool.php';
