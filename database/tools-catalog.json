@@ -1,18 +1,16 @@
 [
     {
-        "name": "Diagnóstico e Precificação",
-        "description": "Ferramenta de teste A.",
-        "slug": "diagnostico-precificacao",
-        "url": "/tool/diagnostico-precificacao",
-        "is_active": 1,
-        "courses": [
-            {
-                "name": "Curso Teste",
-                "description": "Curso utilizado para testes do Portal do Aluno.",
-                "hotmart_product_ucode": "TEST_UCODE_001",
-                "is_active": 1,
-                "link_active": 1
-            }
-        ]
+        "name": "Diagnóstico do Imóvel ELO",
+        "description": "Diagnóstico do imóvel, levantamento de informações e elaboração de relatórios.",
+        "slug": "diagnostico-imovel",
+        "url": "/tool/diagnostico-imovel",
+        "is_active": 1
+    },
+    {
+        "name": "INSS de Obra — Planejamento Estratégico",
+        "description": "Planejamento estratégico do INSS de obra, com simulações e análise de cenários.",
+        "slug": "inss-obra-planejamento-estrategico",
+        "url": "/tool/inss-obra-planejamento-estrategico",
+        "is_active": 1
     }
 ]
