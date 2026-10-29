@@ -24,6 +24,7 @@ $whatsappLink = 'https://wa.me/5519996371148?text=' . $whatsappMessage;
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/jpeg" href="/assets/images/logo_elo_quadrado_branco.jpg">
 
     <meta
         name="viewport"

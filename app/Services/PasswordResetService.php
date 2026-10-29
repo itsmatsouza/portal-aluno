@@ -108,46 +108,80 @@ class PasswordResetService
             'UTF-8'
         );
 
-        return "
+        $logoUrl = htmlspecialchars(
+            rtrim($_ENV['APP_URL'] ?? 'http://localhost:8000', '/')
+                . '/assets/images/logo-elo-horizontal.jpg',
+            ENT_QUOTES,
+            'UTF-8'
+        );
+        $expirationMinutes = self::TOKEN_EXPIRATION_MINUTES;
+
+        return <<<HTML
             <!DOCTYPE html>
-            <html lang=\"pt-BR\">
+            <html lang="pt-BR">
             <head>
-                <meta charset=\"UTF-8\">
-                <title>Redefinição de senha</title>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Redefina sua senha | Portal do Aluno ELO</title>
             </head>
-            <body>
-                <p>Olá, {$name}.</p>
-
-                <p>
-                    Recebemos uma solicitação para
-                    redefinir a senha do seu acesso
-                    ao Portal do Aluno.
-                </p>
-
-                <p>
-                    <a href=\"{$url}\">
-                        Redefinir minha senha
-                    </a>
-                </p>
-
-                <p>
-                    Este link é válido por
-                    " . self::TOKEN_EXPIRATION_MINUTES . "
-                    minutos e pode ser utilizado
-                    apenas uma vez.
-                </p>
-
-                <p>
-                    Se você não solicitou a redefinição
-                    da senha, ignore este e-mail.
-                </p>
-
-                <p>
-                    Leila Brito
-                </p>
+            <body style="margin:0;padding:0;background-color:#ebecf0;color:#18263b;font-family:'Nunito Sans',Arial,sans-serif;-webkit-text-size-adjust:100%;">
+                <div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;">
+                    Defina uma nova senha para o Portal do Aluno ELO. Seu link é válido por {$expirationMinutes} minutos.
+                </div>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ebecf0" style="background-color:#ebecf0;">
+                    <tr>
+                        <td align="center" style="padding:40px 16px;">
+                            <!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;">
+                                <tr>
+                                    <td bgcolor="#0a1931" style="padding:32px 28px;background-color:#0a1931;border-radius:24px 24px 0 0;">
+                                        <img src="{$logoUrl}" width="220" alt="ELO — Estrategista Legal de Obras" style="display:block;width:220px;max-width:100%;height:auto;border:0;color:#ffffff;font-size:18px;">
+                                        <table role="presentation" width="48" cellpadding="0" cellspacing="0" border="0" style="margin-top:28px;">
+                                            <tr><td height="2" bgcolor="#8b745a" style="height:2px;font-size:0;line-height:0;background-color:#8b745a;">&nbsp;</td></tr>
+                                        </table>
+                                        <p style="margin:20px 0 0;color:#94b5de;font-size:11px;line-height:18px;font-weight:700;letter-spacing:2px;">PORTAL DO ALUNO</p>
+                                        <p style="margin:8px 0 0;color:#ffffff;font-size:22px;line-height:30px;font-weight:700;">Seu próximo passo começa aqui.</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td bgcolor="#ffffff" style="padding:32px 28px;background-color:#ffffff;border-radius:0 0 24px 24px;">
+                                        <h1 style="margin:0 0 24px;color:#0a1931;font-size:28px;line-height:36px;font-weight:800;">Redefina sua senha</h1>
+                                        <p style="margin:0 0 12px;font-size:16px;line-height:26px;color:#18263b;">Olá, {$name}.</p>
+                                        <p style="margin:0 0 28px;font-size:16px;line-height:26px;color:#6c7c90;">Recebemos uma solicitação para redefinir sua senha. Clique no botão abaixo para criar uma nova e voltar ao Portal do Aluno.</p>
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td align="center" bgcolor="#0a1931" style="background-color:#0a1931;border-radius:12px;mso-padding-alt:18px 24px;">
+                                                    <a href="{$url}" style="display:block;padding:18px 24px;border:1px solid #0a1931;border-radius:12px;color:#ffffff;font-size:16px;line-height:22px;font-weight:700;text-align:center;text-decoration:none;">Redefinir minha senha</a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <p style="margin:16px 0 28px;text-align:center;font-size:13px;line-height:21px;color:#6c7c90;">Válido por <strong style="color:#18263b;">{$expirationMinutes} minutos</strong>. Uso único.</p>
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td bgcolor="#f4f6f9" style="padding:18px 20px;background-color:#f4f6f9;border-left:3px solid #94b5de;border-radius:0 10px 10px 0;">
+                                                    <p style="margin:0 0 6px;font-size:14px;line-height:22px;font-weight:700;color:#18263b;">Não solicitou esta alteração?</p>
+                                                    <p style="margin:0;font-size:14px;line-height:22px;color:#6c7c90;">Ignore este e-mail. Sua senha atual permanece a mesma. Não compartilhe este link com outras pessoas.</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <p style="margin:28px 0 8px;font-size:12px;line-height:20px;color:#6c7c90;">Se o botão não funcionar, copie e cole este endereço no navegador:</p>
+                                        <p style="margin:0;font-size:12px;line-height:20px;word-break:break-all;overflow-wrap:anywhere;"><a href="{$url}" style="color:#0a1931;text-decoration:underline;word-break:break-all;">{$url}</a></p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding:24px 16px 0;">
+                                        <p style="margin:0 0 4px;font-size:13px;line-height:21px;font-weight:700;color:#18263b;">Leila Brito · Formação ELO</p>
+                                        <p style="margin:0;font-size:12px;line-height:20px;color:#6c7c90;">Conhecimento, estratégia e evolução.</p>
+                                    </td>
+                                </tr>
+                            </table>
+                            <!--[if mso]></td></tr></table><![endif]-->
+                        </td>
+                    </tr>
+                </table>
             </body>
             </html>
-        ";
+            HTML;
     }
 
     private function buildTextEmail(

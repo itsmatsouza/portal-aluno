@@ -11,6 +11,7 @@ preg_match('/^./us', trim($admin['name']), $initial);
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/jpeg" href="/assets/images/logo_elo_quadrado_branco.jpg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $heading ?> | Portal ELO</title>
     <link rel="stylesheet" href="/assets/css/dashboard.css">

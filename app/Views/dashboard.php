@@ -14,7 +14,7 @@ declare(strict_types=1);
 
     <title>Dashboard | Portal do Aluno</title>
 
-    <link rel="icon" type="image/png" href="/assets/images/logo_elo_quadrado_branco.jpg">
+    <link rel="icon" type="image/jpeg" href="/assets/images/logo_elo_quadrado_branco.jpg">
 
     <meta
         name="description"
