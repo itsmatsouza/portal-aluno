@@ -1,0 +1,1548 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Piso e Valor ELO</title>
+<style>
+  /* Layout: ficha do caso no topo, cards numerados na coluna principal, resumo grafite fixo ao lado. Tema único claro, padrão das ferramentas ELO. */
+  :root{
+    color-scheme:light;
+    --graphite:#1f2a37; --graphite-2:#2c3a4b;
+    --amber:#e8a33d; --amber-dark:#b8761a; --amber-soft:#f7e2bd;
+    --ink:#1b232d; --muted:#5b6672; --line:#dde3ea;
+    --bg:#f4f6f9; --white:#ffffff; --soft:#fbfcfe;
+    --red:#b24a25; --red-bg:#fdeee9; --red-line:#f3cdbd;
+    --ok:#1d7a4e; --ok-bg:#eaf6ef; --ok-line:#bfe4cf;
+    --info:#264a6b; --info-bg:#eef4fb; --info-line:#cfe0f2;
+    --opp:#0f6f6a; --opp-bg:#e6f5f3; --opp-line:#b5e0da;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;font-size:14px;}
+  .wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:24px 80px;}
+  header.brand{background:linear-gradient(135deg,var(--graphite),var(--graphite-2));color:#fff;border-radius:16px;padding:22px 26px;position:relative;overflow:hidden;}
+  header.brand::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(232,163,61,.25),transparent 70%);pointer-events:none;}
+  .logo-row{display:flex;align-items:center;gap:14px;}
+  .logo-badge{width:50px;height:50px;border-radius:12px;background:var(--amber);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--graphite);font-size:19px;letter-spacing:1px;flex:none;}
+  .brand-name{font-size:12.5px;letter-spacing:3px;text-transform:uppercase;color:var(--amber);font-weight:700;}
+  .brand-sub{font-size:12px;color:#c7d0da;margin-top:2px;}
+  header.brand h1{margin:14px 0 4px;font-size:23px;line-height:1.2;text-wrap:balance;}
+  header.brand p{margin:0;color:#cfd8e2;font-size:13.5px;max-width:720px;}
+  .steps3{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+  .steps3 span{font-size:12px;font-weight:700;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:4px 11px;color:#e6ebf1;}
+  .steps3 span b{color:var(--amber);}
+  .example-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--amber-soft);border:1px solid #efcf98;color:#6b4610;border-radius:12px;padding:10px 14px;margin-top:14px;font-size:13px;}
+  .example-bar b{color:var(--graphite);}
+
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:18px;align-items:start;margin-top:16px;}
+  .aside{position:sticky;top:calc(12px + env(safe-area-inset-top,0px));}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin-bottom:16px;}
+  .card h2{margin:0 0 4px;font-size:17.5px;color:var(--graphite);display:flex;align-items:center;gap:9px;}
+  .card h2 .n{min-width:30px;height:30px;padding:0 6px;border-radius:9px;background:var(--graphite);color:var(--amber);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex:none;}
+  .card > p.sub{margin:2px 0 0;color:var(--muted);font-size:13.5px;}
+  h3.sec{margin:18px 0 0;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--amber-dark);}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:12px;}
+  .field{display:flex;flex-direction:column;gap:5px;min-width:0;}
+  .field.full{grid-column:1/-1;}
+  .field label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;}
+  input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--soft);width:100%;min-width:0;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--amber);background:#fff;box-shadow:0 0 0 3px rgba(232,163,61,.18);}
+  input[type=number]{text-align:right;font-variant-numeric:tabular-nums;}
+  textarea{resize:vertical;min-height:60px;}
+  .hint{font-size:12.5px;color:var(--muted);margin:8px 0 0;}
+  .banner{margin-top:12px;border-radius:12px;padding:10px 14px;font-size:13.5px;border:1px solid;}
+  .b-info{background:var(--info-bg);border-color:var(--info-line);color:var(--info);}
+  .b-opp{background:var(--opp-bg);border-color:var(--opp-line);color:var(--opp);}
+  .b-crit{background:var(--red-bg);border-color:var(--red-line);color:var(--red);}
+  .b-ok{background:var(--ok-bg);border-color:var(--ok-line);color:var(--ok);}
+  .seg{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+  .seg button{font-family:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);background:#fff;color:var(--graphite);border-radius:9px;padding:8px 13px;cursor:pointer;text-align:left;}
+  .seg button small{display:block;font-weight:500;color:var(--muted);font-size:11.5px;}
+  .seg button.on{background:var(--graphite);border-color:var(--graphite);color:#fff;}
+  .seg button.on small{color:#c7d0da;}
+  .btn{font-family:inherit;font-size:14px;font-weight:700;border-radius:9px;padding:10px 16px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--graphite);}
+  .btn.primary{background:var(--amber);border-color:var(--amber);color:var(--graphite);}
+  .btn.primary:hover{background:var(--amber-dark);border-color:var(--amber-dark);color:#fff;}
+  .btn.small{padding:5px 11px;font-size:12.5px;}
+  .btn.danger{color:var(--red);border-color:var(--red-line);}
+  .btn.x{padding:4px 9px;font-size:13px;color:var(--muted);}
+  .btn:focus-visible,.seg button:focus-visible{outline:3px solid var(--amber);outline-offset:2px;}
+  .btn-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:center;}
+
+  .tbl-wrap{overflow-x:auto;margin-top:10px;}
+  table.t{width:100%;border-collapse:collapse;font-size:13.5px;min-width:520px;}
+  table.t th{font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700;text-align:left;padding:6px;border-bottom:1px solid var(--line);}
+  table.t th.r,table.t td.r{text-align:right;}
+  table.t td{padding:6px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  table.t td.calc{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap;color:var(--graphite);}
+  table.t td.del{width:40px;text-align:right;}
+  table.t tr.etapa td{background:var(--soft);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--amber-dark);padding-top:10px;}
+
+  .formula{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:var(--soft);border:1px dashed var(--line);border-radius:10px;padding:8px 12px;margin-top:12px;color:var(--graphite);overflow-x:auto;white-space:nowrap;}
+  .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:12px;}
+  .kv > div{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px 12px;}
+  .kv .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700;}
+  .kv .v{font-size:17px;font-weight:800;color:var(--graphite);font-variant-numeric:tabular-nums;}
+
+  /* régua piso → valor */
+  .ruler{margin-top:16px;padding:6px 4px 0;}
+  .ruler-track{position:relative;height:12px;border-radius:999px;background:linear-gradient(90deg,var(--red-bg),var(--amber-soft) 40%,var(--opp-bg));border:1px solid var(--line);}
+  .ruler-zone{position:absolute;top:-1px;bottom:-1px;left:0;border-radius:999px 0 0 999px;background:repeating-linear-gradient(45deg,rgba(178,74,37,.18) 0 6px,transparent 6px 12px);}
+  .mk{position:absolute;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px var(--line);}
+  .mk.piso{background:var(--red);} .mk.merc{background:var(--info);} .mk.valor{background:var(--opp);}
+  .mk.final{width:22px;height:22px;background:var(--amber);border-color:var(--graphite);}
+  .ruler-labels{position:relative;height:40px;margin-top:6px;font-size:11px;}
+  .ruler-labels span{position:absolute;transform:translateX(-50%);white-space:nowrap;text-align:center;line-height:1.25;color:var(--muted);font-weight:700;}
+  .ruler-labels span b{display:block;color:var(--graphite);font-variant-numeric:tabular-nums;}
+
+  .pos-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:12px;}
+  .pos-cards button{font-family:inherit;text-align:left;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 12px;cursor:pointer;color:var(--ink);}
+  .pos-cards button .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;font-weight:800;color:var(--muted);}
+  .pos-cards button .v{font-size:18px;font-weight:800;color:var(--graphite);font-variant-numeric:tabular-nums;}
+  .pos-cards button .d{font-size:12px;color:var(--muted);}
+  .pos-cards button.on{border-color:var(--graphite);box-shadow:0 0 0 2px var(--graphite);}
+  .pos-cards button.on .l{color:var(--amber-dark);}
+  .pos-cards button:focus-visible{outline:3px solid var(--amber);outline-offset:2px;}
+
+  /* resumo */
+  .res{background:var(--graphite);color:#fff;border-radius:16px;padding:18px;}
+  .res .k{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--amber);}
+  .res .big{font-size:32px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums;margin-top:4px;}
+  .res .sm{color:#cfd8e2;font-size:13px;margin-top:4px;}
+  .res-rows{margin-top:12px;border-top:1px solid rgba(255,255,255,.14);padding-top:8px;}
+  .res-rows div{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:4px 0;color:#dfe5ec;}
+  .res-rows div b{color:#fff;font-variant-numeric:tabular-nums;}
+  .res-rows .tot{border-top:1px solid rgba(255,255,255,.14);margin-top:4px;padding-top:8px;}
+  .pill{display:inline-block;font-size:11px;font-weight:800;border-radius:999px;padding:3px 10px;margin-top:8px;}
+  .pill.bad{background:var(--red-bg);color:var(--red);} .pill.mid{background:var(--amber-soft);color:#6b4610;} .pill.good{background:var(--ok-bg);color:var(--ok);}
+  .mini{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+  .mini > div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0;}
+  .mini .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700;}
+  .mini .v{font-size:17px;font-weight:800;color:var(--graphite);font-variant-numeric:tabular-nums;}
+  .mini .v.pos{color:var(--ok);} .mini .v.neg{color:var(--red);}
+  .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--graphite);color:#fff;padding:10px 16px;border-radius:10px;font-size:13.5px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.2);z-index:20;}
+  .legal{margin-top:6px;font-size:12px;color:var(--muted);}
+  pre.prop{white-space:pre-wrap;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px;max-height:420px;overflow:auto;}
+
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-top:16px;border-bottom:2px solid var(--line);}
+  .tabs button{font-family:inherit;font-size:14px;font-weight:700;border:none;background:none;color:var(--muted);padding:10px 14px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;display:flex;gap:8px;align-items:center;}
+  .tabs button .tg{background:var(--line);color:var(--graphite);border-radius:6px;padding:1px 8px;font-size:11px;}
+  .tabs button small{font-weight:500;font-size:11.5px;color:var(--muted);}
+  .tabs button.on{color:var(--graphite);border-bottom-color:var(--amber);}
+  .tabs button.on .tg{background:var(--graphite);color:var(--amber);}
+  .tabs button:focus-visible{outline:3px solid var(--amber);outline-offset:2px;}
+  table.t tr.cat td{background:var(--soft);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--amber-dark);padding-top:10px;}
+  table.t select{padding:6px 8px;font-size:13px;}
+  .esc-card{border-left:4px solid var(--amber);}
+  .lock{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;color:var(--ok);background:var(--ok-bg);border:1px solid var(--ok-line);border-radius:999px;padding:3px 10px;margin-top:10px;}
+  .pil-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:12px;}
+  .pil{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;}
+  .pil-h{background:var(--graphite);color:#fff;padding:9px 12px;}
+  .pil-h .k{font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--amber);}
+  .pil-h .nm{font-size:14px;font-weight:800;}
+  .pil-h .ct{float:right;font-size:11px;font-weight:800;background:var(--amber);color:var(--graphite);border-radius:999px;padding:1px 8px;margin-top:2px;}
+  .pil label{display:flex;gap:8px;align-items:flex-start;padding:7px 12px;border-top:1px solid var(--line);font-size:13px;cursor:pointer;line-height:1.3;}
+  .pil label:hover{background:var(--soft);}
+  .pil label input{width:16px;height:16px;margin:1px 0 0;accent-color:var(--amber-dark);flex:none;}
+  .pil label .no{font-weight:800;color:var(--amber-dark);min-width:20px;font-variant-numeric:tabular-nums;}
+  .pil label.on{background:#fdf5e6;font-weight:700;}
+  details.svc{border:1px solid var(--line);border-radius:12px;margin-top:10px;background:#fff;overflow:hidden;}
+  details.svc > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--soft);font-weight:700;color:var(--graphite);flex-wrap:wrap;}
+  details.svc > summary::-webkit-details-marker{display:none;}
+  details.svc > summary .tag{font-size:11px;font-weight:800;background:var(--graphite);color:var(--amber);border-radius:6px;padding:2px 7px;}
+  details.svc > summary .pl{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;}
+  details.svc > summary .sum{margin-left:auto;font-size:13px;color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  details.svc > summary::after{content:"▾";color:var(--muted);}
+  details.svc[open] > summary::after{content:"▴";}
+  details.svc table.t{min-width:560px;margin:0;}
+  details.svc table.t td{padding:5px 8px;}
+  details.svc tr.off td{color:#a6b0bb;}
+  details.svc tr.off input[type=number],details.svc tr.off select{opacity:.55;}
+  details.svc td.ck{width:30px;} details.svc td.ck input{width:16px;height:16px;accent-color:var(--amber-dark);}
+  details.svc td.mn{width:96px;} details.svc td.qm{width:170px;}
+  .svc-foot{padding:8px 14px;border-top:1px solid var(--line);}
+  .pblk{border:1px solid var(--line);border-radius:14px;margin-top:12px;overflow:hidden;background:#fff;}
+  .pblk-h{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--graphite);color:#fff;padding:10px 14px;}
+  .pblk-h .k{font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--amber);}
+  .pblk-h .nm{font-size:15px;font-weight:800;}
+  .pblk-h .ps{font-size:12px;color:#c7d0da;}
+  .pp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .pp label{font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--amber);}
+  .pp input{width:120px;background:#fff;}
+  .pp small{display:block;font-size:11.5px;color:#c7d0da;min-width:130px;}
+  .srow{display:flex;align-items:center;gap:10px;padding:8px 14px;border-top:1px solid var(--line);flex-wrap:wrap;}
+  .srow:first-of-type{border-top:none;}
+  .srow label{display:flex;gap:8px;align-items:flex-start;cursor:pointer;flex:1;min-width:220px;font-size:13.5px;line-height:1.35;}
+  .srow label input{width:17px;height:17px;margin:1px 0 0;accent-color:var(--amber-dark);flex:none;}
+  .srow .no{font-weight:800;color:var(--amber-dark);min-width:22px;font-variant-numeric:tabular-nums;}
+  .srow .xtra{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;background:var(--info-bg);color:var(--info);border:1px solid var(--info-line);border-radius:6px;padding:1px 5px;margin-right:2px;}
+  .srow.on{background:#fdf5e6;} .srow.on label{font-weight:700;}
+  .srow .ssum{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .tasks{border-top:1px solid var(--line);background:var(--soft);padding:4px 10px 8px 34px;}
+  .tasks table.t{min-width:560px;}
+  .tasks table.t td{padding:5px 6px;}
+  .tasks tr.off td{color:#a6b0bb;}
+  .tasks tr.off input[type=number],.tasks tr.off select{opacity:.55;}
+  .tasks td.ck{width:28px;} .tasks td.ck input{width:16px;height:16px;accent-color:var(--amber-dark);}
+  .tasks td.mn{width:90px;} .tasks td.qm{width:160px;}
+  .props{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:12px;}
+  .prp{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;display:flex;flex-direction:column;}
+  .prp.main{border-color:var(--amber);box-shadow:0 0 0 2px var(--amber-soft);}
+  .prp{cursor:pointer;position:relative;} .prp:hover{border-color:var(--graphite);}
+  .prp.esc{border-color:var(--ok);box-shadow:0 0 0 3px var(--ok-line);}
+  .prp .badge{display:none;width:max-content;margin-bottom:6px;background:var(--ok);color:#fff;font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 9px;}
+  .prp.esc .badge{display:block;}
+  .prp.dim{opacity:.55;}
+  .prp-h{background:var(--graphite);color:#fff;padding:10px 14px;}
+  .prp.main .prp-h{background:linear-gradient(135deg,var(--graphite),#3a2e18);}
+  .prp-h .k{font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--amber);}
+  .prp-h .nm{font-size:14px;font-weight:800;}
+  .prp-h .sc{font-size:12px;color:#c7d0da;margin-top:2px;}
+  .prp-v{padding:10px 14px 4px;font-size:24px;font-weight:800;color:var(--graphite);font-variant-numeric:tabular-nums;}
+  .prp-v small{display:block;font-size:12px;font-weight:600;color:var(--muted);}
+  .prp table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .prp td{padding:6px 14px;border-top:1px solid var(--line);vertical-align:top;}
+  .prp td.r{text-align:right;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;}
+  .assign{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+  .assign label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:6px 8px;font-size:13px;background:#fff;}
+  .assign select{width:auto;padding:4px 6px;font-size:12.5px;}
+  .q{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;border:1px solid var(--amber-dark);background:#fff;color:var(--amber-dark);font-size:11px;font-weight:800;line-height:1;cursor:pointer;padding:0;margin-left:4px;vertical-align:middle;text-transform:none;letter-spacing:0;font-family:inherit;}
+  .q:hover,.q:focus-visible{background:var(--amber);color:var(--graphite);outline:none;}
+  .pblk-h .q,.prp-h .q,.res .q{border-color:var(--amber);background:transparent;color:var(--amber);}
+  .tipbox{position:absolute;z-index:50;max-width:290px;background:var(--graphite);color:#fff;font-size:12.5px;line-height:1.45;border-radius:10px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.25);}
+  .ctr-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:16px;}
+  .ctr-kpi > div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;}
+  .ctr-kpi .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700;}
+  .ctr-kpi .v{font-size:20px;font-weight:800;color:var(--graphite);font-variant-numeric:tabular-nums;}
+  .ctr-kpi .v.red{color:var(--red);} .ctr-kpi .v.ok{color:var(--ok);}
+  .ctr-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px;}
+  .ctr-tools input,.ctr-tools select{width:auto;}
+  .ct{background:#fff;border:1px solid var(--line);border-radius:16px;margin-top:12px;overflow:hidden;}
+  .ct.st-concluido{border-left:5px solid var(--ok);} .ct.st-cancelado{opacity:.6;} .ct.st-pausado{border-left:5px solid var(--amber);} .ct.st-ativo{border-left:5px solid var(--info);}
+  .ct-h{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;padding:14px 16px 6px;}
+  .ct-h .n{font-size:11px;font-weight:800;color:var(--amber-dark);letter-spacing:.5px;}
+  .ct-h .cl{font-size:16px;font-weight:800;color:var(--graphite);}
+  .ct-h .im{font-size:12.5px;color:var(--muted);}
+  .ct-h .vv{text-align:right;font-size:18px;font-weight:800;color:var(--graphite);font-variant-numeric:tabular-nums;}
+  .ct-h .vv small{display:block;font-size:11.5px;font-weight:600;color:var(--muted);}
+  .ct-prog{display:flex;align-items:center;gap:12px;padding:4px 16px 8px;}
+  .ct-prog .bar{flex:1;height:14px;border-radius:999px;background:var(--line);overflow:hidden;}
+  .ct-prog .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--amber),var(--ok));}
+  .ct-prog b{font-size:22px;font-weight:800;color:var(--graphite);min-width:62px;text-align:right;font-variant-numeric:tabular-nums;}
+  .ct-pils{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;padding:0 16px 10px;}
+  .ct-pil{border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:12px;}
+  .ct-pil .t{font-weight:800;color:var(--graphite);display:flex;justify-content:space-between;}
+  .ct-pil .s{font-weight:700;margin-top:2px;}
+  .ct-pil .mb{height:5px;border-radius:999px;background:var(--line);margin-top:5px;overflow:hidden;} .ct-pil .mb i{display:block;height:100%;}
+  .ct-f{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--line);background:var(--soft);font-size:12.5px;color:var(--muted);}
+  .ct-f b{color:var(--graphite);} .ct-f .cob{color:var(--red);font-weight:800;}
+  .ct-d{border-top:1px solid var(--line);padding:6px 16px 16px;}
+  .ct-d h4{margin:16px 0 4px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--amber-dark);}
+  .ct-pd{border:1px solid var(--line);border-radius:12px;margin-top:8px;overflow:hidden;}
+  .ct-pd-h{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--soft);padding:8px 12px;font-weight:800;color:var(--graphite);}
+  .ct-pd-h select{width:auto;}
+  .ct-tk{display:flex;gap:8px;align-items:flex-start;padding:5px 12px;border-top:1px solid var(--line);font-size:13px;}
+  .ct-tk input{width:16px;height:16px;margin-top:2px;accent-color:var(--ok);flex:none;}
+  .ct-tk.done span.nm{text-decoration:line-through;color:var(--muted);}
+  .ct-tk small{margin-left:auto;color:var(--muted);white-space:nowrap;}
+  .ct-sv{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:6px 12px 2px;border-top:1px solid var(--line);}
+  .chip{display:inline-block;font-size:11px;font-weight:800;border-radius:999px;padding:2px 9px;}
+  .pst-prev{background:var(--line);color:var(--graphite);} .pst-lib{background:var(--red-bg);color:var(--red);} .pst-rec{background:var(--ok-bg);color:var(--ok);}
+  .fx-bars{display:grid;gap:6px;margin-top:10px;}
+  .fx-row{display:grid;grid-template-columns:70px 1fr 110px;gap:8px;align-items:center;font-size:12.5px;}
+  .fx-row .tr{height:16px;background:var(--line);border-radius:6px;overflow:hidden;display:flex;position:relative;}
+  .fx-row .tr i.r{background:var(--ok);} .fx-row .tr i.a{background:var(--amber);} .fx-row .tr .c{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--red);}
+  .fx-row b{text-align:right;font-variant-numeric:tabular-nums;}
+  @media (max-width:980px){ .layout{grid-template-columns:1fr;} .aside{position:static;order:-1;} }
+  @media (max-width:560px){ header.brand{padding:18px;} header.brand h1{font-size:20px;} .card{padding:16px;} .res .big{font-size:27px;} }
+  @media (prefers-reduced-motion:no-preference){ .mk{transition:left .25s ease;} }
+</style>
+
+<div class="wrap">
+  <header class="brand">
+    <div class="logo-row">
+      <div class="logo-badge">ELO</div>
+      <div>
+        <div class="brand-name">Formação ELO</div>
+        <div class="brand-sub">Estrategista Legal de Obras · Método ELO</div>
+      </div>
+    </div>
+    <h1>Piso e Valor: quanto cobrar na regularização</h1>
+    <p>Primeiro você calcula o piso, o menor preço que paga sua hora, o escritório e o lucro mínimo. Depois ancora o preço no ganho do cliente. Na regularização, quem cobra só pela hora deixa dinheiro na mesa.</p>
+    <div class="steps3"><span><b>1</b> Piso pelo custo</span><span><b>2</b> Reserva de risco</span><span><b>3</b> Âncora no valor</span><span><b>4</b> Preço e etapas</span></div>
+  </header>
+
+  <nav class="tabs" id="tabs" role="tablist">
+    <button type="button" data-tab="esc"><span class="tg">1×</span>Meu escritório <small>preencha uma vez</small></button>
+    <button type="button" data-tab="caso"><span class="tg">R$</span>Precificar caso <small>a cada cliente</small></button>
+    <button type="button" data-tab="ctr"><span class="tg">✓</span>Contratos <small>gestor de processos</small></button>
+    <button type="button" data-tab="meta"><span class="tg">Σ</span>Meta do mês <small>fluxo de caixa real</small></button>
+  </nav>
+
+  <!-- ===== ABA MEU ESCRITÓRIO ===== -->
+  <section class="panel" id="p-esc">
+    <div class="layout">
+      <main style="min-width:0">
+        <section class="card esc-card">
+          <h2><span class="n">A</span>Equipe e custo da hora</h2>
+          <p class="sub">Quanto custa cada hora de quem produz. Use o pró-labore que você <b>quer</b> ganhar, não o que tira hoje. Assim o preço já paga o seu crescimento.</p>
+          <div class="tbl-wrap">
+            <table class="t">
+              <thead><tr><th>Pessoa</th><th class="r">Custo mensal (R$)<button type="button" class="q" data-tip="CLT: salário com todos os encargos (costuma ser 70% a 100% acima do salário). PJ: valor da nota mensal. Sócio: o pró-labore que você quer ganhar, com encargos." aria-label="Ajuda">?</button></th><th class="r">Horas produtivas/mês<button type="button" class="q" data-tip="Horas realmente trabalhadas em casos de clientes. Não conte captação, WhatsApp, reuniões internas e administração. Na dúvida, use de 100 a 120 horas." aria-label="Ajuda">?</button></th><th class="r">Custo da hora</th><th></th></tr></thead>
+              <tbody id="tbEquipe"></tbody>
+            </table>
+          </div>
+          <div class="btn-row"><button class="btn small" type="button" id="addPessoa">+ Pessoa</button></div>
+          <p class="hint">CLT: salário com todos os encargos. PJ: valor da nota. Sócio: pró-labore com encargos. Conte só horas de trabalho efetivo. Se não tiver controle, comece com 120 a 140 horas.</p>
+        </section>
+
+        <section class="card esc-card">
+          <h2><span class="n">B</span>Despesas fixas do escritório</h2>
+          <p class="sub">Tudo que você paga todo mês, tendo cliente ou não. Contas anuais: marque "Anual" e o valor é dividido por 12 sozinho. Deixe em branco o que não se aplica.</p>
+          <div class="tbl-wrap">
+            <table class="t">
+              <thead><tr><th>Despesa</th><th class="r">Valor (R$)</th><th>Paga<button type="button" class="q" data-tip="Mensal: valor pago todo mês. Anual: valor pago uma vez por ano (CREA/CAU, IPTU, licença de software, seguro). A ferramenta divide o anual por 12." aria-label="Ajuda">?</button></th><th class="r">Por mês</th><th></th></tr></thead>
+              <tbody id="tbDesp"></tbody>
+            </table>
+          </div>
+          <div class="btn-row">
+            <select id="addDespCat" aria-label="Categoria da nova despesa" style="width:auto"></select>
+            <button class="btn small" type="button" id="addDesp">+ Despesa</button>
+          </div>
+          <p class="hint">Mesmo em home office essas despesas existem: parte da energia, da internet e do espaço da casa é custo do escritório.</p>
+          <div class="kv">
+            <div><div class="l">Folha de produção/mês</div><div class="v" id="oFolha">–</div></div>
+            <div><div class="l">Despesas fixas/mês</div><div class="v" id="oDesp">–</div></div>
+            <div><div class="l">Coeficiente de despesas (CDA)</div><div class="v" id="oCDA">–</div></div>
+          </div>
+          <div class="banner b-info" id="cdaMsg" hidden></div>
+        </section>
+        <p class="legal">Os dados desta aba ficam salvos neste navegador e valem para todos os casos. O botão "Começar do zero" da aba Precificar caso não apaga o seu escritório.</p>
+      </main>
+      <aside class="aside">
+        <div class="res">
+          <div class="k">Seu escritório custa</div>
+          <div class="big" id="eTotal">–</div>
+          <div class="sm">por mês, com equipe e despesas fixas</div>
+          <span class="lock">✓ Salvo para todos os casos</span>
+          <div class="res-rows">
+            <div><span>Folha de produção</span><b id="eFolha">–</b></div>
+            <div><span>Despesas fixas</span><b id="eDesp">–</b></div>
+            <div><span>Horas produtivas da equipe</span><b id="eHoras">–</b></div>
+            <div class="tot"><span>Custo médio da hora (com despesas)</span><b id="eHora">–</b></div>
+          </div>
+        </div>
+        <div class="mini">
+          <div><div class="l">CDA</div><div class="v" id="eCDA">–</div></div>
+          <div><div class="l">Maior despesa</div><div class="v" id="eMaior" style="font-size:13.5px">–</div></div>
+        </div>
+        <div class="btn-row"><button class="btn primary" type="button" id="goCaso" style="width:100%">Ir para precificar o caso →</button></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===== ABA PRECIFICAR CASO ===== -->
+  <section class="panel" id="p-caso">
+  <div class="example-bar" id="exBar">
+    <span><b>Caso de exemplo:</b> Prefeitura completa, Receita Federal com redução do INSS, averbação, desdobro e registro do desdobro, com 3 engenheiros. Os números são ilustrativos. Troque pelos do seu caso.</span>
+    <button class="btn small" id="btnReset" type="button">Começar do zero</button>
+  </div>
+
+  <div class="layout">
+    <main style="min-width:0">
+
+      <!-- 1 CASO -->
+      <section class="card">
+        <h2><span class="n">1</span>Ficha do caso</h2>
+        <p class="sub">Dados que aparecem no resumo da proposta.</p>
+        <div class="grid">
+          <div class="field"><label for="cCliente">Cliente</label><input id="cCliente" data-k="cliente" placeholder="(inserir nome completo)"></div>
+          <div class="field"><label for="cImovel">Imóvel</label><input id="cImovel" data-k="imovel" placeholder="(inserir endereço completo)"></div>
+          <div class="field"><label for="cArea">Área construída (m²)</label><input id="cArea" type="number" min="0" data-k="area" placeholder="(inserir área construída)"></div>
+        </div>
+      </section>
+
+      <!-- 2 ESCRITÓRIO (resumo da aba fixa) -->
+      <section class="card">
+        <h2><span class="n">2</span>Seu escritório</h2>
+        <p class="sub">Vem da aba <b>Meu escritório</b>. Você não precisa preencher de novo a cada cliente.</p>
+        <div class="kv">
+          <div><div class="l">Folha de produção/mês</div><div class="v" id="cFolha">–</div></div>
+          <div><div class="l">Despesas fixas/mês</div><div class="v" id="cDesp">–</div></div>
+          <div><div class="l">CDA</div><div class="v" id="cCDA">–</div></div>
+          <div><div class="l">Pessoas na equipe</div><div class="v" id="cPess">–</div></div>
+        </div>
+        <div class="btn-row"><button class="btn small" type="button" id="goEsc">Editar meu escritório</button></div>
+      </section>
+
+      <!-- 3 SERVIÇOS E TAREFAS -->
+      <section class="card">
+        <h2><span class="n">3</span>Serviços e tarefas do caso</h2>
+        <p class="sub">Marque os serviços deste caso. Cada serviço marcado abre as tarefas logo abaixo: quem faz e quanto tempo leva, a partir de 5 minutos. No topo de cada pilar, informe o seu preço de tabela para o que está marcado nele.</p>
+        <p class="hint">Os itens com a etiqueta <span class="xtra" style="font-size:10px;font-weight:800;background:var(--info-bg);color:var(--info);border:1px solid var(--info-line);border-radius:6px;padding:1px 5px">extra</span> são serviços complementares.</p>
+        <div id="svcList"></div>
+        <div class="kv">
+          <div><div class="l">Serviços marcados</div><div class="v" id="oNSvc">–</div></div>
+          <div><div class="l">Tempo total</div><div class="v" id="oHoras">–</div></div>
+          <div><div class="l">Mão de obra direta</div><div class="v" id="oCTMOD">–</div></div>
+          <div><div class="l">Sua tabela (pilares + acompanhamento)</div><div class="v" id="oTab">–</div></div>
+        </div>
+      </section>
+
+      <!-- 4 RISCO -->
+      <section class="card">
+        <h2><span class="n">4</span>Reserva de risco</h2>
+        <p class="sub">Na regularização o tempo não depende só de você. Exigências, notas devolutivas e prazo de órgão viram horas extras. A reserva cobre isso sem você trabalhar de graça.</p>
+        <div class="seg" id="segRisco">
+          <button type="button" data-v="10">Baixo<small>órgão conhecido, documentação limpa · 10%</small></button>
+          <button type="button" data-v="20">Médio<small>alguma pendência ou órgão novo · 20%</small></button>
+          <button type="button" data-v="35">Alto<small>matrícula com problema, histórico de exigências · 35%</small></button>
+        </div>
+        <div class="grid">
+          <div class="field"><label for="riscoPct">Reserva sobre a mão de obra (%)</label><input id="riscoPct" type="number" min="0" max="200" data-k="riscoPct"></div>
+          <div class="field"><label for="exigInc">Exigências incluídas no preço</label><input id="exigInc" type="number" min="0" data-k="exigInc"></div>
+          <div class="field"><label for="exigExtra">Valor por exigência adicional (R$)</label><input id="exigExtra" type="number" min="0" data-k="exigExtra"></div>
+        </div>
+        <p class="hint">Coloque no contrato quantas exigências estão incluídas. Acima disso, cobra-se o valor adicional. Isso protege a sua margem e mostra profissionalismo.</p>
+      </section>
+
+      <!-- 5 CUSTOS -->
+      <section class="card">
+        <h2><span class="n">5</span>Custos do caso</h2>
+        <p class="sub">Separe o que é seu custo do que é do cliente. Taxa, imposto e emolumento não são receita sua.</p>
+        <h3 class="sec">Seus custos diretos (não reembolsáveis)<button type="button" class="q" data-tip="O que você paga do seu bolso para executar este caso: topografia terceirizada, deslocamentos, cópias, parceiro local. Lance o valor real. Ele volta no contrato e entra no fluxo de caixa." aria-label="Ajuda">?</button></h3>
+        <div class="tbl-wrap"><table class="t"><thead><tr><th>Item</th><th class="r">Valor (R$)</th><th></th></tr></thead><tbody id="tbCDE"></tbody></table></div>
+        <div class="btn-row"><button class="btn small" type="button" id="addCDE">+ Custo</button></div>
+        <h3 class="sec">Pagos pelo cliente, fora dos honorários</h3>
+        <p class="hint" style="margin-top:2px">Taxas e multas da Prefeitura, INSS da obra, emolumentos de cartório e ART. Preencha só o que se aplica: itens com valor zero não aparecem na proposta.</p>
+        <div class="tbl-wrap"><table class="t"><thead><tr><th>Item</th><th class="r">Valor estimado (R$)</th><th></th></tr></thead><tbody id="tbReemb"></tbody></table></div>
+        <div class="btn-row"><select id="addReembCat" aria-label="Órgão" style="width:auto"></select><button class="btn small" type="button" id="addReemb">+ Item do cliente</button></div>
+        <p class="hint">O cliente paga direto ao órgão ou reembolsa em conta separada. Se entrar no seu caixa, vira imposto sobre dinheiro que não é seu. Taxas e emolumentos variam por município e por cartório: consulte as tabelas vigentes.</p>
+      </section>
+
+      <!-- 6 PISO -->
+      <section class="card">
+        <h2><span class="n">6</span>Piso: preço de venda mínimo</h2>
+        <p class="sub">Abaixo deste valor você paga para trabalhar. Ele é o limite da negociação, não o seu preço.</p>
+        <div class="grid">
+          <div class="field"><label for="mlm">Margem de lucro mínima sobre o gasto (%)</label><input id="mlm" type="number" min="0" data-k="mlm"></div>
+          <div class="field"><label for="imp">Imposto sobre a nota (%)</label><input id="imp" type="number" min="0" max="60" step="0.01" data-k="imp"></div>
+        </div>
+        <p class="hint">O lucro da empresa não é o seu salário. Seu pró-labore já está no custo da hora. Confirme a alíquota com seu contador.</p>
+        <div class="formula" id="fPiso">–</div>
+        <div class="kv">
+          <div><div class="l">Mão de obra + risco</div><div class="v" id="oMOR">–</div></div>
+          <div><div class="l">Rateio do escritório</div><div class="v" id="oDAP">–</div></div>
+          <div><div class="l">Gasto total do caso</div><div class="v" id="oGTP">–</div></div>
+          <div><div class="l">Piso com nota</div><div class="v" id="oPiso">–</div></div>
+        </div>
+        <div class="banner b-crit" id="impMsg" hidden></div>
+      </section>
+
+      <!-- 7 RECEITA FEDERAL -->
+      <section class="card">
+        <h2><span class="n">7</span>Economia na Receita Federal (INSS da obra)</h2>
+        <p class="sub">Vale só para o <b>Pilar 3 · regularização da obra na Receita Federal</b>. Mostra ao cliente quanto ele economiza no INSS da obra com a sua estratégia e permite cobrar um honorário de êxito sobre essa economia.</p>
+        <div class="banner b-info" id="rfOff" hidden>Nenhum serviço da Receita Federal foi marcado no item 3. Este item não entra no preço nem na proposta.</div>
+        <div class="grid">
+          <div class="field"><label for="debSem">INSS da obra sem estratégia (R$)</label><input id="debSem" type="number" min="0" data-k="debSem"></div>
+          <div class="field"><label for="debCom">INSS da obra com a estratégia ELO (R$)</label><input id="debCom" type="number" min="0" data-k="debCom"></div>
+          <div class="field"><label for="captura">Honorário de êxito (% da economia)</label><input id="captura" type="number" min="0" max="100" data-k="captura"></div>
+        </div>
+        <p class="hint"><b>Pegue os dois valores de INSS na Simuladora ELO</b>: o débito calculado sem estratégia e o débito depois de aplicar a estratégia (decadência, redução legal, fator de ajuste). O êxito soma ao preço do Pilar 3 no item 8. Entre 8% e 12% da economia deixa o cliente com retorno claro.</p>
+        <div class="kv">
+          <div><div class="l">Economia do cliente no INSS</div><div class="v" id="oGanho">–</div></div>
+          <div><div class="l">Seu êxito sobre a economia</div><div class="v" id="oValor">–</div></div>
+        </div>
+      </section>
+
+      <!-- 8 POSICIONAMENTO -->
+      <section class="card">
+        <h2><span class="n">8</span>Preço final</h2>
+        <p class="sub">O preço parte da sua tabela do item 3. O piso aparece só como limite: abaixo dele você paga para trabalhar.</p>
+        <div class="ruler" aria-hidden="true">
+          <div class="ruler-track" id="rTrack">
+            <div class="ruler-zone" id="rZone"></div>
+            <div class="mk piso" id="mkPiso"></div>
+            <div class="mk valor" id="mkValor"></div>
+            <div class="mk final" id="mkFinal"></div>
+          </div>
+          <div class="ruler-labels" id="rLabels"></div>
+        </div>
+        <div class="pos-cards" id="posCards">
+          <button type="button" data-p="tabela"><div class="l">Sua tabela</div><div class="v" id="pcTab">–</div><div class="d">Todos os pilares + acompanhamento</div></button>
+          <button type="button" data-p="tabelaExito"><div class="l">Tabela + êxito</div><div class="v" id="pcTabEx">–</div><div class="d" id="pcTabExD">Tabela + % da economia</div></button>
+          <button type="button" data-p="livre"><div class="l">Personalizado</div><div class="v" id="pcLivre">–</div><div class="d">Você define o total</div></button>
+        </div>
+        <div class="grid" id="livreWrap">
+          <div class="field"><label for="livre">Preço personalizado (R$)</label><input id="livre" type="number" min="0" data-k="livre"></div>
+        </div>
+        <div class="banner" id="posMsg"></div>
+
+        <h3 class="sec">Pagamento dividido por etapas</h3>
+        <p class="hint" style="margin-top:4px"><b>Esta é a forma de negociação com o cliente.</b> Ele pode fechar o contrato completo (Proposta 01, com desconto de pacote) ou contratar por etapas (Propostas 02 e 03, sem desconto). Em todas, o pagamento acontece na assinatura do contrato e no protocolo da documentação em cada órgão. Nunca condicione o pagamento ao fim do processo: o prazo da Prefeitura, da Receita e do Cartório não depende de você.</p>
+        <div class="grid">
+          <div class="field"><label for="desc">Desconto do pacote completo (%)</label><input id="desc" type="number" min="0" max="50" data-k="desc"></div>
+          <div class="field"><label>Entrada na assinatura do contrato</label>
+            <div class="seg" id="segEnt" style="margin-top:0"><button type="button" data-e="r">Valor fixo<small>R$</small></button><button type="button" data-e="p">Percentual<small>% do contrato</small></button></div></div>
+          <div class="field" id="entRWrap"><label for="entR">Entrada (R$)</label><input id="entR" type="number" min="0" step="100" data-k="entR"></div>
+          <div class="field" id="entPWrap"><label for="entP">Entrada (% do contrato)</label><input id="entP" type="number" min="0" max="100" data-k="entP"></div>
+        </div>
+        <p class="hint">O restante é dividido entre os protocolos de cada órgão, proporcional ao preço de cada pilar. Com entrada em valor fixo, cada contrato separado (02 e 03) também tem a sua entrada.</p>
+        <h3 class="sec">Como dividir as Propostas 02 e 03<button type="button" class="q" data-tip="Escolha em qual contrato separado cada pilar entra. Use a ordem natural do processo: o que vem primeiro na Proposta 02." aria-label="Ajuda">?</button></h3>
+        <div class="assign" id="assign"></div>
+        <h3 class="sec">Qual proposta o cliente escolheu?<button type="button" class="q" data-tip="Marque quando o cliente fechar. A escolha define o valor do contrato, o cronograma de pagamento e o que vai para a aba Contratos." aria-label="Ajuda">?</button></h3>
+        <div class="seg" id="segEsc">
+          <button type="button" data-esc="">Ainda não decidiu<small>proposta mostra as 3 opções</small></button>
+          <button type="button" data-esc="1">Proposta 01<small>pacote completo</small></button>
+          <button type="button" data-esc="2">Proposta 02<small>só a primeira etapa</small></button>
+          <button type="button" data-esc="3">Proposta 03<small>só a segunda etapa</small></button>
+          <button type="button" data-esc="23">02 e 03<small>as duas, separadas</small></button>
+        </div>
+        <p class="hint">Você também pode clicar no card da proposta. A escolha atualiza o resumo ao lado, a Meta do mês e a proposta do item 9.</p>
+        <div class="props" id="propBox"></div>
+        <div class="btn-row"><button class="btn primary" type="button" id="btnSalvarCt">Salvar como contrato →</button><span class="hint" id="ctMsg" style="margin:0"></span></div>
+      </section>
+
+      <!-- 9 PROPOSTA -->
+      <section class="card">
+        <h2><span class="n">9</span>Proposta comercial</h2>
+        <p class="sub">Modelo completo para colar no seu papel timbrado ou no Word. Substitua tudo o que estiver entre [colchetes] antes de enviar.</p>
+        <pre class="prop" id="propTxt"></pre>
+        <div class="btn-row">
+          <button class="btn primary" type="button" id="btnCopy">Copiar proposta</button>
+        </div>
+        <p class="legal">Ferramenta do método da Formação ELO · Estrategista Legal de Obras.</p>
+      </section>
+    </main>
+
+    <aside class="aside">
+      <div class="res">
+        <div class="k" id="sK">Proposta 01 · pacote completo</div>
+        <div class="big" id="sFinal">–</div>
+        <div class="sm" id="sPos">–</div>
+        <span class="pill" id="sPill">–</span>
+        <div class="res-rows">
+          <div><span>Piso com nota</span><b id="sPiso">–</b></div>
+          <div><span>Imposto da nota</span><b id="sImp">–</b></div>
+          <div><span>Gasto total do caso</span><b id="sGTP">–</b></div>
+          <div class="tot"><span>Lucro do escritório</span><b id="sLucro">–</b></div>
+        </div>
+      </div>
+      <div class="mini">
+        <div><div class="l">Vezes o piso</div><div class="v" id="sMult">–</div></div>
+        <div><div class="l">Seu ganho por hora</div><div class="v" id="sHora">–</div></div>
+        <div><div class="l">Economia do cliente</div><div class="v pos" id="sGanho">–</div></div>
+        <div><div class="l">Retorno do cliente</div><div class="v" id="sROI">–</div></div>
+      </div>
+      <div class="mini" style="grid-template-columns:1fr">
+        <div><div class="l">Investimento total do cliente</div><div class="v" id="sInvest">–</div><div class="legal" style="margin-top:2px">Honorários + itens pagos aos órgãos</div></div>
+      </div>
+    </aside>
+  </div>
+  </section>
+
+  <!-- ===== ABA CONTRATOS ===== -->
+  <section class="panel" id="p-ctr" hidden>
+    <section class="card esc-card" style="margin-top:16px">
+      <h2><span class="n">✓</span>Contratos e processos</h2>
+      <p class="sub">Cada contrato fechado vira um processo com checklist, situação de cada órgão, % de conclusão e pagamentos. Toda a equipe vê o que está acontecendo com cada cliente.</p>
+      <div class="ctr-kpi">
+        <div><div class="l">Em andamento</div><div class="v" id="kAt">–</div></div>
+        <div><div class="l">Conclusão média</div><div class="v" id="kPc">–</div></div>
+        <div><div class="l">Já recebido</div><div class="v ok" id="kRec">–</div></div>
+        <div><div class="l">A receber</div><div class="v" id="kArec">–</div></div>
+        <div><div class="l">Cobrar agora</div><div class="v red" id="kCob">–</div></div>
+      </div>
+      <div class="ctr-tools">
+        <select id="fSt" aria-label="Filtrar"><option value="ativos">Em andamento e pausados</option><option value="todos">Todos</option><option value="concluido">Concluídos</option><option value="cancelado">Cancelados</option></select>
+        <input id="fBusca" placeholder="Buscar cliente ou imóvel" aria-label="Buscar">
+        <span style="flex:1"></span>
+        <button class="btn small primary" type="button" id="btnXlsx">Baixar planilha</button><button type="button" class="q" data-tip="Gera um arquivo .xlsx formatado com 5 abas: Painel, Contratos, Pagamentos, Fluxo de caixa e Checklist. As somas são fórmulas: mudando a situação de um pagamento na planilha, os totais se atualizam. Para abrir no Google Planilhas: drive.google.com, botão Novo, Upload de arquivo, clique no arquivo e escolha Abrir com Google Planilhas." aria-label="Ajuda">?</button>
+        <button class="btn small" type="button" id="btnBkp">Baixar backup</button><button type="button" class="q" data-tip="Os dados ficam salvos só neste navegador. Baixe o backup toda semana e guarde no Google Drive. Para usar em outro computador, abra a ferramenta lá e clique em Restaurar backup." aria-label="Ajuda">?</button>
+        <label class="btn small" style="cursor:pointer">Restaurar backup<input type="file" id="fileBkp" accept=".json,application/json" hidden></label>
+      </div>
+      <p class="hint" id="bkpInfo"></p>
+    </section>
+    <div id="ctrList"></div>
+  </section>
+
+  <!-- ===== ABA META DO MÊS ===== -->
+  <section class="panel" id="p-meta" hidden>
+    <div class="layout">
+      <main style="min-width:0">
+        <section class="card esc-card">
+          <h2><span class="n">Σ</span>Fluxo de caixa do escritório</h2>
+          <p class="sub">Calculado com os contratos da aba <b>Contratos</b> e o custo da aba <b>Meu escritório</b>. Recebido é o que entrou de fato. A receber é o que está previsto para entrar.</p>
+          <div class="grid"><div class="field"><label for="mMes">Mês</label><input id="mMes" type="month"></div></div>
+          <div class="kv">
+            <div><div class="l">Recebido no mês</div><div class="v" id="fRec">–</div></div>
+            <div><div class="l">A receber no mês</div><div class="v" id="fArec">–</div></div>
+            <div><div class="l">Em atraso (cobrar)</div><div class="v" id="fAtr" style="color:var(--red)">–</div></div>
+            <div><div class="l">Custo do escritório</div><div class="v" id="fCusto">–</div></div>
+            <div><div class="l">Custos diretos do mês</div><div class="v" id="fCd">–</div></div>
+            <div><div class="l">Contratos fechados no mês</div><div class="v" id="fNovos">–</div></div>
+          </div>
+          <div class="banner" id="fMsg"></div>
+          <h3 class="sec">Próximos 6 meses</h3>
+          <p class="hint" style="margin-top:2px">Verde: recebido. Âmbar: a receber. Linha vermelha: custo do escritório no mês.</p>
+          <div class="fx-bars" id="fBars"></div>
+          <div class="tbl-wrap"><table class="t">
+            <thead><tr><th>Mês</th><th class="r">Recebido</th><th class="r">A receber</th><th class="r">Custo + impostos + diretos</th><th class="r">Saldo previsto</th></tr></thead>
+            <tbody id="fTab"></tbody></table></div>
+          <h3 class="sec">Cobrar agora</h3>
+          <p class="hint" style="margin-top:2px">Parcelas com protocolo feito ou com a data prevista vencida, ainda sem pagamento.</p>
+          <div class="tbl-wrap"><table class="t"><thead><tr><th>Contrato</th><th>Parcela</th><th class="r">Previsto para</th><th class="r">Valor</th></tr></thead><tbody id="fCob"></tbody></table></div>
+          <h3 class="sec">Agenda da equipe</h3>
+          <div class="kv">
+            <div><div class="l">Horas em carteira</div><div class="v" id="fHc">–</div></div>
+            <div><div class="l">Capacidade por mês</div><div class="v" id="fCap">–</div></div>
+            <div><div class="l">Meses de trabalho contratado</div><div class="v" id="fMeses">–</div></div>
+          </div>
+          <p class="hint">Horas em carteira = horas previstas dos contratos em andamento que ainda faltam executar, pelo % de conclusão.</p>
+        </section>
+      </main>
+      <aside class="aside">
+        <div class="res">
+          <div class="k">Resultado do mês</div>
+          <div class="big" id="aRes">–</div>
+          <div class="sm" id="aResSub">recebido menos impostos, custos diretos e escritório</div>
+          <div class="res-rows">
+            <div><span>Recebido</span><b id="aRec">–</b></div>
+            <div><span>Impostos sobre o recebido</span><b id="aImp">–</b></div>
+            <div><span>Custos diretos</span><b id="aCd">–</b></div>
+            <div><span>Escritório (equipe + despesas)</span><b id="aEsc">–</b></div>
+            <div class="tot"><span>Saldo previsto com o a receber</span><b id="aPrev">–</b></div>
+          </div>
+        </div>
+        <div class="mini">
+          <div><div class="l">Falta para pagar o mês</div><div class="v" id="aFalta">–</div></div>
+          <div><div class="l">Custo da hora</div><div class="v" id="aHora">–</div></div>
+        </div>
+        <div class="btn-row"><button class="btn small" type="button" id="goCtr" style="width:100%">Ver contratos</button></div>
+      </aside>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script>
+(function(){
+  const KEY='elo-piso-valor-v4';
+  const REEMB_CATS=['Prefeitura','Receita Federal','Cartório','Outros'];
+  const REEMB_PADRAO=[
+    ['Prefeitura','Taxa de análise e aprovação do projeto'],['Prefeitura','Taxa de alvará ou de regularização'],['Prefeitura','Taxa do Habite-se'],
+    ['Prefeitura','Multa por obra sem alvará'],['Prefeitura','ISS da obra'],
+    ['Receita Federal','INSS da obra (DARF)'],['Receita Federal','Multa e juros do INSS'],
+    ['Cartório','Emolumentos de averbação da construção'],['Cartório','Emolumentos de registro (desdobro, unificação, retificação)'],
+    ['Cartório','Certidões de matrícula e de ônus'],['Cartório','Reconhecimento de firma'],['Cartório','ITBI (quando houver transmissão)'],
+    ['Outros','ART / RRT / TRT']].map(r=>({cat:r[0],item:r[1],valor:0}));
+  function reembCom(v){ const r=JSON.parse(JSON.stringify(REEMB_PADRAO)); Object.keys(v).forEach(k=>{const x=r.find(z=>z.item===k); if(x) x.valor=v[k];}); return r; }
+  const EXEMPLO={
+    cliente:'', imovel:'', area:'',
+    sv:{g1:true,g2:true,g3:true,g4:true,s05a:true,s07:true,s08:true,s09:true,s10:true,s13:true,s14:true,s15:true,s16:true,s18:true,s19:true,regdes:true}, tk:{}, tx:{},
+    pp:{p1:3000,p2:5000,p3:3500,p4:3000,g:500},
+    riscoPct:20, exigInc:2, exigExtra:350,
+    cde:[{item:'Topografia terceirizada',valor:800}],
+    reemb:reembCom({'Taxa de alvará ou de regularização':350,'INSS da obra (DARF)':6900,'Emolumentos de averbação da construção':2710,'ART / RRT / TRT':105}),
+    mlm:30, imp:6,
+    debSem:38400, debCom:6900,
+    captura:10,
+    pos:'tabelaExito', livre:0, desc:10, entMode:'r', entR:1500, entP:20, prop:{}
+  };
+  const ZERO={cliente:'',imovel:'',area:'',sv:{},tk:{},tx:{},pp:{},riscoPct:20,exigInc:2,exigExtra:0,
+    cde:[],reemb:reembCom({}),mlm:30,imp:6,debSem:0,debCom:0,captura:10,pos:'tabela',livre:0,desc:10,entMode:'r',entR:1500,entP:20,prop:{}};
+  const clone=o=>JSON.parse(JSON.stringify(o));
+  const ESC_KEY='elo-piso-escritorio-v2', ESC_KEY_OLD='elo-piso-escritorio-v1';
+  const CATS=['Espaço físico','Comunicação','Profissionais e registros','Softwares e ferramentas','Marketing','Operação','Outros'];
+  const DESP_PADRAO=[
+    ['Espaço físico','Aluguel, coworking ou parte da casa',800,'m'],
+    ['Espaço físico','Condomínio',0,'m'],
+    ['Espaço físico','IPTU',0,'a'],
+    ['Espaço físico','Energia elétrica',180,'m'],
+    ['Espaço físico','Água',0,'m'],
+    ['Espaço físico','Limpeza e manutenção',0,'m'],
+    ['Comunicação','Internet',150,'m'],
+    ['Comunicação','Telefone e celular',120,'m'],
+    ['Comunicação','WhatsApp Business, e-mail e domínio',0,'m'],
+    ['Profissionais e registros','Contador',450,'m'],
+    ['Profissionais e registros','Anuidade CREA / CAU',650,'a'],
+    ['Profissionais e registros','Certificado digital',240,'a'],
+    ['Profissionais e registros','Seguro de responsabilidade civil profissional',0,'a'],
+    ['Profissionais e registros','Advogado ou assessoria jurídica',0,'m'],
+    ['Softwares e ferramentas','Software CAD / BIM',2400,'a'],
+    ['Softwares e ferramentas','Assinaturas (Google, Canva, armazenamento em nuvem)',100,'m'],
+    ['Softwares e ferramentas','Site e hospedagem',360,'a'],
+    ['Softwares e ferramentas','Sistema de gestão, CRM ou assinatura eletrônica',0,'m'],
+    ['Marketing','Anúncios (Instagram, Google)',600,'m'],
+    ['Marketing','Social media, designer ou edição de vídeo',0,'m'],
+    ['Marketing','Brindes, cartões e materiais impressos',0,'m'],
+    ['Operação','Material de escritório e impressões',80,'m'],
+    ['Operação','Combustível e deslocamentos fixos',250,'m'],
+    ['Operação','Tarifas bancárias e maquininha',60,'m'],
+    ['Operação','Cursos e capacitação',100,'m'],
+    ['Operação','Reserva para troca de equipamentos (computador, impressora)',100,'m'],
+    ['Outros','Outras despesas',0,'m']
+  ].map(r=>({cat:r[0],item:r[1],valor:r[2],per:r[3]}));
+  const ESC_PADRAO={equipe:[{id:'p1',nome:'Engenheiro 1',custo:3500,horas:140},{id:'p2',nome:'Engenheiro 2',custo:3500,horas:140},{id:'p3',nome:'Engenheiro 3',custo:3500,horas:140}],desp:DESP_PADRAO};
+  function num0(v){const n=parseFloat(v);return isFinite(n)?n:0;}
+  let S;
+  try{ const raw=localStorage.getItem(KEY); S=raw?JSON.parse(raw):null; }catch(e){ S=null; }
+  let E;
+  try{ const raw=localStorage.getItem(ESC_KEY); E=raw?JSON.parse(raw):null; }catch(e){ E=null; }
+  if(!E){ try{ const o=JSON.parse(localStorage.getItem(ESC_KEY_OLD)||'null');
+    if(o&&o.equipe){ const padraoAntigo=o.equipe.length===2&&o.equipe[0].nome==='Engenheira titular'&&num0(o.equipe[0].custo)===9000&&num0(o.equipe[1].custo)===2400;
+      E={equipe:padraoAntigo?clone(ESC_PADRAO.equipe):o.equipe,desp:o.desp||clone(DESP_PADRAO)}; } }catch(e){} }
+  if(!E||!E.equipe){
+    E=clone(ESC_PADRAO);
+    const old=S||{};
+    if(old['equipe']&&old['equipe'].length){ E.equipe=old['equipe']; if(num0(old['despAdm'])>0){ E.desp.forEach(d=>d.valor=0); E.desp.push({cat:'Outros',item:'Despesas administrativas (versão anterior)',valor:num0(old['despAdm']),per:'m'}); } }
+  }
+  if(!(E.casos>=0)) E.casos=3;
+  if(!S) S=clone(EXEMPLO);
+  if(!S.sv){ S.sv=clone(EXEMPLO.sv); S.tk={}; S.tx={}; delete S.tarefas; }
+  if(!S.pp) S.pp={}; if(!['tabela','tabelaExito','livre'].includes(S.pos)) S.pos='tabela';
+  if(!S.prop) S.prop={}; if(S.desc===undefined) S.desc=10; if(!S.entMode) S.entMode='r'; if(S.entR===undefined) S.entR=1500; if(S.entP===undefined) S.entP=20; S.reemb=(S.reemb||[]).map(r=>({cat:r.cat||'Outros',item:r.item,valor:r.valor}));
+  let TAB='esc'; try{ TAB=localStorage.getItem('elo-piso-tab-v3')||'caso'; }catch(e){}
+  let isExample=!(S._edited);
+
+  const $=id=>document.getElementById(id);
+  const brl=v=>isFinite(v)?v.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}):'–';
+  const brl2=v=>isFinite(v)?v.toLocaleString('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:2,maximumFractionDigits:2}):'–';
+  const pct=v=>isFinite(v)?(v*100).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'–';
+  const num=v=>{const n=parseFloat(v);return isFinite(n)?n:0;};
+  const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); localStorage.setItem(ESC_KEY,JSON.stringify(E)); }catch(e){} }
+  function touched(){ if(!S._edited){S._edited=true;} $('exBar').hidden=true; }
+  function toast(m){const t=$('toast');t.textContent=m;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,2200);}
+
+  /* campos simples */
+  document.querySelectorAll('[data-k]').forEach(el=>{
+    el.addEventListener('input',()=>{ S[el.dataset.k]=el.type==='number'?num(el.value):el.value; touched(); if(el.dataset.k==='riscoPct') paintRisk(); calc(); });
+  });
+  function fillFields(){ document.querySelectorAll('[data-k]').forEach(el=>{ const v=S[el.dataset.k]; el.value=(v===undefined||v===null)?'':v; }); }
+
+  /* equipe */
+  function chh(p){ return p.horas>0?p.custo/p.horas:0; }
+  function renderEquipe(){
+    $('tbEquipe').innerHTML=E.equipe.map((p,i)=>`<tr>
+      <td><input id="eqN${i}" value="${esc(p.nome)}" data-i="${i}" data-f="nome" aria-label="Nome"></td>
+      <td class="r"><input id="eqC${i}" type="number" min="0" value="${p.custo}" data-i="${i}" data-f="custo" aria-label="Custo mensal"></td>
+      <td class="r"><input id="eqH${i}" type="number" min="0" value="${p.horas}" data-i="${i}" data-f="horas" aria-label="Horas por mês"></td>
+      <td class="r calc" id="eqV${i}">${brl2(chh(p))}</td>
+      <td class="del">${E.equipe.length>1?`<button class="btn x" type="button" data-del="${i}" aria-label="Remover pessoa">✕</button>`:''}</td></tr>`).join('');
+  }
+  $('tbEquipe').addEventListener('input',e=>{const t=e.target,i=+t.dataset.i;if(isNaN(i))return;E.equipe[i][t.dataset.f]=t.type==='number'?num(t.value):t.value;
+    $('eqV'+i).textContent=brl2(chh(E.equipe[i])); if(t.dataset.f==='nome') renderTarefas(); calc();});
+  $('tbEquipe').addEventListener('click',e=>{const d=e.target.closest('[data-del]');if(!d)return;const p=E.equipe[+d.dataset.del];
+    E.equipe.splice(+d.dataset.del,1); Object.values(S.tk).forEach(o=>{if(o.quem===p.id)delete o.quem;}); Object.values(S.tx).forEach(a=>a.forEach(o=>{if(o.quem===p.id)o.quem='';})); renderEquipe(); renderTarefas(); calc();});
+  $('addPessoa').onclick=()=>{E.equipe.push({id:'p'+Date.now(),nome:'Nova pessoa',custo:0,horas:140});renderEquipe();renderTarefas();calc();};
+
+  /* despesas fixas */
+  const mensal=d=>num(d.valor)/(d.per==='a'?12:1);
+  function renderDesp(){
+    let h='';
+    CATS.forEach(c=>{
+      const rows=E.desp.map((d,i)=>[d,i]).filter(x=>x[0].cat===c);
+      if(!rows.length) return;
+      h+=`<tr class="cat"><td colspan="5">${c}</td></tr>`;
+      rows.forEach(([d,i])=>{ h+=`<tr>
+        <td><input id="dsI${i}" value="${esc(d.item)}" data-i="${i}" data-f="item" aria-label="Despesa"></td>
+        <td class="r" style="width:130px"><input id="dsV${i}" type="number" min="0" step="any" value="${num(d.valor)||''}" placeholder="0" data-i="${i}" data-f="valor" aria-label="Valor"></td>
+        <td style="width:110px"><select id="dsP${i}" data-i="${i}" data-f="per" aria-label="Periodicidade"><option value="m"${d.per!=='a'?' selected':''}>Mensal</option><option value="a"${d.per==='a'?' selected':''}>Anual</option></select></td>
+        <td class="r calc" id="dsM${i}">${brl2(mensal(d))}</td>
+        <td class="del"><button class="btn x" type="button" data-del="${i}" aria-label="Remover despesa">✕</button></td></tr>`; });
+    });
+    $('tbDesp').innerHTML=h||`<tr><td colspan="5" style="color:var(--muted)">Nenhuma despesa.</td></tr>`;
+  }
+  $('addDespCat').innerHTML=CATS.map(c=>`<option>${c}</option>`).join('');
+  $('addDespCat').value='Outros';
+  $('tbDesp').addEventListener('input',e=>{const t=e.target,i=+t.dataset.i;if(isNaN(i)||t.tagName==='SELECT')return;E.desp[i][t.dataset.f]=t.type==='number'?num(t.value):t.value;const m=$('dsM'+i);if(m)m.textContent=brl2(mensal(E.desp[i]));calc();});
+  $('tbDesp').addEventListener('change',e=>{const t=e.target,i=+t.dataset.i;if(isNaN(i)||t.tagName!=='SELECT')return;E.desp[i].per=t.value;$('dsM'+i).textContent=brl2(mensal(E.desp[i]));calc();});
+  $('tbDesp').addEventListener('click',e=>{const d=e.target.closest('[data-del]');if(!d)return;E.desp.splice(+d.dataset.del,1);renderDesp();calc();});
+  $('addDesp').onclick=()=>{const c=$('addDespCat').value;let at=-1;E.desp.forEach((d,i)=>{if(d.cat===c)at=i;});const nd={cat:c,item:'Nova despesa',valor:0,per:'m'};if(at<0)E.desp.push(nd);else E.desp.splice(at+1,0,nd);renderDesp();calc();
+    const idx=E.desp.indexOf(nd);const el=$('dsI'+idx);if(el){el.focus();el.select();}};
+
+  /* abas */
+  function showTab(t){ TAB=t; document.querySelectorAll('.panel').forEach(p=>p.hidden=(p.id!=='p-'+t));
+    document.querySelectorAll('#tabs button').forEach(b=>{const on=b.dataset.tab===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on);});
+    try{localStorage.setItem('elo-piso-tab-v3',t);}catch(e){} }
+  $('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)showTab(b.dataset.tab);});
+  $('goCaso').onclick=()=>{showTab('caso');window.scrollTo({top:0,behavior:'smooth'});};
+  $('goCtr').onclick=()=>{showTab('ctr');window.scrollTo({top:0,behavior:'smooth'});};
+  $('goEsc').onclick=()=>{showTab('esc');window.scrollTo({top:0,behavior:'smooth'});};
+
+  /* catálogo de serviços: [id, nº, nome, tarefas[[nome, minutos, papel t=técnico a=assistente, opcional]]] */
+  const T='t',A='a';
+  const PILARES=[
+   {id:'p1',k:'Pilar 1',nome:'Lote e matrícula',svcs:[
+    ['s01','01','Análise da matrícula',[['Solicitar certidão de matrícula atualizada (inteiro teor e ônus)',10,A],['Ler a matrícula: titularidade, área, confrontações, ônus e averbações',40,T],['Comparar com IPTU, ficha técnica do lote e situação real',30,T],['Relatório de pendências para o cliente',30,T]]],
+    ['s02','02','Estudo de viabilidade técnica (EVTL)',[['Consultar plano diretor, zoneamento e código de obras',60,T],['Levantar parâmetros do lote: taxa de ocupação, coeficiente de aproveitamento, recuos e permeabilidade',30,T],['Verificar restrições: APP, tombamento, faixa não edificável e servidões',30,T],['Simular a capacidade construtiva e o enquadramento da obra',60,T],['Elaborar o relatório de viabilidade',60,T],['Reunião de apresentação ao cliente',30,T]]],
+    ['s03','03','Levantamento técnico',[['Agendar a visita com o cliente',10,A],['Deslocamento até o imóvel',60,T],['Medição do lote e da edificação',120,T],['Registro fotográfico',20,T],['Desenho do levantamento (as built)',120,A],['Contratar e acompanhar topografia terceirizada',30,T,1]]],
+    ['s04','04','Retificação de área',[['Analisar matrícula, títulos anteriores e a divergência de área',40,T],['Acompanhar o levantamento topográfico ou georreferenciado',60,T],['Elaborar planta e memorial descritivo',180,T],['Emitir ART/RRT/TRT',15,A],['Colher a anuência dos confrontantes',120,A],['Requerimento e declarações',30,A],['Protocolar no Cartório de RGI',30,A],['Acompanhar notificações e prazos',30,A],['Atender nota devolutiva',60,T]]],
+    ['s05a','05','Desdobro / desmembramento',[['Consultar lote mínimo e testada mínima na legislação municipal',30,T],['Acompanhar o levantamento topográfico',60,T],['Projeto de desdobro (situação atual e pretendida)',180,T],['Memorial descritivo de cada lote resultante',90,T],['Emitir ART/RRT/TRT',15,A],['Protocolar a aprovação na Prefeitura',30,A],['Atender comunique-se da Prefeitura',60,T],['Retirar a aprovação do desdobro',20,A]]],
+    ['s05b','05','Unificação / remembramento',[['Conferir matrículas, titularidade e confrontações dos lotes',30,T],['Acompanhar o levantamento topográfico',60,T],['Projeto de unificação',120,T],['Memorial descritivo do lote unificado',60,T],['Emitir ART/RRT/TRT',15,A],['Protocolar a aprovação na Prefeitura',30,A],['Atender comunique-se da Prefeitura',60,T],['Retirar a aprovação da unificação',20,A]]],
+    ['s06','06','Usucapião (parte técnica)',[['Analisar os documentos de posse com o advogado',40,T],['Acompanhar o levantamento planimétrico ou georreferenciado',60,T],['Planta da área usucapienda',180,T],['Memorial descritivo',90,T],['Emitir ART/RRT/TRT',15,A],['Colher a assinatura dos confrontantes na planta e no memorial',120,A],['Acompanhar a ata notarial com o tabelião',60,T,1],['Atender exigências técnicas do Cartório ou do juízo',60,T]]],
+    ['reurb','+','REURB (peças técnicas)',[['Reunião com o município e definição da modalidade (REURB-S ou REURB-E)',60,T],['Acompanhar o levantamento planialtimétrico cadastral georreferenciado',120,T],['Projeto de regularização fundiária: perímetro, lotes, vias e áreas públicas',480,T],['Memoriais descritivos dos lotes e áreas',240,T],['Estudo técnico de riscos ou ambiental, quando exigido',240,T,1],['Cronograma de obras de infraestrutura essencial',60,T,1],['Emitir ART/RRT/TRT',15,A],['Atender exigências do município até a CRF',120,T]]],
+    ['laje','+','Direito de laje',[['Levantamento da unidade sobreposta',90,T],['Planta e memorial descritivo da laje',150,T],['Emitir ART/RRT/TRT',15,A],['Protocolar no Cartório de RGI para abrir a matrícula própria',30,A],['Acompanhar o registro e nota devolutiva',40,A]]],
+    ['transc','+','Abertura de matrícula a partir de transcrição',[['Solicitar certidão da transcrição',10,A],['Conferir descrição e titularidade',30,T],['Requerimento de abertura de matrícula',20,A],['Protocolar e acompanhar',30,A]]],
+    ['adj','+','Adjudicação compulsória (apoio técnico)',[['Analisar contrato e cadeia de títulos com o advogado',40,T],['Planta e memorial descritivo, quando exigidos',120,T,1],['Reunir certidões e documentos técnicos',30,A],['Acompanhar o procedimento',30,A]]]
+   ]},
+   {id:'p2',k:'Pilar 2',nome:'Prefeitura',svcs:[
+    ['s07','07','Projeto legal (novo ou de regularização)',[['Solicitar a ficha técnica do lote na Prefeitura',15,A],['Emitir a CND municipal do imóvel',10,A],['Acompanhar o estudo topográfico',30,T,1],['Elaborar o Projeto Legal',600,T],['Memória de cálculo de áreas',60,T],['Memorial descritivo da obra',60,T],['Conferir o Projeto Legal',60,T],['Demais documentos exigidos pelo município',60,A],['Emitir ART/RRT/TRT',15,A]]],
+    ['s08','08','Alvará de construção',[['Protocolar o processo (presencial ou on-line)',40,A],['Acompanhar o protocolo',60,A],['Verificar comunique-se ou nota de exigência',20,A],['Corrigir as exigências e protocolar de novo',120,T],['Retirar o alvará e enviar ao cliente',20,A]]],
+    ['s09','09','Laudo técnico de vistoria',[['Deslocamento até o imóvel',60,T],['Vistoria e medição da obra',120,T],['Registro fotográfico',20,T],['Elaborar o laudo',120,T],['Emitir ART/RRT/TRT',15,A]]],
+    ['s10','10','CCO e Habite-se',[['Protocolar o pedido de Habite-se',30,A],['Acompanhar a vistoria da fiscalização',60,T],['Atender exigências da vistoria',60,T],['Enviar o boleto do ISS da obra ao cliente',10,A],['Retirar o Habite-se / CCO e enviar ao cliente',20,A]]],
+    ['s11','11','Atualização cadastral do IPTU',[['Requerimento de revisão cadastral',30,A],['Anexar Habite-se, planta e documentos',20,A],['Protocolar',20,A],['Acompanhar até a atualização do lançamento',30,A]]],
+    ['s12','12','Certidão de área construída',[['Requerimento e pagamento da taxa',20,A],['Protocolar',15,A],['Acompanhar e retirar a certidão',20,A]]],
+    ['numer','+','Certidão de numeração oficial',[['Requerimento',20,A],['Acompanhar e retirar a certidão',20,A]]],
+    ['demol','+','Alvará de demolição',[['Projeto ou croqui de demolição',90,T],['Emitir ART/RRT/TRT',15,A],['Protocolar o processo',30,A],['Acompanhar e atender exigências',60,T],['Retirar o alvará ou certidão de demolição',20,A]]],
+    ['licen','+','Licenças complementares (Bombeiros, Vigilância Sanitária, ambiental)',[['Levantar as exigências para o uso do imóvel',40,T],['Projeto ou documentação técnica',240,T],['Emitir ART/RRT/TRT',15,A],['Protocolar e acompanhar',60,A],['Acompanhar a vistoria',60,T]]]
+   ]},
+   {id:'p3',k:'Pilar 3',nome:'Receita Federal',svcs:[
+    ['s13','13','Cadastro da obra no CNO',[['Acessar o e-CAC com certificado digital',5,A],['Solicitar ao cliente a procuração eletrônica no e-CAC para o seu CPF',15,A],['Conferir a procuração',5,A],['Migrar a matrícula CEI para o CNO, se houver',30,A,1],['Preencher o CNO (todas as abas)',30,T],['Conferir e salvar o comprovante',10,A]]],
+    ['s14','14','Aferição no SERO',[['Reunir documentos da obra (Habite-se, alvará, notas fiscais)',30,A],['Preencher as informações da obra no SERO',45,T],['Conferir a RMT e o débito calculado',20,T],['Enviar a DCTFWeb',20,T],['Enviar a DARF ao cliente para pagamento',10,A]]],
+    ['s15','15','Estudo de decadência',[['Levantar provas da data de conclusão (Habite-se, IPTU, contas de consumo, imagens aéreas)',60,A],['Calcular as competências decaídas (CTN art. 173, I)',30,T],['Parecer da decadência para o cliente',60,T]]],
+    ['s16','16','Redução legal do INSS de obra',[['Simular o débito sem estratégia',30,T],['Analisar os enquadramentos de redução aplicáveis à obra',45,T],['Reunir notas fiscais e comprovantes',60,A],['Relatório comparativo para o cliente',30,T]]],
+    ['s17','17','Parcelamento do débito',[['Simular o parcelamento',20,T],['Solicitar o parcelamento no e-CAC',30,T],['Enviar DARF e parcelas ao cliente',10,A],['Acompanhar os pagamentos',20,A]]],
+    ['s18','18','Emissão da CND da obra',[['Emitir a CND da obra',10,A],['Salvar os arquivos na pasta do cliente',5,A],['Criar o termo de recebimento e enviar por e-mail',15,A],['Conferir a assinatura do termo e arquivar',10,A]]]
+   ]},
+   {id:'p4',k:'Pilar 4',nome:'Cartório',svcs:[
+    ['s19','19','Averbação da construção',[['Solicitar certidão de matrícula atualizada',10,A],['Conferir a lista de exigências do Cartório',20,T],['Reunir Habite-se, CND da obra e demais documentos',20,A],['Requerimento com firma reconhecida',20,A],['Protocolar no Cartório de RGI',30,A],['Enviar a guia de emolumentos ao cliente',10,A],['Acompanhar a prenotação e o prazo',20,A],['Atender nota devolutiva',60,T],['Retirar a matrícula averbada e entregar ao cliente',15,A]]],
+    ['s20','20','Atualização da matrícula',[['Identificar os dados desatualizados (inscrição municipal, logradouro, numeração)',30,T],['Reunir as certidões da Prefeitura que comprovam a alteração',20,A],['Requerimento',20,A],['Protocolar e acompanhar',40,A],['Atender nota devolutiva',60,T,1]]],
+    ['s21','21','Transferência de titularidade',[['Conferir matrícula, ônus e certidões do vendedor',40,T],['Orientar o cliente sobre ITBI e escritura',30,T],['Acompanhar a emissão da guia de ITBI',20,A],['Acompanhar a lavratura no Tabelionato de Notas',30,A],['Protocolar a escritura no Cartório de RGI',30,A],['Acompanhar o registro e nota devolutiva',60,A]]],
+    ['s22','22','Instituição de condomínio',[['Quadro de áreas (NBR 12.721)',240,T],['Cálculo das frações ideais',120,T],['Memorial descritivo e discriminação das unidades',120,T],['Apoio técnico à minuta da convenção',60,T],['Emitir ART/RRT/TRT',15,A],['Protocolar no Cartório de RGI',30,A],['Atender nota devolutiva',60,T]]],
+    ['s23','23','Averbação de demolição',[['Reunir o alvará ou certidão de demolição da Prefeitura',20,A],['CND da Receita Federal da demolição, quando exigida',10,A],['Requerimento com firma reconhecida',20,A],['Protocolar e acompanhar',40,A],['Atender nota devolutiva',60,T,1]]],
+    ['regdes','+','Registro do desdobro ou da unificação',[['Solicitar certidões atualizadas das matrículas',10,A],['Requerimento com firma reconhecida',20,A],['Protocolar no Cartório de RGI para abrir as novas matrículas',30,A],['Enviar a guia de emolumentos ao cliente',10,A],['Acompanhar o registro',30,A],['Atender nota devolutiva',60,T,1],['Retirar as novas matrículas e entregar ao cliente',15,A]]],
+    ['s24','24','Correção de dados na matrícula',[['Analisar o erro e os documentos que comprovam o dado correto',40,T],['Requerimento de retificação',30,A],['Protocolar e acompanhar',40,A],['Atender nota devolutiva',60,T,1]]]
+   ]},
+   {id:'g',k:'Todo caso',nome:'Atendimento e gestão',svcs:[
+    ['g1','G','Reunião inicial e diagnóstico',[['Reunião com o cliente',60,T],['Análise da documentação recebida',40,T]]],
+    ['g2','G','Proposta e contrato',[['Elaborar a proposta',30,T],['Contrato e coleta de assinatura',30,A]]],
+    ['g3','G','Acompanhamento de protocolo no sistema',[['Acompanhar o andamento dos protocolos nos sistemas dos órgãos',60,A],['Atualizar o cliente a cada movimentação',30,A]]],
+    ['g4','G','Entrega final e dossiê',[['Organizar o dossiê do imóvel',30,A],['Termo de entrega e reunião final',30,T]]]
+   ]}
+  ];
+  const SVC={}; PILARES.forEach(p=>p.svcs.forEach(v=>SVC[v[0]]={id:v[0],no:v[1],nome:v[2],tasks:v[3],pil:p}));
+  function pessoa(id){return E.equipe.find(p=>p.id===id)||E.equipe[0];}
+  function quemPapel(r){ return (r===A&&E.equipe[1]?E.equipe[1]:E.equipe[0]).id; }
+  function fmtMin(m){ m=Math.round(m); if(m<60) return m+' min'; const h=Math.floor(m/60),r=m%60; return h+'h'+(r?' '+String(r).padStart(2,'0'):''); }
+  /* lista das tarefas de um serviço, já com os ajustes do caso */
+  function tarefasDe(id){
+    const v=SVC[id], out=[];
+    v.tasks.forEach((t,i)=>{ const key=id+'.'+i, o=S.tk[key]||{};
+      out.push({key,nome:t[0],on:o.on!==undefined?o.on:!t[3],min:o.min!==undefined?o.min:t[1],quem:o.quem||quemPapel(t[2]),custom:false}); });
+    (S.tx[id]||[]).forEach((o,i)=>out.push({key:id+'.x'+i,nome:o.t,on:o.on!==false,min:num(o.min),quem:o.quem||E.equipe[0].id,custom:true,ix:i}));
+    return out;
+  }
+  const OPEN=new Set();
+  function tasksHTML(id){
+    const opts=q=>E.equipe.map(p=>`<option value="${p.id}"${p.id===q?' selected':''}>${esc(p.nome)}</option>`).join('');
+    return `<div class="tasks"><div class="tbl-wrap" style="margin-top:4px"><table class="t"><thead><tr><th></th><th>Tarefa</th><th>Quem</th><th class="r">Minutos<button type="button" class="q" data-tip="Tempo de trabalho efetivo da tarefa, a partir de 5 minutos. Não conte o tempo de espera do órgão: ele já está coberto pela reserva de risco do item 4." aria-label="Ajuda">?</button></th><th class="r">Custo</th><th></th></tr></thead><tbody>`+
+      tarefasDe(id).map(t=>`<tr class="${t.on?'':'off'}">
+        <td class="ck"><input type="checkbox" data-tk="${t.key}" data-f="on"${t.on?' checked':''} aria-label="Incluir tarefa"></td>
+        <td>${t.custom?`<input value="${esc(t.nome)}" data-tk="${t.key}" data-f="nome" placeholder="Descreva a tarefa" aria-label="Tarefa">`:esc(t.nome)}</td>
+        <td class="qm"><select data-tk="${t.key}" data-f="quem" aria-label="Quem faz">${opts(t.quem)}</select></td>
+        <td class="mn"><input type="number" min="5" step="5" value="${t.min}" data-tk="${t.key}" data-f="min" aria-label="Minutos"></td>
+        <td class="r calc" id="tc-${t.key.replace('.','_')}">–</td>
+        <td class="del">${t.custom?`<button class="btn x" type="button" data-tkdel="${t.key}" aria-label="Remover tarefa">✕</button>`:''}</td></tr>`).join('')+
+      `</tbody></table></div><button class="btn small" type="button" data-tkadd="${id}" style="margin-top:6px">+ Tarefa</button></div>`;
+  }
+  function renderTarefas(){
+    $('svcList').innerHTML=PILARES.map(p=>{
+      const n=p.svcs.filter(v=>S.sv[v[0]]).length;
+      let h=`<div class="pblk"><div class="pblk-h"><div><div class="k">${p.k}</div><div class="nm">${p.nome}</div><div class="ps" id="psum-${p.id}">${n?n+' serviço(s)':'nenhum serviço marcado'}</div></div>`;
+      if(p.id!=='g') h+=`<div class="pp"><div><label for="pp-${p.id}">Seu preço para este pilar (R$)</label>${q('Quanto você cobra pelos serviços marcados neste pilar. Ao lado aparece o piso: abaixo dele você paga para trabalhar.')}<input id="pp-${p.id}" type="number" min="0" step="50" data-pp="${p.id}" value="${num(S.pp[p.id])||''}" placeholder="0"></div><small id="pm-${p.id}"></small></div>`;
+      else h+=`<div class="pp"><div><label for="pp-g">Acompanhamento de protocolo (R$)</label>${q('Valor fixo pelo acompanhamento dos protocolos nos sistemas dos órgãos. Entra uma vez em cada contrato quando o serviço estiver marcado.')}<input id="pp-g" type="number" min="0" step="50" data-pp="g" value="${num(S.pp.g)||''}" placeholder="0"></div><small id="pm-g">Cobrado uma vez por contrato, quando o serviço estiver marcado</small></div>`;
+      h+=`</div>`;
+      p.svcs.forEach(v=>{ const id=v[0], on=!!S.sv[id], ex=v[1]==='+';
+        h+=`<div class="srow${on?' on':''}"><label><input type="checkbox" data-sv="${id}"${on?' checked':''}><span class="no">${ex?'':v[1]==='G'?'':v[1]}</span><span>${ex?'<span class="xtra">extra</span> ':''}${esc(v[2])}</span></label>`+
+          (on?`<span class="ssum" id="ts-${id}"></span><button class="btn small" type="button" data-tg="${id}" aria-expanded="${OPEN.has(id)}">${OPEN.has(id)?'Fechar tarefas ▴':'Tarefas ▾'}</button>`:'')+`</div>`;
+        if(on&&OPEN.has(id)) h+=tasksHTML(id); });
+      return h+`</div>`; }).join('');
+  }
+  function renderPick(){}
+  function setTask(key,f,val){
+    const [id,ix]=key.split('.');
+    if(ix[0]==='x'){ const o=S.tx[id][+ix.slice(1)]; if(f==='nome')o.t=val; else o[f]=val; }
+    else { S.tk[key]=S.tk[key]||{}; S.tk[key][f]=val; }
+  }
+  const L3=$('svcList');
+  L3.addEventListener('change',e=>{const t=e.target;
+    if(t.dataset.sv){ const id=t.dataset.sv; if(t.checked){S.sv[id]=true;OPEN.add(id);}else{delete S.sv[id];OPEN.delete(id);} touched(); renderTarefas(); calc(); return; }
+    if(!t.dataset.tk) return;
+    if(t.type==='checkbox'){ setTask(t.dataset.tk,'on',t.checked); const tr=t.closest('tr'); if(tr) tr.classList.toggle('off',!t.checked); }
+    else if(t.tagName==='SELECT') setTask(t.dataset.tk,'quem',t.value);
+    else if(t.dataset.f==='min'&&num(t.value)>0&&num(t.value)<5){ t.value=5; setTask(t.dataset.tk,'min',5); }
+    touched(); calc();});
+  L3.addEventListener('input',e=>{const t=e.target;
+    if(t.dataset.pp){ S.pp[t.dataset.pp]=num(t.value); touched(); calc(); return; }
+    if(!t.dataset.tk||t.type==='checkbox'||t.tagName==='SELECT')return;
+    if(t.dataset.f==='min') setTask(t.dataset.tk,'min',Math.max(0,num(t.value))); else setTask(t.dataset.tk,t.dataset.f,t.value); touched(); calc();});
+  L3.addEventListener('click',e=>{const g=e.target.closest('[data-tg]'),a=e.target.closest('[data-tkadd]'),d=e.target.closest('[data-tkdel]');
+    if(g){ const id=g.dataset.tg; if(OPEN.has(id))OPEN.delete(id); else OPEN.add(id); renderTarefas(); calc(); return; }
+    if(a){ const id=a.dataset.tkadd; (S.tx[id]=S.tx[id]||[]).push({t:'',min:15,quem:E.equipe[0].id,on:true}); touched(); renderTarefas(); calc();
+      const ins=L3.querySelectorAll(`[data-tk^="${id}.x"][data-f="nome"]`); if(ins.length) ins[ins.length-1].focus(); }
+    if(d){ const [id,ix]=d.dataset.tkdel.split('.'); S.tx[id].splice(+ix.slice(1),1); touched(); renderTarefas(); calc(); }});
+
+  /* ---------- Meta do mês ---------- */
+  /* ---------- propostas e pagamento por etapas ---------- */
+  const PNOME={p1:'Lote e matrícula',p2:'Prefeitura',p3:'Receita Federal',p4:'Cartório'};
+  const TRIG={p1:'No protocolo das peças técnicas do lote',p2:'No protocolo do processo na Prefeitura',p3:'No protocolo da obra na Receita Federal (CNO e SERO)',p4:'No protocolo no Cartório de Registro de Imóveis'};
+  function propDe(pid){ return S.prop[pid]||((pid==='p1'||pid==='p2')?'2':'3'); }
+  function cronograma(total,parts){ /* parts: [[pid,valor]] */
+    const ent=S.entMode==='p'?total*num(S.entP)/100:Math.min(num(S.entR),total);
+    const resto=total-ent, soma=parts.reduce((a,x)=>a+x[1],0), out=[['Na assinatura do contrato',Math.round(ent),'']];
+    let acc=Math.round(ent);
+    if(!parts.length){ out.push(['No primeiro protocolo',Math.round(total)-acc,'']); return out; }
+    parts.forEach((x,i)=>{ const v=i===parts.length-1?Math.round(total)-acc:Math.round(resto*(soma>0?x[1]/soma:1/parts.length)); acc+=v; out.push([TRIG[x[0]],v,x[0]]); });
+    return out;
+  }
+  function escolher(v){ S.escolha=(S.escolha===v&&v!=='')?'':v; touched(); calc(); }
+  $('segEsc').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;S.escolha=b.dataset.esc;touched();calc();});
+  $('propBox').addEventListener('click',e=>{const c=e.target.closest('[data-esc]');if(c)escolher(c.dataset.esc);});
+  $('propBox').addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ')return;const c=e.target.closest('[data-esc]');if(c){e.preventDefault();escolher(c.dataset.esc);}});
+  $('segEnt').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.entMode=b.dataset.e;touched();calc();});
+  $('assign').addEventListener('change',e=>{const t=e.target;if(!t.dataset.as)return;S.prop[t.dataset.as]=t.value;touched();calc();});
+
+  /* listas item/valor */
+  function listTable(key,tb,addBtn,addLabel){
+    function render(){ $(tb).innerHTML=S[key].length?S[key].map((r,i)=>`<tr>
+      <td><input id="${key}I${i}" value="${esc(r.item)}" data-i="${i}" data-f="item" aria-label="Item"></td>
+      <td class="r" style="width:150px"><input id="${key}V${i}" type="number" min="0" value="${r.valor}" data-i="${i}" data-f="valor" aria-label="Valor"></td>
+      <td class="del"><button class="btn x" type="button" data-del="${i}" aria-label="Remover">✕</button></td></tr>`).join('')
+      :`<tr><td colspan="3" style="color:var(--muted)">Nenhum item.</td></tr>`; }
+    $(tb).addEventListener('input',e=>{const t=e.target,i=+t.dataset.i;if(isNaN(i))return;S[key][i][t.dataset.f]=t.type==='number'?num(t.value):t.value;touched();calc();});
+    $(tb).addEventListener('click',e=>{const d=e.target.closest('[data-del]');if(!d)return;S[key].splice(+d.dataset.del,1);touched();render();calc();});
+    $(addBtn).onclick=()=>{S[key].push({item:addLabel,valor:0});touched();render();calc();};
+    return render;
+  }
+  const renderCDE=listTable('cde','tbCDE','addCDE','Novo custo');
+  function renderReemb(){
+    let h=''; REEMB_CATS.forEach(c=>{ const rows=S.reemb.map((r,i)=>[r,i]).filter(x=>x[0].cat===c); if(!rows.length) return;
+      h+=`<tr class="cat"><td colspan="3">${c}</td></tr>`;
+      rows.forEach(([r,i])=>{ h+=`<tr><td><input id="reembI${i}" value="${esc(r.item)}" data-i="${i}" data-f="item" aria-label="Item"></td>
+        <td class="r" style="width:150px"><input id="reembV${i}" type="number" min="0" value="${num(r.valor)||''}" placeholder="0" data-i="${i}" data-f="valor" aria-label="Valor"></td>
+        <td class="del"><button class="btn x" type="button" data-del="${i}" aria-label="Remover">✕</button></td></tr>`; }); });
+    $('tbReemb').innerHTML=h||`<tr><td colspan="3" style="color:var(--muted)">Nenhum item.</td></tr>`;
+  }
+  $('addReembCat').innerHTML=REEMB_CATS.map(c=>`<option>${c}</option>`).join('');
+  $('tbReemb').addEventListener('input',e=>{const t=e.target,i=+t.dataset.i;if(isNaN(i))return;S.reemb[i][t.dataset.f]=t.type==='number'?num(t.value):t.value;touched();calc();});
+  $('tbReemb').addEventListener('click',e=>{const d=e.target.closest('[data-del]');if(!d)return;S.reemb.splice(+d.dataset.del,1);touched();renderReemb();calc();});
+  $('addReemb').onclick=()=>{const c=$('addReembCat').value;let at=-1;S.reemb.forEach((r,i)=>{if(r.cat===c)at=i;});const nr={cat:c,item:'Nova taxa ou guia',valor:0};if(at<0)S.reemb.push(nr);else S.reemb.splice(at+1,0,nr);touched();renderReemb();calc();
+    const el=$('reembI'+S.reemb.indexOf(nr));if(el){el.focus();el.select();}};
+
+  /* risco */
+  function paintRisk(){ document.querySelectorAll('#segRisco button').forEach(b=>b.classList.toggle('on',num(b.dataset.v)===num(S.riscoPct))); }
+  $('segRisco').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.riscoPct=num(b.dataset.v);$('riscoPct').value=S.riscoPct;touched();paintRisk();calc();});
+
+  /* posicionamento */
+  $('posCards').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.pos=b.dataset.p;touched();calc();});
+
+  let R={};
+  function calc(){
+    const folha=E.equipe.reduce((a,p)=>a+num(p.custo),0);
+    const despMes=E.desp.reduce((a,d)=>a+mensal(d),0);
+    const cda=folha>0?despMes/folha:0;
+    const horasEq=E.equipe.reduce((a,p)=>a+num(p.horas),0);
+    let horas=0,ctmod=0;
+    let nSvc=0; const pMod={}, pMin={};
+    Object.keys(SVC).forEach(id=>{ if(!S.sv[id]) return; nSvc++; let sm=0,sc=0; const pid=SVC[id].pil.id;
+      tarefasDe(id).forEach(t=>{ const h=num(t.min)/60, c=t.on?h*chh(pessoa(t.quem)):0; if(t.on){sm+=num(t.min);sc+=c;}
+        const el=$('tc-'+t.key.replace('.','_')); if(el) el.textContent=t.on?brl2(c):'–'; });
+      horas+=sm/60; ctmod+=sc; pMod[pid]=(pMod[pid]||0)+sc; pMin[pid]=(pMin[pid]||0)+sm; const su=$('ts-'+id); if(su) su.textContent=`${fmtMin(sm)} · ${brl(sc)}`; });
+    $('oNSvc').textContent=nSvc;
+    const risco=ctmod*num(S.riscoPct)/100;
+    const mor=ctmod+risco;
+    const dap=cda*mor;
+    const cde=S.cde.reduce((a,r)=>a+num(r.valor),0);
+    const gtp=mor+cde+dap;
+    const pvm=gtp*(1+num(S.mlm)/100);
+    const impD=num(S.imp)/100;
+    const piso=impD<1?pvm/(1-impD):NaN;
+    const temRF0=PILARES.find(p=>p.id==='p3').svcs.some(v=>S.sv[v[0]]);
+    const ganho=temRF0?Math.max(0,num(S.debSem)-num(S.debCom)):0;
+    const valor=ganho*num(S.captura)/100;
+    $('rfOff').hidden=temRF0;
+    /* tabela por pilar */
+    const fPiso=x=>impD<1?x*(1+num(S.riscoPct)/100)*(1+cda)*(1+num(S.mlm)/100)/(1-impD):NaN;
+    let tabela=0; const prc={}; const temRF=PILARES.find(p=>p.id==='p3').svcs.some(v=>S.sv[v[0]]);
+    PILARES.forEach(p=>{ if(p.id==='g') return; const has=p.svcs.some(v=>S.sv[v[0]]), pr=has?num(S.pp[p.id]):0; tabela+=pr; if(has) prc[p.id]=pr;
+      const ps=$('psum-'+p.id), pm=$('pm-'+p.id), pi=fPiso(pMod[p.id]||0);
+      if(ps) ps.textContent=has?`${p.svcs.filter(v=>S.sv[v[0]]).length} serviço(s) · ${fmtMin(pMin[p.id]||0)}`:'nenhum serviço marcado';
+      if(pm) pm.innerHTML=has?`Piso ${brl(pi)}`+(pr>0?` · <b style="color:${pr<pi?'#f3a58c':'#9fe0bd'}">${(pr/pi).toLocaleString('pt-BR',{maximumFractionDigits:1})}× o piso</b>`:' · informe o preço'):'';
+      });
+    const acomp=S.sv.g3?num(S.pp.g):0; tabela+=acomp;
+    const gPiso=$('psum-g'); if(gPiso) gPiso.textContent=(pMin.g?fmtMin(pMin.g)+' · ':'')+'entra no piso do caso';
+    $('oTab').textContent=tabela>0?brl(tabela):'–';
+    const opts={tabela:tabela,tabelaExito:tabela>0?tabela+valor:0,livre:num(S.livre)};
+    let base=opts[S.pos]; if(!(base>0)) base=0;
+    const exInc=S.pos==='tabelaExito'?valor:0;
+    if(prc.p3!==undefined) prc.p3+=exInc;
+    const somaTab=Object.values(prc).reduce((a,b)=>a+b,0)+acomp;
+    const k=somaTab>0?base/somaTab:0; /* personalizado escala a tabela */
+    const dsc=Math.min(50,Math.max(0,num(S.desc)))/100;
+    const fin=Math.round(base*(1-dsc));
+    let impV=fin*impD;
+    let lucro=fin-impV-gtp; const lucroPac=lucro;
+    const reemb=S.reemb.reduce((a,r)=>a+num(r.valor),0);
+    /* propostas */
+    const ordem=['p1','p2','p3','p4'].filter(x=>prc[x]!==undefined);
+    const P1={nome:'Pacote completo',pils:ordem,bruto:Math.round(base),total:fin,crono:cronograma(fin,ordem.map(x=>[x,prc[x]*k*(1-dsc)]))};
+    const grp=g=>{ const ps=ordem.filter(x=>propDe(x)===g); if(!ps.length) return null; const tot=Math.round(ps.reduce((a,x)=>a+prc[x]*k,0)+acomp*k);
+      return {pils:ps,total:tot,crono:cronograma(tot,ps.map(x=>[x,prc[x]*k]))}; };
+    const P2=grp('2'), P3=grp('3');
+    const modTot=Object.values(pMod).reduce((a,b)=>a+b,0)||1;
+    const share=ps=>Math.min(1,(ps.reduce((a,x)=>a+(pMod[x]||0),0)+(pMod.g||0))/modTot);
+    let esc=S.escolha||''; if(['2','3','23'].includes(esc)&&!(P2&&P3)) esc='';
+    const ESCN={'1':'Proposta 01 · pacote completo','2':'Proposta 02 · contrato por etapa','3':'Proposta 03 · contrato por etapa','23':'Propostas 02 e 03 · contratos separados'};
+    let vend=fin, shr=1;
+    if(esc==='2'){vend=P2.total;shr=share(P2.pils);} else if(esc==='3'){vend=P3.total;shr=share(P3.pils);} else if(esc==='23'){vend=P2.total+P3.total;}
+    impV=vend*impD; lucro=vend-impV-gtp*shr; const pisoV=piso*shr;
+    R={folha,cda,horas,ctmod,risco,mor,dap,cde,gtp,pvm,piso,ganho,valor,fin,base,dsc,impV,lucro,reemb,tabela,acomp,exInc,P1,P2,P3,temRF:temRF0,esc,vend};
+
+    $('oFolha').textContent=brl(folha);
+    $('oCDA').textContent=pct(cda);
+    const cm=$('cdaMsg');
+    $('oDesp').textContent=brl(despMes);
+    $('cFolha').textContent=brl(folha);$('cDesp').textContent=brl(despMes);$('cCDA').textContent=pct(cda);$('cPess').textContent=E.equipe.length;
+    $('eTotal').textContent=brl(folha+despMes);$('eFolha').textContent=brl(folha);$('eDesp').textContent=brl(despMes);
+    $('eHoras').textContent=horasEq.toLocaleString('pt-BR',{maximumFractionDigits:1})+' h';
+    $('eHora').textContent=horasEq>0?brl2((folha+despMes)/horasEq):'–';
+    $('eCDA').textContent=pct(cda);
+    const mx=E.desp.reduce((m,d)=>mensal(d)>(m?mensal(m):0)?d:m,null);
+    $('eMaior').textContent=mx&&mensal(mx)>0?`${mx.item} · ${brl(mensal(mx))}`:'–';
+    if(folha>0&&despMes>0){cm.hidden=false;
+      if(cda>0.45){cm.className='banner b-crit';cm.textContent='CDA acima de 45%. Suas despesas fixas pesam muito sobre a produção, ou o custo da sua hora está baixo demais. Revise antes de precificar.';}
+      else if(cda<0.15){cm.className='banner b-info';cm.textContent='CDA abaixo de 15%. Confira se todas as despesas fixas entraram, inclusive as anuais divididas por 12.';}
+      else {cm.className='banner b-ok';cm.textContent='CDA em faixa saudável. A referência do método fica perto de 30%.';}
+    } else cm.hidden=true;
+
+    $('oHoras').textContent=fmtMin(horas*60);
+    $('oCTMOD').textContent=brl(ctmod);
+    $('oMOR').textContent=brl(mor);
+    $('oDAP').textContent=brl(dap);
+    $('oGTP').textContent=brl(gtp);
+    $('oPiso').textContent=brl(piso);
+    $('fPiso').textContent=`(${brl(ctmod)} + risco ${brl(risco)} + custos ${brl(cde)} + rateio ${brl(dap)}) × (1 + ${num(S.mlm)}%) ÷ (1 − ${num(S.imp)}%) = ${brl(piso)}`;
+    const im=$('impMsg');
+    if(impD>0){im.hidden=false;im.className='banner b-info';
+      const errado=pvm*(1+impD), sobra=errado*(1-impD);
+      im.innerHTML=`Imposto por dentro. Se você só somasse ${num(S.imp)}% ao preço (${brl(errado)}), sobrariam ${brl(sobra)} depois da nota, menos que o seu mínimo de ${brl(pvm)}.`;}
+    else im.hidden=true;
+
+    $('oGanho').textContent=brl(ganho);
+    $('oValor').textContent=brl(valor);
+
+    /* cards */
+    $('pcTab').textContent=tabela>0?brl(tabela):'Preencha no item 3';$('pcTabEx').textContent=tabela>0?brl(tabela+valor):'Preencha no item 3';
+    $('pcTabExD').textContent=valor>0?`Tabela + ${num(S.captura)}% da economia (${brl(valor)})`:'Informe a economia no item 7';
+    $('pcLivre').textContent=num(S.livre)>0?brl(num(S.livre)):'Informe';
+    $('pcTabExD').textContent=!temRF0?'Sem serviço da Receita Federal':valor>0?`Tabela + ${num(S.captura)}% da economia (${brl(valor)})`:'Informe a economia no item 7';
+    /* entrada e propostas */
+    document.querySelectorAll('#segEnt button').forEach(b=>b.classList.toggle('on',b.dataset.e===S.entMode));
+    $('entRWrap').hidden=S.entMode!=='r'; $('entPWrap').hidden=S.entMode!=='p';
+    $('assign').innerHTML=ordem.length?ordem.map(x=>`<label>${PNOME[x]} <select data-as="${x}"><option value="2"${propDe(x)==='2'?' selected':''}>Proposta 02</option><option value="3"${propDe(x)==='3'?' selected':''}>Proposta 03</option></select></label>`).join(''):'<span class="hint">Marque os serviços no item 3.</span>';
+    const card=(n,t,sc,pp,main,extra,id)=>`<div class="prp${main?' main':''}${esc&&(esc===id||(esc==='23'&&id!=='1'))?' esc':esc?' dim':''}" data-esc="${id}" role="button" tabindex="0" aria-label="Escolher ${n}"><div class="prp-h"><div class="k">${n}</div><div class="nm">${t}</div><div class="sc">${sc}</div></div><div class="prp-v"><span class="badge">✓ Escolhida pelo cliente</span>${brl(pp.total)}${extra||''}</div><table>${pp.crono.map(c=>`<tr><td>${c[0]}</td><td class="r">${brl(c[1])}</td></tr>`).join('')}</table></div>`;
+    let pb='';
+    if(fin>0){
+      pb+=card('Proposta 01 · recomendada','Pacote completo',ordem.map(x=>PNOME[x]).join(' + ')+(acomp?' + acompanhamento':''),P1,true,dsc>0?`<small>de ${brl(base)} por ${brl(fin)} · ${Math.round(dsc*100)}% de desconto</small>`:'<small>sem desconto</small>','1');
+      if(P2&&P3){ pb+=card('Proposta 02','Contrato por etapa',P2.pils.map(x=>PNOME[x]).join(' + ')+(acomp?' + acompanhamento':''),P2,false,'<small>sem desconto</small>','2');
+                  pb+=card('Proposta 03','Contrato por etapa',P3.pils.map(x=>PNOME[x]).join(' + ')+(acomp?' + acompanhamento':''),P3,false,'<small>sem desconto</small>','3'); }
+      else pb+=`<div class="banner b-info" style="margin:0">Para gerar as Propostas 02 e 03, coloque pelo menos um pilar em cada uma.</div>`;
+    }
+    $('propBox').innerHTML=pb;
+    document.querySelectorAll('#segEsc button').forEach(b=>{const on=b.dataset.esc===esc;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);b.disabled=['2','3','23'].includes(b.dataset.esc)&&!(P2&&P3);});
+    document.querySelectorAll('#posCards button').forEach(b=>b.classList.toggle('on',b.dataset.p===S.pos));
+    $('livreWrap').hidden=S.pos!=='livre';
+
+    const pm=$('posMsg');
+    if(!(fin>0)){pm.className='banner b-info';pm.textContent='Preencha o valor da opção escolhida para ver o preço.';}
+    else if(fin<piso-0.5){pm.className='banner b-crit';pm.textContent=`Este preço fica ${brl(piso-fin)} abaixo do seu piso. Você paga para trabalhar neste caso. Suba o preço, reduza horas delegando, ou recuse.`;}
+    else if(fin<piso*1.3){pm.className='banner b-opp';pm.textContent=`Preço acima do piso, mas com margem apertada: lucro de ${brl(lucroPac)} no pacote. Revise os tempos do item 3 ou o preço dos pilares.`;}
+    else {pm.className='banner b-ok';pm.textContent=`Preço acima do piso, com lucro de ${brl(lucroPac)} no pacote completo.`+(ganho>0?` O cliente ainda fica com ${brl(ganho-fin)} de economia líquida.`:'');}
+
+    /* régua */
+    const pts=[piso,tabela>0?tabela:null,fin>0?fin:null].filter(v=>v!=null&&isFinite(v));
+    const max=Math.max(...pts,1)*1.12;
+    const pos=v=>Math.min(100,Math.max(0,v/max*100));
+    const setMk=(id,v)=>{const m=$(id);if(v>0&&isFinite(v)){m.hidden=false;m.style.left=pos(v)+'%';}else m.hidden=true;};
+    setMk('mkPiso',piso);setMk('mkValor',tabela);setMk('mkFinal',fin);
+    $('rZone').style.width=pos(piso)+'%';
+    const labs=[['Piso',piso],['Tabela',tabela],['Pacote',fin]].filter(x=>x[1]>0&&isFinite(x[1])).sort((a,b)=>a[1]-b[1]);
+    let lastX=-100;
+    $('rLabels').innerHTML=labs.map(([n,v])=>{let x=pos(v);if(x-lastX<16)x=lastX+16;x=Math.min(x,94);x=Math.max(x,6);lastX=x;return `<span style="left:${x}%">${n}<b>${brl(v)}</b></span>`;}).join('');
+
+    /* resumo */
+    $('sK').textContent=esc?'Fechado · '+ESCN[esc]:'Proposta 01 · pacote completo';
+    $('sFinal').textContent=vend>0?brl(vend):'–';
+    const nomes={tabela:'Sua tabela',tabelaExito:`Tabela + êxito de ${num(S.captura)}% da economia`,livre:'Preço personalizado'};
+    $('sPos').textContent=esc?(esc==='1'?`Pacote com ${Math.round(dsc*100)}% de desconto`:'Contratação por etapa, sem desconto')+' · '+(nomes[S.pos]||''):'Cliente ainda não escolheu · '+(nomes[S.pos]||'')+(dsc>0?` · ${Math.round(dsc*100)}% de desconto de pacote`:'');
+    const pill=$('sPill');
+    if(!(vend>0)){pill.className='pill mid';pill.textContent='Aguardando dados';}
+    else if(vend<pisoV-0.5){pill.className='pill bad';pill.textContent='Abaixo do piso';}
+    else if(vend<pisoV*1.3){pill.className='pill mid';pill.textContent='Margem apertada';}
+    else {pill.className='pill good';pill.textContent='Margem saudável';}
+    $('sPiso').textContent=brl(pisoV);$('sImp').textContent=brl(impV);$('sGTP').textContent=brl(gtp*shr);
+    $('sLucro').textContent=brl(lucro);
+    $('sMult').textContent=(pisoV>0&&vend>0)?(vend/pisoV).toLocaleString('pt-BR',{maximumFractionDigits:1})+'×':'–';
+    const lh=horas>0?(vend-impV-cde*shr)/(horas*shr):NaN;
+    $('sHora').textContent=horas>0&&vend>0?brl(lh):'–';
+    $('sGanho').textContent=ganho>0?brl(ganho):'–';
+    const roi=$('sROI');roi.textContent=(ganho>0&&vend>0)?(ganho/vend).toLocaleString('pt-BR',{maximumFractionDigits:1})+'×':'–';
+    roi.className='v'+((ganho>0&&vend>0)?(ganho/vend>=3?' pos':''):'');
+    $('sInvest').textContent=brl(vend+reemb);
+
+    renderMeta();
+    $('btnSalvarCt').disabled=!esc; $('ctMsg').textContent=esc?'Grava o contrato com checklist, cronograma de pagamento e custos.':'Marque antes a proposta escolhida pelo cliente.';
+    renderProp();
+    save();
+  }
+
+  function renderProp(){
+    const r=R, L=[], B=x=>brl(x), hoje=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+    const pils=PILARES.filter(p=>p.id!=='g'&&p.svcs.some(v=>S.sv[v[0]]));
+    const linha='────────────────────────────────────────';
+    L.push('[INSERIR LOGOMARCA]');
+    L.push('');
+    L.push(`PROPOSTA COMERCIAL Nº [inserir número]/${new Date().getFullYear()}`);
+    L.push(`Regularização de imóvel${pils.length?': '+pils.map(p=>p.nome).join(', '):''}`);
+    L.push('');
+    L.push('[INSERIR SEU NOME OU RAZÃO SOCIAL]');
+    L.push('[Engenheiro(a) civil / Arquiteto(a) e urbanista] · CREA/CAU nº [inserir número]');
+    L.push('CNPJ: [inserir CNPJ]');
+    L.push('WhatsApp: [inserir telefone] · E-mail: [inserir e-mail]');
+    L.push('Instagram / site: [inserir @ ou endereço do site]');
+    L.push(`[Inserir cidade/UF], ${hoje}`);
+    L.push(linha);
+    L.push('PARA');
+    L.push(`Cliente: ${S.cliente||'(inserir nome completo)'}`);
+    L.push('CPF/CNPJ: [inserir CPF ou CNPJ]');
+    L.push(`Imóvel: ${S.imovel||'(inserir endereço completo)'}`);
+    L.push(`Área construída: ${num(S.area)>0?num(S.area).toLocaleString('pt-BR')+' m²':'(inserir área construída)'}`);
+    L.push('Matrícula nº [inserir número] · Cartório de Registro de Imóveis de [inserir cidade]');
+    L.push('Inscrição imobiliária (IPTU): [inserir número]');
+    L.push(linha);
+    let n=1;
+    L.push(`${n++}. APRESENTAÇÃO`);
+    L.push('[Inserir 2 ou 3 linhas sobre você: formação, anos de experiência e quantos imóveis já regularizou.]');
+    L.push('Esta proposta apresenta o escopo, o investimento e as condições para regularizar o imóvel acima, deixando-o apto para venda, financiamento bancário e segurança patrimonial.');
+    L.push('');
+    L.push(`${n++}. SITUAÇÃO ATUAL E OBJETIVO`);
+    L.push('[Inserir o diagnóstico do imóvel: o que está irregular hoje e o que o cliente quer fazer com ele (vender, financiar, inventariar, ampliar).]');
+    L.push('');
+    L.push(`${n++}. ESCOPO DOS SERVIÇOS`);
+    pils.forEach(p=>{ L.push(`${p.k} · ${p.nome}`); p.svcs.filter(v=>S.sv[v[0]]).forEach(v=>L.push(`   • ${v[2]}`)); });
+    const gs=PILARES.find(p=>p.id==='g').svcs.filter(v=>S.sv[v[0]]);
+    if(gs.length){ L.push('Atendimento e gestão do caso'); gs.forEach(v=>L.push(`   • ${v[2]}`)); }
+    L.push('');
+    if(r.temRF&&r.ganho>0){
+      L.push(`${n++}. ECONOMIA NO INSS DA OBRA (RECEITA FEDERAL)`);
+      L.push(`INSS estimado sem estratégia: ${B(num(S.debSem))}`);
+      L.push(`INSS estimado com a estratégia proposta: ${B(num(S.debCom))}`);
+      L.push(`Economia estimada: ${B(r.ganho)}`);
+      L.push('Valores calculados na simulação técnica. O valor definitivo depende da aferição oficial no SERO.');
+      L.push('');
+    }
+    L.push(`${n++}. INVESTIMENTO E FORMA DE PAGAMENTO`);
+    L.push(r.esc?'O pagamento acontece na assinatura do contrato e no protocolo da documentação em cada órgão.':'Você pode contratar o pacote completo ou contratar por etapas. O pagamento acontece na assinatura do contrato e no protocolo da documentação em cada órgão.');
+    L.push('');
+    const bloco=(tit,P,obs)=>{ L.push(tit); if(obs) L.push(obs); L.push(`Valor total: ${B(P.total)}`); P.crono.forEach(c=>L.push(`   • ${c[0]}: ${B(c[1])}`)); L.push(''); };
+    if(r.esc&&r.fin>0){
+      L.push('Proposta escolhida pelo cliente:'); L.push('');
+      if(r.esc==='1') bloco(`PROPOSTA 01 · PACOTE COMPLETO`,r.P1,r.dsc>0?`De ${B(r.base)} por ${B(r.fin)}, com ${Math.round(r.dsc*100)}% de desconto por contratar todas as etapas juntas.`:'');
+      if(r.esc==='2'||r.esc==='23') bloco(`PROPOSTA 02 · ${r.P2.pils.map(x=>PNOME[x]).join(' + ').toUpperCase()}`,r.P2,'Contratação por etapa.');
+      if(r.esc==='3'||r.esc==='23') bloco(`PROPOSTA 03 · ${r.P3.pils.map(x=>PNOME[x]).join(' + ').toUpperCase()}`,r.P3,'Contratação por etapa.');
+      if(r.esc==='23') L.push(`Total das duas propostas: ${B(r.vend)}`);
+      const temP3=r.esc==='1'||(r.esc==='2'&&r.P2.pils.includes('p3'))||(r.esc==='3'&&r.P3.pils.includes('p3'))||r.esc==='23';
+      if(r.exInc>0&&temP3) L.push(`O valor da Receita Federal inclui honorário de êxito de ${num(S.captura)}% sobre a economia estimada no INSS da obra (${B(r.exInc)}).`);
+      if(r.acomp>0) L.push(`O acompanhamento dos protocolos nos sistemas dos órgãos está incluído (${B(r.acomp)} por contrato).`);
+      L.push('Formas de pagamento: Pix, transferência ou boleto. Chave Pix / dados bancários: [inserir].');
+      L.push('Nota fiscal emitida em nome do contratante.');
+      L.push('');
+    }
+    else if(r.P1&&r.fin>0){
+      bloco(`PROPOSTA 01 · PACOTE COMPLETO (recomendada)`,r.P1,r.dsc>0?`De ${B(r.base)} por ${B(r.fin)}, com ${Math.round(r.dsc*100)}% de desconto por contratar todas as etapas juntas.`:'');
+      if(r.P2&&r.P3){
+        bloco(`PROPOSTA 02 · ${r.P2.pils.map(x=>PNOME[x]).join(' + ').toUpperCase()}`,r.P2,'Contratação por etapa, sem desconto.');
+        bloco(`PROPOSTA 03 · ${r.P3.pils.map(x=>PNOME[x]).join(' + ').toUpperCase()}`,r.P3,'Contratação por etapa, sem desconto.');
+      }
+      if(r.exInc>0) L.push(`Os valores com Receita Federal incluem honorário de êxito de ${num(S.captura)}% sobre a economia estimada no INSS da obra (${B(r.exInc)}).`);
+      if(r.acomp>0) L.push(`O acompanhamento dos protocolos nos sistemas dos órgãos está incluído (${B(r.acomp)} por contrato).`);
+      L.push('Formas de pagamento: Pix, transferência ou boleto. Chave Pix / dados bancários: [inserir].');
+      L.push('Nota fiscal emitida em nome do contratante.');
+      L.push('');
+    }
+    const xs=S.reemb.filter(x=>num(x.valor)>0);
+    if(xs.length){
+      L.push(`${n++}. TAXAS, EMOLUMENTOS E TRIBUTOS (pagos pelo cliente diretamente aos órgãos)`);
+      REEMB_CATS.forEach(c=>{ const ys=xs.filter(x=>x.cat===c); if(!ys.length) return; L.push(c); ys.forEach(x=>L.push(`   • ${x.item}: ${B(num(x.valor))} (estimado)`)); });
+      L.push(`Total estimado: ${B(r.reemb)}`);
+      L.push('Esses valores não fazem parte dos honorários. Seguem as tabelas vigentes de cada órgão na data do pagamento.');
+      if(r.fin>0) L.push(r.esc?`Investimento total estimado: ${B(r.vend+r.reemb)}`:`Investimento total estimado com a Proposta 01: ${B(r.fin+r.reemb)}`);
+      L.push('');
+    }
+    L.push(`${n++}. PRAZOS`);
+    L.push('Início dos trabalhos: em até [inserir] dias úteis após a assinatura do contrato e o recebimento dos documentos.');
+    L.push('Prazo estimado da etapa técnica: [inserir prazo].');
+    L.push('Os prazos de análise da Prefeitura, da Receita Federal e do Cartório são definidos por cada órgão e não dependem do responsável técnico.');
+    L.push('');
+    L.push(`${n++}. O QUE ESTÁ INCLUÍDO E O QUE NÃO ESTÁ`);
+    L.push(`Incluído: os serviços listados no escopo e até ${num(S.exigInc)} resposta(s) a exigências dos órgãos.${num(S.exigExtra)>0?` Cada exigência adicional: ${B(num(S.exigExtra))}.`:''}`);
+    L.push('Não incluído: taxas, emolumentos, tributos e multas dos órgãos; obras ou adequações físicas no imóvel; projetos e serviços não listados no escopo; [inserir outros itens].');
+    L.push('');
+    L.push(`${n++}. DOCUMENTOS QUE O CLIENTE DEVE FORNECER`);
+    L.push('   • Documento de identidade e CPF dos proprietários');
+    L.push('   • Certidão de matrícula atualizada ou escritura do imóvel');
+    L.push('   • Carnê do IPTU');
+    if(r.temRF) L.push('   • Procuração eletrônica no e-CAC para o responsável técnico');
+    L.push('   • [Inserir outros documentos do caso]');
+    L.push('');
+    L.push(`${n++}. VALIDADE`);
+    L.push('Esta proposta é válida por [inserir] dias a partir da data de emissão.');
+    L.push(linha);
+    L.push('ACEITE');
+    L.push(r.esc?`Declaro que li e aceito a ${r.esc==='23'?'Proposta 02 e a Proposta 03':'Proposta 0'+r.esc} nas condições acima.`:'Declaro que li e aceito a Proposta [01 / 02 / 03] nas condições acima.');
+    L.push('');
+    L.push('_______________________________________');
+    L.push(`${S.cliente||'(inserir nome completo)'} · Contratante`);
+    L.push('Data: ____/____/______');
+    L.push('');
+    L.push('_______________________________________');
+    L.push('[Inserir seu nome] · CREA/CAU nº [inserir número]');
+    $('propTxt').textContent=L.join('\n');
+  }
+
+  $('btnCopy').addEventListener('click',()=>{
+    const txt=$('propTxt').textContent;
+    const fallback=()=>{const sel=window.getSelection();const rg=document.createRange();rg.selectNodeContents($('propTxt'));sel.removeAllRanges();sel.addRange(rg);toast('Texto selecionado. Use Ctrl+C ou Cmd+C.');};
+    try{ navigator.clipboard.writeText(txt).then(()=>toast('Resumo copiado'),fallback); }catch(e){ fallback(); }
+  });
+
+  let armed=false;
+  $('btnReset').addEventListener('click',function(){
+    if(!armed){armed=true;this.textContent='Confirmar: apagar o exemplo';this.classList.add('danger');setTimeout(()=>{armed=false;this.textContent='Começar do zero';this.classList.remove('danger');},4000);return;}
+    S=clone(ZERO);S._edited=true;$('exBar').hidden=true;boot();toast('Caso zerado. Seu escritório foi mantido.');
+  });
+
+  /* ===================== AJUDA (?) ===================== */
+  function q(t){ return `<button type="button" class="q" data-tip="${esc(t)}" aria-label="Ajuda">?</button>`; }
+  const tipBox=document.createElement('div'); tipBox.className='tipbox'; tipBox.hidden=true; tipBox.setAttribute('role','tooltip'); document.body.appendChild(tipBox);
+  document.addEventListener('click',e=>{ const b=e.target.closest('.q');
+    if(b){ e.preventDefault(); e.stopPropagation(); if(tipBox._b===b&&!tipBox.hidden){tipBox.hidden=true;return;}
+      tipBox.textContent=b.dataset.tip; tipBox.hidden=false; tipBox._b=b; const r=b.getBoundingClientRect();
+      tipBox.style.top=(r.bottom+window.scrollY+6)+'px'; tipBox.style.left=Math.max(8,Math.min(r.left+window.scrollX-130,document.documentElement.clientWidth-300))+'px'; return; }
+    if(!e.target.closest('.tipbox')) tipBox.hidden=true; },true);
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') tipBox.hidden=true; });
+  const TIPS={
+    cArea:'Área construída total do imóvel, como consta ou vai constar no projeto. Aparece só na proposta.',
+    riscoPct:'Horas extras para cobrir exigências, retrabalho e espera de órgão. Baixo 10%, médio 20%, alto 35%.',
+    exigInc:'Quantas respostas a exigências (comunique-se, nota devolutiva) já estão no preço. Acima disso você cobra o valor adicional.',
+    exigExtra:'Quanto você cobra por cada exigência além das incluídas. Vai para a proposta e protege a sua margem.',
+    mlm:'Lucro mínimo da empresa sobre o gasto total do caso. Não é o seu salário: o pró-labore já está no custo da hora.',
+    imp:'Alíquota de imposto sobre a nota fiscal de serviço (Simples Nacional, lucro presumido ou carnê-leão). Confirme com seu contador.',
+    debSem:'Valor do INSS da obra calculado na Simuladora ELO sem aplicar nenhuma estratégia.',
+    debCom:'Valor do INSS da obra na Simuladora ELO depois de aplicar a estratégia (decadência, redução legal, fator de ajuste). Use 0 se zerar.',
+    captura:'Percentual da economia de INSS que você cobra como êxito. Entre 8% e 12% deixa o cliente com retorno claro.',
+    livre:'Valor total que você quer cobrar no pacote, antes do desconto. Os pilares são ajustados na mesma proporção.',
+    desc:'Desconto só para quem fecha o pacote completo (Proposta 01). As Propostas 02 e 03 saem sem desconto.',
+    entR:'Valor pago na assinatura do contrato. Em contratos separados (02 e 03), cada um tem a sua entrada.',
+    entP:'Percentual do contrato pago na assinatura. O restante é dividido entre os protocolos.',
+    mMes:'Escolha o mês para ver o que entrou, o que falta entrar e o resultado.'
+  };
+  function addTips(){ Object.keys(TIPS).forEach(id=>{ const l=document.querySelector(`label[for="${id}"]`); if(l&&!l.querySelector('.q')) l.insertAdjacentHTML('beforeend',' '+q(TIPS[id])); }); }
+
+  /* ===================== CONTRATOS ===================== */
+  const CKEY='elo-contratos-v1';
+  let CT=null; try{ CT=JSON.parse(localStorage.getItem(CKEY)||'null'); }catch(e){}
+  const seedCT=!CT; if(!CT||!Array.isArray(CT.list)) CT={seq:0,list:[]};
+  function saveC(){ try{ localStorage.setItem(CKEY,JSON.stringify(CT)); }catch(e){} }
+  const PST=[['nao','Não iniciado'],['doc','Aguardando documentos do cliente'],['elab','Em elaboração técnica'],['prot','Protocolado · em análise no órgão'],['exig','Em exigência do órgão'],['concl','Concluído']];
+  const PSTN=Object.fromEntries(PST), PSTC={nao:'#8a95a1',doc:'#b8761a',elab:'#264a6b',prot:'#0f6f6a',exig:'#b24a25',concl:'#1d7a4e'};
+  const CST=[['ativo','Em andamento'],['pausado','Pausado'],['concluido','Concluído'],['cancelado','Cancelado']], CSTN=Object.fromEntries(CST);
+  const PARC=[['prev','Prevista'],['lib','Liberada: cobrar'],['rec','Recebida']];
+  const PRZ={p1:30,p2:45,p3:30,p4:90};
+  const PNOMEG=Object.assign({g:'Atendimento e gestão'},PNOME);
+  const OPENC=new Set();
+  function isoLocal(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  const hoje=()=>isoLocal(new Date());
+  function addDias(iso,n){ const t=new Date(iso+'T12:00:00'); t.setDate(t.getDate()+n); return isoLocal(t); }
+  function fmtD(iso){ if(!iso) return '–'; const p=iso.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
+  const MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  function mesN(k){ const p=k.split('-'); return MES[+p[1]-1]+'/'+p[0].slice(2); }
+  function addMes(k,n){ const p=k.split('-'); const d=new Date(+p[0],+p[1]-1+n,1); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
+  function nomePessoa(id){ const p=E.equipe.find(x=>x.id===id); return p?p.nome:'–'; }
+  function pilTot(p){ return p.svcs.reduce((a,s)=>a+s.tasks.reduce((b,k)=>b+num(k.min),0),0); }
+  function pctPil(p){ if(p.status==='concl') return 1; const t=pilTot(p); if(!t) return 0; let d=0; p.svcs.forEach(s=>s.tasks.forEach(k=>{ if(k.done) d+=num(k.min); })); return d/t; }
+  function pctC(c){ if(c.status==='concluido') return 1; let t=0,d=0; c.pils.forEach(p=>{ const x=pilTot(p); t+=x; d+=x*pctPil(p); }); return t?d/t:0; }
+  function autoLib(c){ c.parc.forEach(x=>{ if(x.st!=='prev'||!x.pid) return; const p=c.pils.find(y=>y.pid===x.pid); if(p&&['prot','exig','concl'].includes(p.status)) x.st='lib'; }); }
+  function cobrar(x){ return x.st!=='rec'&&(x.st==='lib'||(x.prev&&x.prev<=hoje())); }
+  function finC(c){ let rec=0,arec=0,cob=0; c.parc.forEach(x=>{ if(x.st==='rec') rec+=num(x.v); else { arec+=num(x.v); if(cobrar(x)) cob+=num(x.v); } }); return {rec,arec,cob}; }
+
+  function criarContrato(silent){
+    const r=R; if(!r||!r.esc){ toast('Marque antes a proposta escolhida pelo cliente.'); return null; }
+    const ass=hoje(); let pids=[], parc=[];
+    const add=(P,pref)=>{ pids=pids.concat(P.pils); P.crono.forEach(cr=>parc.push({d:(pref||'')+cr[0],v:cr[1],pid:cr[2]||'',prev:cr[2]?addDias(ass,PRZ[cr[2]]||30):ass,st:cr[2]?'prev':'lib',rec:''})); };
+    if(r.esc==='1') add(r.P1,''); if(r.esc==='2'||r.esc==='23') add(r.P2,r.esc==='23'?'Proposta 02 · ':''); if(r.esc==='3'||r.esc==='23') add(r.P3,r.esc==='23'?'Proposta 03 · ':'');
+    const usa=pids.concat(['g']); const pils=[];
+    usa.forEach(pid=>{ const svcs=Object.keys(SVC).filter(id=>S.sv[id]&&SVC[id].pil.id===pid).map(id=>({nome:SVC[id].nome,tasks:tarefasDe(id).filter(t=>t.on).map(t=>({n:t.nome||'Tarefa',min:num(t.min),quem:t.quem,done:false}))}));
+      if(svcs.length) pils.push({pid,status:'nao',svcs}); });
+    const min=pils.reduce((a,p)=>a+pilTot(p),0);
+    const catOk={'Prefeitura':pids.includes('p1')||pids.includes('p2'),'Receita Federal':pids.includes('p3'),'Cartório':pids.includes('p4')||pids.includes('p1'),'Outros':true};
+    const c={id:'c'+Date.now(),num:++CT.seq,cliente:S.cliente||'(inserir nome do cliente)',imovel:S.imovel||'',area:S.area||'',ass,esc:r.esc,proposta:({'1':'Proposta 01 · pacote completo','2':'Proposta 02','3':'Proposta 03','23':'Propostas 02 e 03'})[r.esc],
+      valor:r.vend,horas:min/60*(1+num(S.riscoPct)/100),pils,parc,cde:S.cde.map(x=>({item:x.item,valor:num(x.valor)})),
+      taxas:S.reemb.filter(x=>num(x.valor)>0&&catOk[x.cat]).map(x=>({cat:x.cat,item:x.item,valor:num(x.valor)})),
+      resp:E.equipe[0]?E.equipe[0].id:'',status:'ativo',prox:'Enviar lista de documentos ao cliente',obs:''};
+    CT.list.unshift(c); saveC();
+    if(!silent){ OPENC.add(c.id); renderCtr(); renderMeta(); toast(`Contrato #${String(c.num).padStart(3,'0')} salvo`); showTab('ctr'); window.scrollTo({top:0,behavior:'smooth'}); }
+    return c;
+  }
+  $('btnSalvarCt').onclick=()=>criarContrato(false);
+
+  function selO(opts,v){ return opts.map(o=>`<option value="${o[0]}"${o[0]===v?' selected':''}>${o[1]}</option>`).join(''); }
+  function renderCtr(){
+    const f=$('fSt').value, b=($('fBusca').value||'').toLowerCase();
+    let at=0,pcs=0,rec=0,arec=0,cob=0;
+    CT.list.forEach(c=>{ if(c.status==='cancelado') return; const F=finC(c); rec+=F.rec; arec+=F.arec; cob+=F.cob; if(c.status==='ativo'||c.status==='pausado'){at++;pcs+=pctC(c);} });
+    $('kAt').textContent=at; $('kPc').textContent=at?pct(pcs/at):'–'; $('kRec').textContent=brl(rec); $('kArec').textContent=brl(arec); $('kCob').textContent=brl(cob);
+    const lst=CT.list.filter(c=>(f==='todos'||(f==='ativos'?(c.status==='ativo'||c.status==='pausado'):c.status===f))&&(!b||(c.cliente+' '+c.imovel).toLowerCase().includes(b)));
+    $('bkpInfo').textContent=`${CT.list.length} contrato(s) salvos neste navegador.`+(CT.lastBkp?` Último backup: ${fmtD(CT.lastBkp)}.`:' Nenhum backup baixado ainda.');
+    if(!lst.length){ $('ctrList').innerHTML=`<div class="banner b-info">${CT.list.length?'Nenhum contrato neste filtro.':'Nenhum contrato ainda. Feche uma proposta no item 8 da aba Precificar caso e clique em "Salvar como contrato".'}</div>`; return; }
+    $('ctrList').innerHTML=lst.map(c=>{
+      const P=pctC(c), F=finC(c), op=OPENC.has(c.id), N=String(c.num).padStart(3,'0');
+      let h=`<div class="ct st-${c.status}" data-c="${c.id}"><div class="ct-h"><div><div class="n">CONTRATO #${N} · ${esc(c.proposta)} · assinado em ${fmtD(c.ass)}</div><div class="cl">${esc(c.cliente)}</div><div class="im">${esc(c.imovel||'(sem endereço)')}</div></div>
+        <div class="vv">${brl(c.valor)}<small><span class="chip" style="background:${c.status==='ativo'?'var(--info-bg)':c.status==='concluido'?'var(--ok-bg)':c.status==='pausado'?'var(--amber-soft)':'var(--line)'};color:var(--graphite)">${CSTN[c.status]}</span></small></div></div>
+        <div class="ct-prog"><div class="bar" role="progressbar" aria-valuenow="${Math.round(P*100)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${Math.round(P*100)}%"></i></div><b>${Math.round(P*100)}%</b></div>
+        <div class="ct-pils">${c.pils.map(p=>{ const pp=pctPil(p), cl=p.pid==='g'?'#5b6672':PSTC[p.status]; return `<div class="ct-pil"><div class="t"><span>${PNOMEG[p.pid]}</span><span>${Math.round(pp*100)}%</span></div><div class="s" style="color:${cl}">${p.pid==='g'?'Checklist da equipe':PSTN[p.status]}</div><div class="mb"><i style="width:${Math.round(pp*100)}%;background:${cl}"></i></div></div>`; }).join('')}</div>
+        <div class="ct-f"><span>Recebido <b>${brl(F.rec)}</b> de ${brl(c.valor)}${F.cob>0?` · <span class="cob">Cobrar agora ${brl(F.cob)}</span>`:''}</span><span>Próxima ação: <b>${esc(c.prox||'–')}</b> · ${esc(nomePessoa(c.resp))}</span><button class="btn small" type="button" data-open="${c.id}">${op?'Fechar ▴':'Abrir processo ▾'}</button></div>`;
+      if(op){
+        h+=`<div class="ct-d"><div class="grid">
+          <div class="field"><label>Cliente</label><input data-cf="cliente" value="${esc(c.cliente)}"></div>
+          <div class="field"><label>Imóvel</label><input data-cf="imovel" value="${esc(c.imovel)}"></div>
+          <div class="field"><label>Assinatura do contrato ${q('Data em que o cliente assinou. A parcela de entrada é prevista para esta data.')}</label><input type="date" data-cf="ass" value="${c.ass}"></div>
+          <div class="field"><label>Responsável ${q('Quem da equipe conduz este processo e responde ao cliente.')}</label><select data-cf="resp">${E.equipe.map(p=>`<option value="${p.id}"${p.id===c.resp?' selected':''}>${esc(p.nome)}</option>`).join('')}</select></div>
+          <div class="field"><label>Situação do contrato ${q('Em andamento: processo correndo. Pausado: parado por decisão ou falta do cliente. Concluído: entregue. Cancelado: sai das contas.')}</label><select data-cf="status">${selO(CST,c.status)}</select></div>
+          <div class="field" style="grid-column:1/-1"><label>Próxima ação ${q('O próximo passo concreto deste processo. Ex.: cobrar matrícula atualizada do cliente; responder comunique-se da Prefeitura até 10/11.')}</label><input data-cf="prox" value="${esc(c.prox)}"></div>
+          <div class="field" style="grid-column:1/-1"><label>Observações</label><textarea data-cf="obs">${esc(c.obs)}</textarea></div></div>`;
+        h+=`<h4>Etapas e checklist ${q('Marque cada tarefa concluída. O % do pilar é calculado pelo tempo das tarefas feitas. A situação do órgão diz onde o processo está. Ao marcar Protocolado, a parcela daquele protocolo fica liberada para cobrar.')}</h4>`;
+        c.pils.forEach((p,pi)=>{ h+=`<div class="ct-pd"><div class="ct-pd-h"><span>${PNOMEG[p.pid]} · ${Math.round(pctPil(p)*100)}%</span>${p.pid==='g'?'':`<select data-pst="${pi}" aria-label="Situação no órgão">${selO(PST,p.status)}</select>`}</div>`;
+          p.svcs.forEach((sv,si)=>{ h+=`<div class="ct-sv">${esc(sv.nome)}</div>`+sv.tasks.map((k,ki)=>`<label class="ct-tk${k.done?' done':''}"><input type="checkbox" data-tkd="${pi}.${si}.${ki}"${k.done?' checked':''}><span class="nm">${esc(k.n)}</span><small>${esc(nomePessoa(k.quem))} · ${fmtMin(k.min)}</small></label>`).join(''); });
+          h+=`</div>`; });
+        h+=`<h4>Pagamentos ${q('Prevista: ainda não chegou a hora. Liberada: protocolo feito ou data vencida, pode cobrar. Recebida: dinheiro na conta, informe a data. A data prevista monta o fluxo de caixa.')}</h4><div class="tbl-wrap"><table class="t"><thead><tr><th>Parcela</th><th class="r">Valor</th><th>Previsto para</th><th>Situação</th><th>Recebido em</th></tr></thead><tbody>`+
+          c.parc.map((x,i)=>`<tr><td>${esc(x.d)}</td><td class="r" style="width:120px"><input type="number" min="0" data-pa="${i}.v" value="${x.v}"></td><td style="width:150px"><input type="date" data-pa="${i}.prev" value="${x.prev||''}"></td><td style="width:170px"><select data-pa="${i}.st">${selO(PARC,x.st)}</select></td><td style="width:150px"><input type="date" data-pa="${i}.rec" value="${x.rec||''}"${x.st==='rec'?'':' disabled'}></td></tr>`).join('')+`</tbody></table></div>`;
+        h+=`<h4>Custos diretos reais ${q('O que você realmente pagou para executar este contrato: topografia, deslocamentos, parceiro local. Entra no fluxo de caixa no mês da assinatura.')}</h4><div class="tbl-wrap"><table class="t"><tbody>`+
+          c.cde.map((x,i)=>`<tr><td><input data-cd="${i}.item" value="${esc(x.item)}"></td><td class="r" style="width:140px"><input type="number" min="0" data-cd="${i}.valor" value="${x.valor}"></td><td class="del"><button class="btn x" type="button" data-cddel="${i}" aria-label="Remover">✕</button></td></tr>`).join('')+`</tbody></table></div><div class="btn-row" style="margin-top:6px"><button class="btn small" type="button" data-cdadd="1">+ Custo</button></div>`;
+        if(c.taxas.length) h+=`<h4>Taxas e emolumentos do cliente ${q('Pagos pelo cliente direto aos órgãos. Servem para lembrar a equipe de enviar as guias. Não entram no seu caixa.')}</h4><div class="tbl-wrap"><table class="t"><tbody>`+c.taxas.map(x=>`<tr><td>${esc(x.cat)} · ${esc(x.item)}</td><td class="r">${brl(x.valor)}</td></tr>`).join('')+`</tbody></table></div>`;
+        h+=`<div class="btn-row"><span style="flex:1"></span><button class="btn small danger" type="button" data-cdel="1">Excluir contrato</button></div></div>`;
+      }
+      return h+`</div>`; }).join('');
+  }
+  function ctById(el){ const d=el.closest('[data-c]'); return d?CT.list.find(c=>c.id===d.dataset.c):null; }
+  function ctChanged(){ saveC(); renderCtr(); renderMeta(); }
+  $('fSt').onchange=renderCtr; $('fBusca').oninput=renderCtr;
+  $('ctrList').addEventListener('change',e=>{ const t=e.target, c=ctById(t); if(!c) return; const d=t.dataset;
+    if(d.cf){ c[d.cf]=t.value; if(d.cf==='status'&&t.value==='concluido') c.pils.forEach(p=>{ if(p.pid!=='g') p.status='concl'; }); }
+    else if(d.pst!==undefined){ c.pils[+d.pst].status=t.value; autoLib(c); }
+    else if(d.tkd){ const [a,b2,k]=d.tkd.split('.').map(Number); c.pils[a].svcs[b2].tasks[k].done=t.checked; }
+    else if(d.pa){ const [i,f]=d.pa.split('.'); const x=c.parc[+i]; x[f]=f==='v'?num(t.value):t.value; if(f==='st'&&t.value==='rec'&&!x.rec) x.rec=hoje(); if(f==='st'&&t.value!=='rec') x.rec=''; }
+    else if(d.cd){ const [i,f]=d.cd.split('.'); c.cde[+i][f]=f==='valor'?num(t.value):t.value; }
+    else return;
+    ctChanged(); });
+  const armDel=new Set();
+  $('ctrList').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||b.classList.contains('q')) return; const c=ctById(b); if(!c) return;
+    if(b.dataset.open){ if(OPENC.has(c.id)) OPENC.delete(c.id); else OPENC.add(c.id); renderCtr(); return; }
+    if(b.dataset.cdadd){ c.cde.push({item:'Novo custo',valor:0}); ctChanged(); return; }
+    if(b.dataset.cddel!==undefined){ c.cde.splice(+b.dataset.cddel,1); ctChanged(); return; }
+    if(b.dataset.cdel){ if(!armDel.has(c.id)){ armDel.add(c.id); b.textContent='Confirmar exclusão'; setTimeout(()=>{armDel.delete(c.id); if(b.isConnected) b.textContent='Excluir contrato';},4000); return; }
+      CT.list=CT.list.filter(x=>x!==c); ctChanged(); toast('Contrato excluído'); } });
+
+  /* ---------- fluxo de caixa ---------- */
+  function custoEsc(){ const folha=E.equipe.reduce((a,p)=>a+num(p.custo),0), desp=E.desp.reduce((a,d)=>a+mensal(d),0), h=E.equipe.reduce((a,p)=>a+num(p.horas),0); return {folha,desp,mes:folha+desp,h}; }
+  function fluxoMes(k){ const imp=num(S.imp)/100, H=hoje(), atual=k===H.slice(0,7); let rec=0,arec=0,atr=0,cd=0,novos=0,novosV=0; const cob=[];
+    CT.list.forEach(c=>{ if(c.status==='cancelado') return;
+      if((c.ass||'').slice(0,7)===k){ novos++; novosV+=num(c.valor); cd+=c.cde.reduce((a,x)=>a+num(x.valor),0); }
+      c.parc.forEach(x=>{ if(x.st==='rec'){ if((x.rec||x.prev||'').slice(0,7)===k) rec+=num(x.v); return; }
+        const m=(x.prev||'').slice(0,7);
+        if(cobrar(x)){ if(atual){ atr+=num(x.v); cob.push([c,x]); } else if(m===k&&k>H.slice(0,7)) arec+=num(x.v); }
+        else if(m===k) arec+=num(x.v); }); });
+    return {rec,arec,atr,cd,novos,novosV,cob,imp}; }
+  function renderMeta(){
+    if(!$('mMes').value) $('mMes').value=hoje().slice(0,7);
+    const k=$('mMes').value, CE=custoEsc(), F=fluxoMes(k);
+    $('fRec').textContent=brl(F.rec); $('fArec').textContent=brl(F.arec); $('fAtr').textContent=brl(F.atr); $('fCusto').textContent=brl(CE.mes); $('fCd').textContent=brl(F.cd);
+    $('fNovos').textContent=`${F.novos} · ${brl(F.novosV)}`;
+    const impR=F.rec*F.imp, res=F.rec-impR-F.cd-CE.mes, prev=(F.rec+F.arec+F.atr)*(1-F.imp)-F.cd-CE.mes;
+    $('aRes').textContent=brl(res); $('aRes').style.color=res>=0?'#9fe0bd':'#f3a58c';
+    $('aRec').textContent=brl(F.rec); $('aImp').textContent=brl(impR); $('aCd').textContent=brl(F.cd); $('aEsc').textContent=brl(CE.mes); $('aPrev').textContent=brl(prev);
+    $('aFalta').textContent=res>=0?'R$ 0':brl(-res); $('aHora').textContent=CE.h>0?brl2(CE.mes/CE.h):'–';
+    const fm=$('fMsg');
+    if(!CT.list.length){ fm.className='banner b-info'; fm.textContent='Nenhum contrato salvo ainda. Feche uma proposta no item 8 da aba Precificar caso e clique em "Salvar como contrato".'; }
+    else if(res>=0){ fm.className='banner b-ok'; fm.textContent=`O recebido em ${mesN(k)} já paga o escritório e sobram ${brl(res)}.`; }
+    else if(prev>=0){ fm.className='banner b-opp'; fm.textContent=`Ainda faltam ${brl(-res)} para pagar ${mesN(k)}. Com o que está a receber e em atraso, o mês fecha com ${brl(prev)}. Priorize a lista Cobrar agora.`; }
+    else { fm.className='banner b-crit'; fm.textContent=`Mesmo recebendo tudo o que está previsto, ${mesN(k)} fecha negativo em ${brl(-prev)}. Feche novos contratos ou antecipe protocolos para liberar parcelas.`; }
+    let rows='',bars=''; const meses=[...Array(6)].map((_,i)=>addMes(k,i)), FS=meses.map(fluxoMes);
+    const mx=Math.max(CE.mes*1.15,...FS.map(x=>x.rec+x.arec+x.atr),1);
+    meses.forEach((m,i)=>{ const x=FS[i], sai=CE.mes+x.cd+(x.rec+x.arec+x.atr)*x.imp, sal=x.rec+x.arec+x.atr-sai;
+      rows+=`<tr><td>${mesN(m)}</td><td class="r">${brl(x.rec)}</td><td class="r">${brl(x.arec+x.atr)}</td><td class="r">${brl(sai)}</td><td class="r" style="color:${sal>=0?'var(--ok)':'var(--red)'};font-weight:700">${brl(sal)}</td></tr>`;
+      bars+=`<div class="fx-row"><span>${mesN(m)}</span><div class="tr"><i class="r" style="width:${x.rec/mx*100}%"></i><i class="a" style="width:${(x.arec+x.atr)/mx*100}%"></i><span class="c" style="left:${CE.mes/mx*100}%"></span></div><b>${brl(x.rec+x.arec+x.atr)}</b></div>`; });
+    $('fTab').innerHTML=rows; $('fBars').innerHTML=bars;
+    const C0=fluxoMes(hoje().slice(0,7)).cob;
+    $('fCob').innerHTML=C0.length?C0.map(([c,x])=>`<tr><td>#${String(c.num).padStart(3,'0')} · ${esc(c.cliente)}</td><td>${esc(x.d)}${x.st==='lib'?` <span class="chip pst-lib">${x.pid?'protocolo feito':'liberada'}</span>`:''}</td><td class="r">${fmtD(x.prev)}</td><td class="r"><b>${brl(x.v)}</b></td></tr>`).join(''):'<tr><td colspan="4" style="color:var(--muted)">Nada para cobrar agora.</td></tr>';
+    const hc=CT.list.filter(c=>c.status==='ativo'||c.status==='pausado').reduce((a,c)=>a+num(c.horas)*(1-pctC(c)),0);
+    $('fHc').textContent=fmtMin(hc*60); $('fCap').textContent=fmtMin(CE.h*60); $('fMeses').textContent=CE.h>0?(hc/CE.h).toLocaleString('pt-BR',{maximumFractionDigits:1}):'–';
+    renderCtrKpiOnly();
+  }
+  function renderCtrKpiOnly(){}
+  $('mMes').addEventListener('change',renderMeta);
+
+  /* ---------- planilha e backup ---------- */
+  async function baixar(filename,data){
+    let dl=null; try{ if(window.claude&&window.claude.use) dl=await window.claude.use('downloads'); }catch(e){}
+    if(dl){ try{ await dl.save({filename,data}); toast('Arquivo pronto'); return true; }catch(e){ if(e&&(e.code==='declined'||e.code==='rate_limited')) return false; } }
+    try{ const blob=data instanceof Blob?data:new Blob([data]); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000); return true; }
+    catch(e){ toast('Não foi possível baixar aqui. Abra a ferramenta no navegador.'); return false; }
+  }
+  $('btnXlsx').onclick=async()=>{
+    if(typeof ExcelJS==='undefined'){ toast('Sem conexão para gerar a planilha. Tente de novo com internet.'); return; }
+    const btn=$('btnXlsx'); btn.disabled=true; btn.textContent='Gerando...';
+    try{
+    const AZ='FF0C447C', GR='FF1F2A37', AM='FFE8A33D', AMS='FFFFF2CC', LN='FFDDE3EA', SOFT='FFF7F9FC', MU='FF5B6672', W='FFFFFFFF';
+    const fill=c=>({type:'pattern',pattern:'solid',fgColor:{argb:c}});
+    const F=o=>Object.assign({name:'Arial',size:10,color:{argb:'FF1B232D'}},o||{});
+    const BR={top:{style:'thin',color:{argb:LN}},bottom:{style:'thin',color:{argb:LN}},left:{style:'thin',color:{argb:LN}},right:{style:'thin',color:{argb:LN}}};
+    const FM={m:'"R$" #,##0.00;[Red]-"R$" #,##0.00',d:'dd/mm/yyyy',p:'0%',n:'#,##0',h:'0.0'};
+    const D=iso=>{ if(!iso) return null; const p=iso.split('-'); return new Date(Date.UTC(+p[0],+p[1]-1,+p[2])); };
+    const N=c=>'#'+String(c.num).padStart(3,'0');
+    const STF={'Em andamento':['FFEEF4FB','FF264A6B'],'Pausado':[AMS,'FF8A5A10'],'Concluído':['FFEAF6EF','FF1D7A4E'],'Cancelado':['FFEDEFF2','FF8A95A1'],
+      'Recebida':['FFEAF6EF','FF1D7A4E'],'Liberada: cobrar':['FFFDEEE9','FFB24A25'],'Prevista':['FFF4F6F9','FF1B232D'],'Sim':['FFEAF6EF','FF1D7A4E'],'Não':['FFF4F6F9','FF8A95A1']};
+    const wb=new ExcelJS.Workbook(); wb.creator='Formação ELO · Piso e Valor'; wb.created=new Date();
+    const hojeF=fmtD(hoje());
+    const pd=wb.addWorksheet('Painel',{properties:{tabColor:{argb:GR}},views:[{showGridLines:false}]});
+    wb.calcProperties.fullCalcOnLoad=true;
+    function novaAba(nome,titulo,sub,larg,cor){
+      const ws=wb.addWorksheet(nome,{properties:{tabColor:{argb:cor||AZ}},views:[{showGridLines:false}]});
+      ws.columns=larg.map(w=>({width:w}));
+      const n=larg.length;
+      ws.mergeCells(1,1,1,n); const t=ws.getCell(1,1); t.value=titulo; t.font=F({size:15,bold:true,color:{argb:W}}); t.fill=fill(GR); t.alignment={vertical:'middle',indent:1}; ws.getRow(1).height=34;
+      ws.mergeCells(2,1,2,n); const s2=ws.getCell(2,1); s2.value=sub; s2.font=F({size:9,italic:true,color:{argb:MU}}); s2.alignment={vertical:'middle',indent:1}; ws.getRow(2).height=20;
+      for(let c=1;c<=n;c++){ ws.getCell(2,c).border={bottom:{style:'medium',color:{argb:AM}}}; }
+      ws.pageSetup={orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:.4,right:.4,top:.5,bottom:.5,header:.2,footer:.2}};
+      ws.headerFooter={oddFooter:'&L&8Formação ELO · Piso e Valor&R&8Página &P de &N'};
+      return ws; }
+    function cab(ws,row,hs){ const r=ws.getRow(row); hs.forEach((h,i)=>{ const c=r.getCell(i+1); c.value=h; c.font=F({bold:true,color:{argb:W},size:9.5}); c.fill=fill(AZ); c.alignment={vertical:'middle',horizontal:'center',wrapText:true}; c.border=BR; }); r.height=32; }
+    function lin(ws,row,vals,tp,zebra){ const r=ws.getRow(row); vals.forEach((v,i)=>{ const c=r.getCell(i+1), t=tp[i]||'t'; c.value=v; c.font=F(); c.border=BR;
+        if(FM[t]) c.numFmt=FM[t]; c.alignment={vertical:'middle',wrapText:t==='w',horizontal:(t==='c'||t==='d'||t==='p')?'center':(FM[t]?'right':'left'),indent:(t==='t'||t==='w')?1:0};
+        if(zebra) c.fill=fill(SOFT);
+        if(typeof v==='string'&&STF[v]&&t==='c'){ c.fill=fill(STF[v][0]); c.font=F({bold:true,color:{argb:STF[v][1]}}); } });
+      r.height=tp.includes('w')?30:20; }
+    function tot(ws,row,cols,label,sumCols,first,last){ const r=ws.getRow(row); for(let i=1;i<=cols;i++){ const c=r.getCell(i); c.fill=fill('FFE7EDF5'); c.border={top:{style:'medium',color:{argb:AZ}},bottom:{style:'thin',color:{argb:LN}}}; c.font=F({bold:true}); }
+      r.getCell(1).value=label; r.getCell(1).alignment={indent:1};
+      sumCols.forEach(([col,fmt])=>{ const L=ws.getColumn(col).letter; const c=r.getCell(col); c.value={formula:`SUBTOTAL(9,${L}${first}:${L}${last})`}; c.numFmt=FM[fmt]; c.alignment={horizontal:'right'}; }); r.height=24; }
+    function valid(ws,ref,list){ ws.dataValidations.add(ref,{type:'list',allowBlank:true,formulae:['"'+list.join(',')+'"'],showErrorMessage:true,errorTitle:'Valor inválido',error:'Escolha um item da lista.'}); }
+    function condStatus(ws,ref,col,first){ const rules=[]; ['Recebida','Liberada: cobrar','Em andamento','Pausado','Concluído','Cancelado','Sim'].forEach(v=>{ const st=STF[v]; rules.push({type:'expression',formulae:[`$${col}${first}="${v}"`],style:{fill:{type:'pattern',pattern:'solid',bgColor:{argb:st[0]}},font:{color:{argb:st[1]},bold:true}}}); });
+      ws.addConditionalFormatting({ref,rules}); }
+
+    const vivos=CT.list.filter(c=>c.status!=='cancelado'), CE=custoEsc(), imp=num(S.imp)/100;
+    /* ---------- CONTRATOS ---------- */
+    const wc=novaAba('Contratos','Contratos e processos',`Gerado em ${hojeF} · Recebido e A receber somam a aba Pagamentos: altere a situação das parcelas lá e os totais se atualizam.`,[9,28,30,12,24,14,15,11,16,14,14,14,18,40,14],AZ);
+    cab(wc,4,['Nº','Cliente','Imóvel','Assinatura','Proposta','Valor do contrato','Situação','Conclusão','Progresso','Recebido','A receber','Cobrar agora','Responsável','Próxima ação','Custos diretos']);
+    let r=5; CT.list.forEach((c,i)=>{ const Fc=finC(c);
+      lin(wc,r,[N(c),c.cliente,c.imovel,D(c.ass),c.proposta,num(c.valor),CSTN[c.status],pctC(c),
+        {formula:`REPT("█",ROUND(H${r}*10,0))&REPT("░",10-ROUND(H${r}*10,0))`,result:'█'.repeat(Math.round(pctC(c)*10))+'░'.repeat(10-Math.round(pctC(c)*10))},
+        {formula:`SUMIFS(Pagamentos!$D:$D,Pagamentos!$A:$A,A${r},Pagamentos!$F:$F,"Recebida")`,result:Fc.rec},
+        {formula:`SUMIFS(Pagamentos!$D:$D,Pagamentos!$A:$A,A${r},Pagamentos!$F:$F,"<>Recebida")`,result:Fc.arec},
+        Fc.cob,nomePessoa(c.resp),c.prox||'',c.cde.reduce((a,x)=>a+num(x.valor),0)],
+        ['c','t','w','d','t','m','c','p','t','m','m','m','t','w','m'],i%2===1);
+      wc.getCell(r,9).font=F({color:{argb:'FF1D7A4E'},size:9}); wc.getCell(r,1).font=F({bold:true,color:{argb:AZ}}); r++; });
+    const lastC=Math.max(5,r-1);
+    tot(wc,r,15,'Total',[[6,'m'],[10,'m'],[11,'m'],[12,'m'],[15,'m']],5,lastC);
+    valid(wc,`G5:G${lastC+200}`,CST.map(x=>x[1])); condStatus(wc,`G5:G${lastC+200}`,'G',5);
+    wc.views=[{state:'frozen',xSplit:2,ySplit:4,showGridLines:false}]; wc.autoFilter={from:{row:4,column:1},to:{row:lastC,column:15}};
+
+    /* ---------- PAGAMENTOS ---------- */
+    const wp=novaAba('Pagamentos','Pagamentos por contrato',`Gerado em ${hojeF} · Mude a Situação para "Recebida" e informe a data: Contratos, Painel e Fluxo de caixa recalculam. Contratos cancelados não aparecem.`,[9,28,50,15,14,17,14],'FF1D7A4E');
+    cab(wp,4,['Nº','Cliente','Parcela','Valor','Previsto para','Situação','Recebido em']);
+    r=5; let zi=0; vivos.forEach(c=>{ c.parc.forEach(x=>{ lin(wp,r,[N(c),c.cliente,x.d,num(x.v),D(x.prev),Object.fromEntries(PARC)[x.st],D(x.rec)],['c','t','w','m','d','c','d'],zi%2===1); wp.getCell(r,1).font=F({bold:true,color:{argb:AZ}}); r++; }); zi++; });
+    const lastP=Math.max(5,r-1);
+    tot(wp,r,7,'Total',[[4,'m']],5,lastP);
+    valid(wp,`F5:F${lastP+300}`,PARC.map(x=>x[1])); condStatus(wp,`F5:F${lastP+300}`,'F',5);
+    wp.addConditionalFormatting({ref:`E5:E${lastP}`,rules:[{type:'expression',formulae:[`AND($F5<>"Recebida",$E5<=TODAY())`],style:{font:{color:{argb:'FFB24A25'},bold:true}}}]});
+    wp.views=[{state:'frozen',xSplit:2,ySplit:4,showGridLines:false}]; wp.autoFilter={from:{row:4,column:1},to:{row:lastP,column:7}};
+
+    /* ---------- FLUXO DE CAIXA ---------- */
+    const wf=novaAba('Fluxo de caixa','Fluxo de caixa do escritório',`Gerado em ${hojeF} · Os campos amarelos são editáveis. Recebido e A receber vêm da aba Pagamentos.`,[14,16,16,17,18,16,15,17],AM);
+    const inp=(row,label,val,fmt)=>{ wf.mergeCells(row,1,row,3); const l=wf.getCell(row,1); l.value=label; l.font=F({bold:true}); l.alignment={indent:1,vertical:'middle'};
+      const v=wf.getCell(row,4); v.value=val; v.numFmt=FM[fmt]; v.fill=fill(AMS); v.font=F({bold:true}); v.border=BR; v.alignment={horizontal:'right'}; };
+    inp(4,'Custo mensal do escritório (equipe + despesas fixas)',Math.round(CE.mes*100)/100,'m'); inp(5,'Imposto sobre a nota',imp,'p');
+    cab(wf,7,['Mês','Recebido','A receber','Total do mês','Custo do escritório','Custos diretos','Impostos','Saldo do mês']);
+    const k0=hoje().slice(0,7); r=8;
+    const arM=m=>vivos.reduce((a,c)=>a+c.parc.filter(x=>x.st!=='rec'&&(x.prev||'').slice(0,7)===m).reduce((b,x)=>b+num(x.v),0),0);
+    [...Array(12)].map((_,i)=>addMes(k0,i-2)).forEach((m,i)=>{ const p=m.split('-'), x=fluxoMes(m), ini=`DATE(${p[0]},${+p[1]},1)`, fim=`EOMONTH(${ini},0)`;
+      const recF=`SUMIFS(Pagamentos!$D:$D,Pagamentos!$F:$F,"Recebida",Pagamentos!$G:$G,">="&${ini},Pagamentos!$G:$G,"<="&${fim})`;
+      const arF=`SUMIFS(Pagamentos!$D:$D,Pagamentos!$F:$F,"<>Recebida",Pagamentos!$E:$E,">="&${ini},Pagamentos!$E:$E,"<="&${fim})`;
+      lin(wf,r,[D(m+'-01'),{formula:recF,result:x.rec},{formula:arF,result:arM(m)},{formula:`B${r}+C${r}`,result:x.rec+arM(m)},{formula:'$D$4',result:CE.mes},x.cd,{formula:`D${r}*$D$5`,result:(x.rec+arM(m))*imp},{formula:`D${r}-E${r}-F${r}-G${r}`,result:(x.rec+arM(m))*(1-imp)-CE.mes-x.cd}],
+        ['c','m','m','m','m','m','m','m'],i%2===1);
+      wf.getCell(r,1).numFmt='mmm/yy'; wf.getCell(r,1).font=F({bold:true}); wf.getCell(r,8).font=F({bold:true});
+      if(m===k0){ for(let cc=1;cc<=8;cc++){ wf.getCell(r,cc).border=Object.assign({},BR,{top:{style:'medium',color:{argb:AM}},bottom:{style:'medium',color:{argb:AM}}}); } wf.getCell(r,1).value=D(m+'-01'); }
+      r++; });
+    tot(wf,r,8,'Total do período',[[2,'m'],[3,'m'],[4,'m'],[5,'m'],[6,'m'],[7,'m'],[8,'m']],8,r-1);
+    wf.getCell(r+2,1).value='Parcelas vencidas e não recebidas aparecem no mês da data prevista. A linha com borda âmbar é o mês atual.'; wf.getCell(r+2,1).font=F({size:9,italic:true,color:{argb:MU}});
+    wf.views=[{state:'frozen',ySplit:7,showGridLines:false}];
+
+    /* ---------- CHECKLIST ---------- */
+    const wk=novaAba('Checklist','Checklist operacional por contrato',`Gerado em ${hojeF} · Use os filtros do cabeçalho para ver as tarefas de um contrato ou de uma pessoa da equipe.`,[9,26,20,30,32,58,18,10,11],'FF264A6B');
+    cab(wk,4,['Nº','Cliente','Pilar','Situação no órgão','Serviço','Tarefa','Responsável','Minutos','Concluída']);
+    r=5; zi=0; vivos.forEach(c=>{ c.pils.forEach(p=>p.svcs.forEach(sv=>sv.tasks.forEach(t=>{ lin(wk,r,[N(c),c.cliente,PNOMEG[p.pid],p.pid==='g'?'Checklist da equipe':PSTN[p.status],sv.nome,t.n,nomePessoa(t.quem),num(t.min),t.done?'Sim':'Não'],['c','t','t','t','t','w','t','n','c'],zi%2===1); wk.getCell(r,1).font=F({bold:true,color:{argb:AZ}}); r++; }))); zi++; });
+    const lastK=Math.max(5,r-1);
+    valid(wk,`I5:I${lastK}`,['Sim','Não']); condStatus(wk,`I5:I${lastK}`,'I',5);
+    wk.views=[{state:'frozen',xSplit:2,ySplit:4,showGridLines:false}]; wk.autoFilter={from:{row:4,column:1},to:{row:lastK,column:9}};
+
+    /* ---------- PAINEL (primeira aba) ---------- */
+    pd.columns=[13,30,19,19,34,34,21].map(w=>({width:w}));
+    pd.mergeCells(1,1,1,7); Object.assign(pd.getCell(1,1),{value:'Painel do escritório'}); pd.getCell(1,1).font=F({size:16,bold:true,color:{argb:W}}); pd.getCell(1,1).fill=fill(GR); pd.getCell(1,1).alignment={vertical:'middle',indent:1}; pd.getRow(1).height=38;
+    pd.mergeCells(2,1,2,7); pd.getCell(2,1).value=`Formação ELO · Piso e Valor · gerado em ${hojeF}. Os indicadores somam as abas Contratos e Pagamentos.`; pd.getCell(2,1).font=F({size:9,italic:true,color:{argb:MU}}); pd.getCell(2,1).alignment={indent:1}; for(let c=1;c<=7;c++) pd.getCell(2,c).border={bottom:{style:'medium',color:{argb:AM}}};
+    const KP=[['Contratos em andamento',{formula:'COUNTIF(Contratos!$G:$G,"Em andamento")+COUNTIF(Contratos!$G:$G,"Pausado")',result:vivos.filter(c=>c.status==='ativo'||c.status==='pausado').length},'n',AZ],
+      ['Conclusão média',{formula:'IFERROR(AVERAGEIFS(Contratos!$H:$H,Contratos!$G:$G,"Em andamento"),0)',result:0},'p',AZ],
+      ['Valor contratado',{formula:'SUMIFS(Contratos!$F:$F,Contratos!$G:$G,"<>Cancelado")',result:vivos.reduce((a,c)=>a+num(c.valor),0)},'m',AZ],
+      ['Já recebido',{formula:'SUMIFS(Pagamentos!$D:$D,Pagamentos!$F:$F,"Recebida")',result:vivos.reduce((a,c)=>a+finC(c).rec,0)},'m','FF1D7A4E'],
+      ['A receber',{formula:'SUMIFS(Pagamentos!$D:$D,Pagamentos!$F:$F,"<>Recebida")',result:vivos.reduce((a,c)=>a+finC(c).arec,0)},'m','FFB8761A'],
+      ['Cobrar agora',{formula:'SUMIFS(Pagamentos!$D:$D,Pagamentos!$F:$F,"Liberada: cobrar")+SUMIFS(Pagamentos!$D:$D,Pagamentos!$F:$F,"Prevista",Pagamentos!$E:$E,"<="&TODAY())',result:vivos.reduce((a,c)=>a+finC(c).cob,0)},'m','FFB24A25'],
+      ['Custo mensal do escritório',{formula:"'Fluxo de caixa'!$D$4",result:CE.mes},'m',GR]];
+    KP.forEach((k,i)=>{ const col=i+1, l=pd.getCell(4,col), v=pd.getCell(5,col);
+      l.value=k[0]; l.font=F({size:8.5,bold:true,color:{argb:MU}}); l.alignment={horizontal:'center',vertical:'bottom',wrapText:true}; l.fill=fill(SOFT); l.border={top:{style:'medium',color:{argb:k[3]}},left:BR.left,right:BR.right};
+      v.value=k[1]; v.numFmt=FM[k[2]]; v.font=F({size:13,bold:true,color:{argb:k[3]}}); v.alignment={horizontal:'center',vertical:'middle'}; v.fill=fill(SOFT); v.border={bottom:BR.bottom,left:BR.left,right:BR.right}; });
+    pd.getRow(4).height=30; pd.getRow(5).height=36;
+    pd.mergeCells(7,1,7,7); pd.getCell(7,1).value='Processos em andamento'; pd.getCell(7,1).font=F({size:12,bold:true,color:{argb:AZ}}); pd.getRow(7).height=24;
+    const hs=['Nº','Cliente','Conclusão','Progresso','Situação por órgão','Próxima ação','Responsável'];
+    const rr=pd.getRow(8); hs.forEach((h,i)=>{ const c=rr.getCell(i+1); c.value=h; c.font=F({bold:true,color:{argb:W},size:9.5}); c.fill=fill(AZ); c.border=BR; c.alignment={horizontal:'center',vertical:'middle'}; }); rr.height=26;
+    r=9; vivos.filter(c=>c.status==='ativo'||c.status==='pausado').forEach((c,i)=>{ const P=pctC(c);
+      const sit=c.pils.filter(p=>p.pid!=='g').map(p=>`${PNOMEG[p.pid]}: ${PSTN[p.status]} (${Math.round(pctPil(p)*100)}%)`).join('\n');
+      lin(pd,r,[N(c),c.cliente,P,'█'.repeat(Math.round(P*10))+'░'.repeat(10-Math.round(P*10)),sit,c.prox||'',nomePessoa(c.resp)],['c','t','p','t','w','w','t'],i%2===1);
+      pd.getCell(r,4).font=F({color:{argb:'FF1D7A4E'}}); pd.getCell(r,1).font=F({bold:true,color:{argb:AZ}}); pd.getRow(r).height=Math.max(30,c.pils.filter(p=>p.pid!=='g').length*26+6); r++; });
+    if(r===9){ pd.mergeCells(9,1,9,7); pd.getCell(9,1).value='Nenhum processo em andamento.'; pd.getCell(9,1).font=F({italic:true,color:{argb:MU}}); }
+    pd.pageSetup={orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0};
+    /* conclusão média resultado */
+    const at=vivos.filter(c=>c.status==='ativo'); pd.getCell(5,2).value={formula:KP[1][1].formula,result:at.length?at.reduce((a,c)=>a+pctC(c),0)/at.length:0};
+    wb.views=[{activeTab:0,firstSheet:0}];
+    const buf=await wb.xlsx.writeBuffer();
+    await baixar(`Contratos-ELO-${hoje()}.xlsx`,new Blob([buf]));
+    }catch(err){ console.error(err); toast('Não foi possível gerar a planilha.'); }
+    btn.disabled=false; btn.textContent='Baixar planilha';
+  };
+  $('btnBkp').onclick=async()=>{ const ok=await baixar(`Backup-Piso-e-Valor-ELO-${hoje()}.json`,JSON.stringify({ferramenta:'Piso e Valor ELO',versao:1,data:hoje(),escritorio:E,contratos:CT,caso:S},null,1)); if(ok){ CT.lastBkp=hoje(); saveC(); renderCtr(); } };
+  $('fileBkp').onchange=e=>{ const f=e.target.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ try{ const d=JSON.parse(rd.result); if(!d||!d.contratos||!d.escritorio) throw 0;
+      E=d.escritorio; CT=d.contratos; if(d.caso) S=d.caso; save(); saveC(); boot(); toast('Backup restaurado'); }catch(err){ toast('Arquivo de backup inválido'); } e.target.value=''; }; rd.readAsText(f); };
+
+  function seedExemplo(){ const old=S.escolha; S.escolha='1'; calc(); const c=criarContrato(true); S.escolha=old||''; if(!c) return;
+    c.cliente='Cliente exemplo (pode excluir)'; c.imovel='Rua Exemplo, 100 · Guarujá/SP'; c.ass=addDias(hoje(),-40);
+    c.parc.forEach(x=>{ x.prev=x.pid?addDias(c.ass,PRZ[x.pid]||30):c.ass; });
+    const P=id=>c.pils.find(p=>p.pid===id);
+    const fazer=(p,n)=>{ if(!p) return; let i=0; p.svcs.forEach(s=>s.tasks.forEach(t=>{ if(i++<n) t.done=true; })); };
+    fazer(P('g'),3); if(P('p1')){ P('p1').status='prot'; fazer(P('p1'),8); } if(P('p2')){ P('p2').status='elab'; fazer(P('p2'),9); } if(P('p3')){ P('p3').status='doc'; fazer(P('p3'),2); }
+    autoLib(c); c.parc[0].st='rec'; c.parc[0].rec=c.ass; c.prox='Cobrar a parcela do protocolo do lote e pedir notas fiscais da obra'; c.cde=[{item:'Topografia terceirizada',valor:800}];
+    saveC(); }
+
+  function boot(){ addTips(); fillFields(); renderEquipe(); renderDesp(); renderTarefas(); renderCDE(); renderReemb(); paintRisk(); calc(); }
+  if(S._edited) $('exBar').hidden=true;
+  boot(); if(seedCT) { seedExemplo(); } renderCtr(); renderMeta(); showTab(TAB);
+})();
+</script>
+
+</body></html>

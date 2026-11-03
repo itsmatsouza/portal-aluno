@@ -1,0 +1,819 @@
+<!doctype html><html><head>
+<link rel="icon" type="image/jpeg" href="/assets/images/logo_elo_quadrado_branco.jpg"><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>01 - Controle do Projeto Legal ELO</title>
+<style>
+  /* Layout: cabeçalho grafite ELO, abas fixas, painéis em cards brancos sobre fundo frio. Mesmo sistema do EVTL. */
+  :root{
+    color-scheme:light;
+    --graphite:#1f2a37; --graphite-2:#2c3a4b;
+    --amber:#e8a33d; --amber-dark:#b8761a; --amber-soft:#f7e2bd;
+    --ink:#1b232d; --muted:#5b6672; --line:#dde3ea;
+    --bg:#f4f6f9; --white:#ffffff; --soft:#fbfcfe; --track:#e9eef4;
+    --red:#b24a25; --red-bg:#fdeee9; --red-line:#f3cdbd;
+    --warn:#9a6512; --warn-bg:#fbf3e6; --warn-line:#f0dcb8;
+    --ok:#1d7a4e; --ok-bg:#eaf6ef; --ok-line:#bfe4cf;
+    --info:#264a6b; --info-bg:#eef4fb; --info-line:#cfe0f2;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;font-size:14px;}
+  .wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:24px 80px;}
+  header.brand{background:linear-gradient(135deg,var(--graphite),var(--graphite-2));color:#fff;border-radius:16px;padding:22px 26px;position:relative;overflow:hidden;display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:flex-end;}
+  header.brand::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(232,163,61,.25),transparent 70%);pointer-events:none;}
+  .logo-row{display:flex;align-items:center;gap:14px;}
+  .logo-badge{width:50px;height:50px;border-radius:12px;background:var(--amber);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--graphite);font-size:19px;letter-spacing:1px;flex:0 0 auto;}
+  .brand-name{font-size:12.5px;letter-spacing:3px;text-transform:uppercase;color:var(--amber);font-weight:700;}
+  .brand-sub{font-size:12px;color:#c7d0da;margin-top:2px;}
+  header.brand h1{margin:14px 0 4px;font-size:23px;line-height:1.2;text-wrap:balance;}
+  header.brand p{margin:0;color:#cfd8e2;font-size:13.5px;max-width:620px;}
+  .hd-stat{position:relative;z-index:1;text-align:right;}
+  .hd-stat .k{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--amber);font-weight:800;}
+  .hd-stat .v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .hd-stat .s{font-size:12px;color:#c7d0da;}
+
+  .example-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--amber-soft);border:1px solid #efcf98;color:#6b4610;border-radius:12px;padding:10px 14px;margin-top:14px;font-size:13px;}
+  .example-bar b{color:var(--graphite);}
+
+  .tabs{display:flex;gap:6px;margin-top:16px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:6px;overflow-x:auto;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;box-shadow:0 4px 14px rgba(31,42,55,.06);}
+  .tab{flex:1 1 0;min-width:118px;display:flex;align-items:center;gap:8px;padding:10px;border-radius:10px;cursor:pointer;font-weight:700;color:var(--muted);font-size:13.5px;border:none;background:transparent;font-family:inherit;text-align:left;}
+  .tab .tn{min-width:26px;height:26px;padding:0 4px;border-radius:7px;background:var(--line);color:var(--graphite);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;}
+  .tab .tl{display:flex;flex-direction:column;line-height:1.15;}
+  .tab .tl small{font-weight:600;opacity:.75;font-size:10.5px;}
+  .tab.active{background:var(--graphite);color:#fff;}
+  .tab.active .tn{background:var(--amber);color:var(--graphite);}
+  .tab:focus-visible,.btn:focus-visible,.chip:focus-visible,.mlink:focus-visible{outline:3px solid var(--amber);outline-offset:2px;}
+
+  .card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin-top:16px;min-width:0;}
+  .card h2{margin:0 0 4px;font-size:17.5px;color:var(--graphite);display:flex;align-items:center;gap:9px;}
+  .card h2 .n{min-width:30px;height:30px;padding:0 6px;border-radius:9px;background:var(--graphite);color:var(--amber);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;}
+  .card > p.sub{margin:2px 0 0;color:var(--muted);font-size:13.5px;}
+  h3.sec{margin:20px 0 0;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--amber-dark);}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:12px;}
+  .field{display:flex;flex-direction:column;gap:5px;min-width:0;}
+  .field.full{grid-column:1/-1;}
+  .field.w2{grid-column:span 2;}
+  .field label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;display:flex;gap:6px;align-items:center;}
+  .src{font-size:9.5px;font-weight:800;border-radius:4px;padding:1px 5px;letter-spacing:.3px;text-transform:none;}
+  .src.lei{background:#fbefdc;color:#8a5a10;} .src.proj{background:#f1ecf8;color:#5e3f8a;} .src.calc{background:#f1f4f8;color:#5b6672;}
+  input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--soft);width:100%;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--amber);background:#fff;box-shadow:0 0 0 3px rgba(232,163,61,.18);}
+  input.calc{background:#f1f4f8;color:var(--graphite);font-weight:700;border-style:dashed;}
+  input[type=checkbox]{width:20px;height:20px;padding:0;margin:0;accent-color:var(--ok);cursor:pointer;flex:0 0 auto;}
+  textarea{resize:vertical;min-height:70px;}
+  .hint{font-size:12.5px;color:var(--muted);margin:8px 0 0;}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted);align-items:center;}
+
+  .btn{font-family:inherit;font-size:14px;font-weight:700;border-radius:9px;padding:10px 16px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--graphite);}
+  .btn.primary{background:var(--amber);border-color:var(--amber);color:var(--graphite);}
+  .btn.primary:hover{background:var(--amber-dark);border-color:var(--amber-dark);color:#fff;}
+  .btn.dark{background:var(--graphite);border-color:var(--graphite);color:#fff;}
+  .btn.small{padding:5px 11px;font-size:12.5px;}
+  .btn.danger{color:var(--red);border-color:var(--red-line);}
+  .btn.x{padding:4px 8px;font-size:13px;line-height:1;color:var(--muted);}
+  .btn.x:hover{color:var(--red);border-color:var(--red-line);}
+  .btn-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center;}
+
+  .tbl-wrap{overflow-x:auto;margin-top:12px;}
+  table.t{width:100%;border-collapse:collapse;font-size:13px;}
+  table.t th{font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:bottom;}
+  table.t td{padding:5px 4px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  table.t td input,table.t td select{padding:6px 7px;font-size:13px;}
+  table.t td.num,table.t th.num{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right;}
+  table.t th.grp{text-align:center;border-bottom:2px solid var(--amber-soft);}
+  table.t input[type=number]{min-width:0;width:68px;padding:6px 5px;text-align:right;}
+
+  .pill{display:inline-block;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:99px;border:1px solid;white-space:nowrap;text-transform:uppercase;letter-spacing:.4px;}
+  .p-ok{background:var(--ok-bg);border-color:var(--ok-line);color:var(--ok);}
+  .p-warn{background:var(--warn-bg);border-color:var(--warn-line);color:var(--warn);}
+  .p-crit{background:var(--red-bg);border-color:var(--red-line);color:var(--red);}
+  .p-info{background:var(--info-bg);border-color:var(--info-line);color:var(--info);}
+  .p-na{background:#f1f4f8;border-color:#d5dde7;color:#5b6672;}
+
+  /* Painel */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px;}
+  .kpi{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;}
+  .kpi .l{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700;}
+  .kpi .v{font-size:22px;font-weight:800;color:var(--graphite);font-variant-numeric:tabular-nums;line-height:1.2;margin-top:2px;}
+  .kpi .s{font-size:12px;color:var(--muted);}
+  .kpi.hl{border-color:var(--amber);box-shadow:0 0 0 3px rgba(232,163,61,.15);}
+  .kpi.bad .v{color:var(--red);}
+  .verdict{border-radius:14px;padding:16px 18px;color:#fff;margin-top:14px;background:var(--graphite);display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
+  .verdict .vk{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--amber);}
+  .verdict h3{margin:3px 0 4px;font-size:20px;}
+  .verdict p{margin:0;color:#cfd8e2;font-size:13.5px;}
+  .verdict .vt{flex:1 1 300px;min-width:0;}
+  .ring{flex:0 0 auto;width:74px;height:74px;}
+  .two{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;align-items:start;}
+  .meter{margin-top:12px;}
+  .mlink{display:block;width:100%;background:none;border:none;padding:4px 6px;margin:0 -6px;border-radius:8px;cursor:pointer;font-family:inherit;text-align:left;color:inherit;}
+  .mlink:hover{background:var(--soft);}
+  .meter-top{display:flex;justify-content:space-between;gap:8px;font-size:13px;align-items:baseline;flex-wrap:wrap;}
+  .meter-top b{color:var(--graphite);}
+  .meter-top .num{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12.5px;}
+  .track{position:relative;height:10px;background:var(--track);border-radius:99px;margin-top:6px;overflow:hidden;}
+  .track i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;}
+  .track .lim{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--graphite);}
+  .m-ok i{background:#2e9e6b;} .m-crit i{background:#d9683a;} .m-na i{background:#c3ccd7;} .m-run i{background:var(--amber);}
+  .rlist{list-style:none;margin:12px 0 0;padding:0;}
+  .rlist li{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px;align-items:flex-start;}
+  .rlist li:last-child{border-bottom:none;}
+  .rlist li > span:last-child{min-width:0;}
+  .who{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .who span{font-size:12.5px;border:1px solid var(--line);border-radius:99px;padding:4px 10px;background:var(--soft);}
+  .who b{font-variant-numeric:tabular-nums;}
+
+  /* Tarefas */
+  .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;margin-top:16px;}
+  .chip{flex:0 0 auto;display:flex;flex-direction:column;gap:5px;min-width:128px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:9px 11px;cursor:pointer;font-family:inherit;text-align:left;color:var(--graphite);}
+  .chip b{font-size:13px;}
+  .chip small{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;}
+  .chip .track{height:5px;margin-top:0;}
+  .chip.active{border-color:var(--graphite);box-shadow:0 0 0 2px var(--graphite);}
+  .chip.add{justify-content:center;align-items:center;color:var(--amber-dark);border-style:dashed;min-width:110px;font-weight:700;font-size:13px;}
+  .et-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;}
+  .et-head .ttl{flex:1 1 260px;min-width:0;}
+  .et-head input.et-name{font-size:17px;font-weight:800;color:var(--graphite);background:transparent;border-color:transparent;padding:4px 6px;margin-left:-6px;}
+  .et-head input.et-name:hover{border-color:var(--line);}
+  .et-prog{font-size:26px;font-weight:800;color:var(--graphite);font-variant-numeric:tabular-nums;text-align:right;line-height:1;}
+  .et-prog small{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-top:4px;}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px;}
+  .toggle{display:inline-flex;gap:7px;align-items:center;font-size:13px;font-weight:600;color:var(--graphite);cursor:pointer;}
+  .toggle input{width:16px;height:16px;}
+  table.tasks td.ck{width:34px;text-align:center;}
+  table.tasks td.no{width:30px;color:var(--muted);font-variant-numeric:tabular-nums;font-size:12px;}
+  table.tasks td.it input{min-width:220px;border-color:transparent;background:transparent;}
+  table.tasks td.it input:hover{border-color:var(--line);}
+  table.tasks tr.done td.it input{color:var(--muted);text-decoration:line-through;text-decoration-color:#9aa6b2;}
+  table.tasks td.ex input{min-width:96px;width:110px;}
+  table.tasks td.dt input{min-width:128px;width:136px;}
+  table.tasks td.hr input{min-width:86px;width:96px;}
+  table.tasks tr.late td.dt input{border-color:var(--red-line);background:var(--red-bg);color:var(--red);}
+  .empty{padding:20px;text-align:center;color:var(--muted);font-size:13.5px;}
+
+  .res-tbl td.k{color:var(--muted);}
+  .res-tbl td.v{font-weight:800;color:var(--graphite);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .rowlist{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+  .rowlist .r{display:grid;grid-template-columns:1fr 120px 34px;gap:8px;align-items:center;}
+
+  .rep-frame{background:#e7ebf0;border-radius:16px;padding:18px;margin-top:16px;overflow-x:auto;}
+  .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--graphite);color:#fff;padding:10px 16px;border-radius:10px;font-size:13.5px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.2);z-index:20;max-width:90vw;}
+  .legal{margin-top:18px;font-size:12px;color:var(--muted);}
+
+  @media (max-width:820px){
+    .kpis{grid-template-columns:repeat(2,1fr);}
+    .two{grid-template-columns:1fr;}
+    .field.w2{grid-column:auto;}
+    header.brand h1{font-size:20px;}
+    .hd-stat{text-align:left;}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+  @media print{
+    body{background:#fff;}
+    .wrap > *:not(#panel-rel){display:none!important;}
+    #panel-rel{display:block!important;}
+    #panel-rel > .card{display:none!important;}
+    .rep-frame{background:none;padding:0;}
+  }
+</style>
+<style id="repCss">
+  .rep{background:#fff;color:#1b232d;width:100%;max-width:820px;margin:0 auto;padding:34px 38px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:12.5px;line-height:1.5;box-shadow:0 4px 18px rgba(31,42,55,.10);}
+  .rep *{box-sizing:border-box;}
+  .rep .r-head{display:flex;justify-content:space-between;gap:16px;border-bottom:3px solid #1f2a37;padding-bottom:12px;align-items:flex-end;flex-wrap:wrap;}
+  .rep .r-kick{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#b8761a;font-weight:800;}
+  .rep h1{margin:4px 0 0;font-size:21px;color:#1f2a37;line-height:1.2;}
+  .rep .r-meta{text-align:right;font-size:11px;color:#5b6672;}
+  .rep .r-meta b{color:#1f2a37;}
+  .rep .r-block{margin-top:18px;break-inside:avoid;page-break-inside:avoid;}
+  .rep h2{font-size:12.5px;text-transform:uppercase;letter-spacing:.8px;color:#1f2a37;margin:0 0 8px;padding:5px 9px;background:#f4f6f9;border-left:4px solid #e8a33d;}
+  .rep table{width:100%;border-collapse:collapse;font-size:11.5px;}
+  .rep th{text-align:left;color:#5b6672;font-size:10px;text-transform:uppercase;letter-spacing:.4px;padding:5px 6px;border-bottom:1px solid #c9d2dc;}
+  .rep td{padding:5px 6px;border-bottom:1px solid #e3e8ee;vertical-align:top;}
+  .rep td.k{color:#5b6672;width:24%;}
+  .rep td.n,.rep th.n{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right;}
+  .rep .r-sum{border:2px solid #1f2a37;border-radius:8px;padding:12px 14px;display:flex;gap:14px;align-items:center;}
+  .rep .r-sum .big{font-size:28px;font-weight:800;color:#1f2a37;font-variant-numeric:tabular-nums;line-height:1;}
+  .rep .r-sum p{margin:0;}
+  .rep .bar{height:7px;background:#e9eef4;border-radius:99px;overflow:hidden;min-width:80px;}
+  .rep .bar i{display:block;height:100%;background:#2e9e6b;}
+  .rep .bar i.run{background:#e8a33d;}
+  .rep .tag{display:inline-block;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;padding:2px 7px;border-radius:99px;border:1px solid;}
+  .rep .t-ok{color:#1d7a4e;border-color:#bfe4cf;background:#eaf6ef;}
+  .rep .t-crit{color:#b24a25;border-color:#f3cdbd;background:#fdeee9;}
+  .rep .t-warn{color:#9a6512;border-color:#f0dcb8;background:#fbf3e6;}
+  .rep .t-na{color:#5b6672;border-color:#d5dde7;background:#f1f4f8;}
+  .rep ul{margin:4px 0 0;padding-left:18px;}
+  .rep li{margin:2px 0;}
+  .rep .pend{font-size:11.5px;color:#1b232d;margin:6px 0 0;}
+  .rep .pend b{color:#1f2a37;}
+  .rep .r-sign{display:flex;gap:40px;margin-top:46px;}
+  .rep .r-sign > div{flex:1;border-top:1px solid #1f2a37;padding-top:6px;font-size:11px;text-align:center;color:#1f2a37;}
+  .rep .r-foot{margin-top:22px;font-size:10px;color:#5b6672;border-top:1px solid #e3e8ee;padding-top:8px;}
+  @media (max-width:600px){ .rep{padding:22px 18px;} .rep .r-meta{text-align:left;} }
+</style>
+<div class="wrap">
+  <header class="brand">
+    <div>
+      <div class="logo-row">
+        <div class="logo-badge">ELO</div>
+        <div><div class="brand-name">Formação ELO</div><div class="brand-sub">Estrategista Legal de Obras · Prefeitura</div></div>
+      </div>
+      <h1>Controle de Tarefas · Projeto Legal</h1>
+      <p>Checklist das pranchas para aprovação na Prefeitura, quadro de áreas, esquadrias e iluminação e ventilação. O painel mostra o andamento e o que ainda trava a aprovação.</p>
+    </div>
+    <div class="hd-stat"><div class="k">Andamento</div><div class="v" id="hdProg">·</div><div class="s" id="hdSub"></div></div>
+  </header>
+
+  <div class="example-bar" id="exampleBar" hidden>
+    <span><b>Projeto de exemplo carregado</b> com os dados da planilha de controle. Explore e depois comece o seu.</span>
+    <button class="btn small dark" type="button" id="btnNew">Começar novo projeto</button>
+  </div>
+
+  <nav class="tabs" role="tablist" aria-label="Seções do projeto">
+    <button class="tab active" role="tab" data-tab="pain" id="tab-pain"><span class="tn">◎</span><span class="tl">Painel<small>Andamento geral</small></span></button>
+    <button class="tab" role="tab" data-tab="cli" id="tab-cli"><span class="tn">1</span><span class="tl">Cliente<small>Ficha e contrato</small></span></button>
+    <button class="tab" role="tab" data-tab="tar" id="tab-tar"><span class="tn">2</span><span class="tl">Tarefas<small>Checklist por prancha</small></span></button>
+    <button class="tab" role="tab" data-tab="are" id="tab-are"><span class="tn">3</span><span class="tl">Áreas<small>Índices urbanísticos</small></span></button>
+    <button class="tab" role="tab" data-tab="esq" id="tab-esq"><span class="tn">4</span><span class="tl">Esquadrias<small>Quadro de aberturas</small></span></button>
+    <button class="tab" role="tab" data-tab="ilu" id="tab-ilu"><span class="tn">5</span><span class="tl">Iluminação<small>e ventilação</small></span></button>
+    <button class="tab" role="tab" data-tab="rel" id="tab-rel"><span class="tn">▤</span><span class="tl">Relatório<small>Status para o cliente</small></span></button>
+  </nav>
+
+  <!-- PAINEL -->
+  <section class="tab-panel" id="panel-pain" role="tabpanel">
+    <div class="verdict" id="verdict"></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="two">
+      <div class="card"><h2><span class="n">▤</span>Progresso por prancha</h2><p class="sub">Toque numa etapa para abrir o checklist dela.</p><div id="etMeters"></div></div>
+      <div>
+        <div class="card"><h2><span class="n">✓</span>Projeto x legislação</h2><p class="sub">Cada barra mostra o projeto. O traço escuro marca o limite da lei.</p><div id="lawMeters"></div></div>
+        <div class="card"><h2><span class="n">◷</span>Próximas tarefas</h2><p class="sub">Pendências com data, da mais próxima para a mais distante.</p><ul class="rlist" id="nextList"></ul><div class="who" id="whoList"></div></div>
+      </div>
+    </div>
+    <div class="card"><h2><span class="n">!</span>O que trava a aprovação</h2><p class="sub">Itens fora da legislação, quadros incompletos e prazos vencidos.</p><ul class="rlist" id="ressalvas"></ul></div>
+  </section>
+
+  <!-- CLIENTE -->
+  <section class="tab-panel" id="panel-cli" role="tabpanel" hidden>
+    <div class="card"><h2><span class="n">1</span>Ficha do cliente</h2><p class="sub">Dados do contratante e do imóvel. Aparecem no relatório.</p>
+      <div class="grid">
+        <div class="field"><label for="c_contr">Nº do contrato</label><input id="c_contr" data-k="cli.contrato"></div>
+        <div class="field w2"><label for="c_nome">Nome completo</label><input id="c_nome" data-k="cli.nome"></div>
+        <div class="field"><label for="c_tel">Telefone</label><input id="c_tel" data-k="cli.tel" inputmode="tel"></div>
+        <div class="field"><label for="c_email">E-mail</label><input id="c_email" data-k="cli.email" inputmode="email"></div>
+        <div class="field w2"><label for="c_end">Endereço</label><input id="c_end" data-k="cli.end"></div>
+        <div class="field"><label for="c_civil">Estado civil</label><input id="c_civil" data-k="cli.civil"></div>
+        <div class="field"><label for="c_nasc">Data de nascimento</label><input id="c_nasc" data-k="cli.nasc" type="date"></div>
+        <div class="field"><label for="c_rg">RG</label><input id="c_rg" data-k="cli.rg"></div>
+        <div class="field"><label for="c_cpf">CPF</label><input id="c_cpf" data-k="cli.cpf"></div>
+        <div class="field"><label for="c_prof">Profissão</label><input id="c_prof" data-k="cli.prof"></div>
+        <div class="field"><label for="c_nac">Nacionalidade</label><input id="c_nac" data-k="cli.nac"></div>
+        <div class="field w2"><label for="c_endi">Endereço do imóvel</label><input id="c_endi" data-k="cli.endImovel"></div>
+        <div class="field w2"><label for="c_orig">Onde te encontrou?</label><input id="c_orig" data-k="cli.origem" placeholder="Instagram, indicação, Google..."></div>
+        <div class="field full"><label for="c_obj">Objetivo do cliente</label><textarea id="c_obj" data-k="cli.objetivo" placeholder="Aprovar projeto novo, regularizar obra existente, ampliação..."></textarea></div>
+      </div>
+    </div>
+    <div class="card"><h2><span class="n">RT</span>Responsável técnico</h2><p class="sub">Aparece no cabeçalho e na assinatura do relatório.</p>
+      <div class="grid">
+        <div class="field w2"><label for="r_nome">Nome do profissional</label><input id="r_nome" data-k="resp.nome"></div>
+        <div class="field"><label for="r_reg">CREA / CAU</label><input id="r_reg" data-k="resp.reg"></div>
+        <div class="field"><label for="r_emp">Escritório</label><input id="r_emp" data-k="resp.emp"></div>
+        <div class="field"><label for="r_mun">Prefeitura</label><input id="r_mun" data-k="resp.mun" placeholder="Município do protocolo"></div>
+        <div class="field"><label for="r_prazo">Previsão de protocolo</label><input id="r_prazo" data-k="resp.prazo" type="date"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAREFAS -->
+  <section class="tab-panel" id="panel-tar" role="tabpanel" hidden>
+    <div class="chips" id="chips" role="tablist" aria-label="Etapas"></div>
+    <div class="card" id="etCard"></div>
+    <datalist id="exList"></datalist>
+  </section>
+
+  <!-- ÁREAS -->
+  <section class="tab-panel" id="panel-are" role="tabpanel" hidden>
+    <div class="card"><h2><span class="n">3</span>Quadro de áreas</h2><p class="sub">Preencha o lote, a legislação municipal e as áreas do projeto. Os índices calculam sozinhos.</p>
+      <div class="legend"><span class="src lei">Lei</span> Legislação municipal <span class="src proj">Projeto</span> Dados do projeto <span class="src calc">Fórmula</span> Não preencher</div>
+      <h3 class="sec">Legislação municipal</h3>
+      <div class="grid">
+        <div class="field"><label for="a_to"><span class="src lei">Lei</span>Taxa de ocupação máx. (%)</label><input id="a_to" type="number" step="any" data-ar="toMax"></div>
+        <div class="field"><label for="a_ca"><span class="src lei">Lei</span>Coef. de aproveitamento máx.</label><input id="a_ca" type="number" step="any" data-ar="caMax"></div>
+        <div class="field"><label for="a_tp"><span class="src lei">Lei</span>Taxa de permeabilidade mín. (%)</label><input id="a_tp" type="number" step="any" data-ar="tpMin"></div>
+      </div>
+      <h3 class="sec">Lote e projeto</h3>
+      <div class="grid">
+        <div class="field"><label for="a_lote"><span class="src proj">Projeto</span>Área do lote (m²)</label><input id="a_lote" type="number" step="any" data-ar="lote"></div>
+        <div class="field"><label for="a_perm"><span class="src proj">Projeto</span>Área permeável (m²)</label><input id="a_perm" type="number" step="any" data-ar="perm"></div>
+      </div>
+      <div class="two" style="margin-top:6px">
+        <div><h3 class="sec">Áreas computáveis por pavimento</h3><p class="hint">O primeiro pavimento é a projeção usada na taxa de ocupação.</p><div class="rowlist" id="pavList"></div><div class="btn-row"><button class="btn small" type="button" id="pavAdd">+ Pavimento</button></div></div>
+        <div><h3 class="sec">Áreas não computáveis</h3><p class="hint">Benfeitorias complementares, como piscina descoberta e casa de máquinas. Entram na área ocupada.</p><div class="rowlist" id="ncList"></div><div class="btn-row"><button class="btn small" type="button" id="ncAdd">+ Área não computável</button></div></div>
+      </div>
+    </div>
+    <div class="two">
+      <div class="card"><h2><span class="n">=</span>Quadro para a prancha</h2><p class="sub">Copie estes valores para o carimbo do projeto.</p><div class="tbl-wrap"><table class="t res-tbl" id="resTbl"></table></div><div class="btn-row"><button class="btn small dark" type="button" id="btnCopyQa">Copiar quadro</button></div></div>
+      <div class="card"><h2><span class="n">✓</span>Atende a lei?</h2><p class="sub">Comparação de cada índice com o limite municipal.</p><div id="areMeters"></div></div>
+    </div>
+  </section>
+
+  <!-- ESQUADRIAS -->
+  <section class="tab-panel" id="panel-esq" role="tabpanel" hidden>
+    <div class="card"><h2><span class="n">4</span>Quadro de esquadrias</h2><p class="sub">Área de iluminação = largura × altura. Área de ventilação = abertura largura × abertura altura. Os códigos (P1, J1...) alimentam o quadro de iluminação.</p>
+      <div class="tbl-wrap"><table class="t" id="esqTbl"></table></div>
+      <div class="btn-row"><button class="btn small" type="button" id="esqAdd">+ Esquadria</button></div>
+    </div>
+  </section>
+
+  <!-- ILUMINAÇÃO -->
+  <section class="tab-panel" id="panel-ilu" role="tabpanel" hidden>
+    <div class="card"><h2><span class="n">5</span>Quadro de iluminação e ventilação</h2><p class="sub">Mínimos do Código de Obras do município x projeto. Vincule a esquadria de cada cômodo para conferir as áreas.</p>
+      <p class="hint">Coeficientes usuais: 1/8 = 0,125 · 1/10 = 0,1 · 1/16 = 0,0625. Confira sempre o Código de Obras local.</p>
+      <div class="tbl-wrap"><table class="t" id="iluTbl"></table></div>
+      <div class="btn-row"><button class="btn small" type="button" id="iluAdd">+ Cômodo</button></div>
+    </div>
+  </section>
+
+  <!-- RELATÓRIO -->
+  <section class="tab-panel" id="panel-rel" role="tabpanel" hidden>
+    <div class="card"><h2><span class="n">▤</span>Relatório de andamento</h2><p class="sub">Status do projeto legal para enviar ao cliente.</p>
+      <div class="field" style="margin-top:12px"><label for="obs">Observações para o cliente</label><textarea id="obs" data-k="obs" placeholder="Documentos que faltam, próximos passos, prazos da Prefeitura..."></textarea></div>
+      <div class="btn-row">
+        <button class="btn primary" type="button" id="btnHtml">Baixar relatório (HTML)</button>
+        <button class="btn" type="button" id="btnPrint" hidden>Imprimir / PDF</button>
+        <span id="resetWrap"><button class="btn danger small" type="button" id="btnReset">Limpar projeto</button></span>
+      </div>
+      <p class="hint" id="dlMsg"></p>
+    </div>
+    <div class="rep-frame"><div class="rep" id="rep"></div></div>
+  </section>
+
+  <p class="legal">Ferramenta de apoio da Formação ELO. Índices urbanísticos e mínimos de iluminação e ventilação variam por município: confira sempre o Plano Diretor, a Lei de Uso e Ocupação do Solo e o Código de Obras locais. Representação gráfica conforme NBR 6492.</p>
+</div>
+
+<script>
+(function(){
+  var KEY="elo-projeto-legal-v1";
+  var TABS=["pain","cli","tar","are","esq","ilu","rel"];
+
+  function I(list){ return list.map(function(s){ var ok=s.charAt(0)==="+"; return {t:ok?s.slice(1):s, ok:ok, ex:"", dt:"", hr:""}; }); }
+  var TEMPLATE=[
+    {id:"prancha",nome:"Prancha",sub:"Composição das folhas",itens:I(["+Escolher o tamanho da folha","+Planta","+Planta da Cobertura","+Planta da Implantação por pavimento","+Planta da Implantação Geral","Corte transversal","Corte longitudinal","Fachada (elevações)","Vistas","Detalhes de escadas","+Detalhes de rampa","+Detalhes de piscina","Detalhes de muro de arrimo ou contenção","Detalhes de fossa séptica","Detalhes de cisterna","Legendas","Notas","+Carimbo","+Ajustar escalas","Ajustar os nomes dos desenhos","Quadro de Iluminação e Ventilação","Quadro de esquadrias"])},
+    {id:"planta",nome:"Planta",sub:"Por pavimento",itens:I(["+Medidas reais de matrícula do lote/terreno","+A medida do passeio público","+Locar todas as paredes","+Identificar todos os ambientes, áreas cobertas e descobertas","Locar todas as aberturas e dimensões das esquadrias (portas e janelas)","Locar lareira(s) e churrasqueira(s), quando houver","Locar a piscina e seus recuos mínimos","Identificar os pontos de hidráulica da cozinha, banheiro e outras áreas molhadas","Identificar as coberturas e beirais","Locar o abrigo de gás","Identificar a altura dos muros","Locar postes e árvores no passeio","Criar folha de Prefeitura com Carimbo","Gerar e copiar Planta em 2D para folha","Ajustar layers por camadas, espessura e cores","Projeções de coberturas e beirais","Projeção da caixa d’água","Indicar calhas e declividade dos telhados","Indicar laje e se é impermeabilizada, e/ou tipo de cobertura","Cotar todos os ambientes internos e externos","Cotar todos os recuos","Cotar o perímetro externo da edificação e lote","Identificar as cotas de nível internas e externas (projeto planialtimétrico)","Identificar garagem se é coberta ou descoberta, com número de vagas","Numerar os degraus e o sentido de subida e descida da escada","Identificar inclinação e sentido de rampa","Identificar o pé direito duplo","Identificar os guarda-corpos e corrimãos","Identificar onde passam as linhas de cortes transversais e longitudinais","Identificar direção de vistas (frente, fundo e laterais)","Identificar Norte","Identificar área permeável","Entrada de energia elétrica","Entrada de água e saída de esgoto","Caixa de correspondência","Identificar portão de carro e guia rebaixada","Nome da rua (na planta do térreo e implantação)"])},
+    {id:"cob",nome:"Cobertura",sub:"Planta da cobertura",itens:I(["+Indicação do norte","+Indicação do nome do desenho","+Indicação da escala","A medida do lote","A medida do passeio público","Locar postes e árvores no passeio","O perímetro da edificação","Locar a piscina","Projeções da edificação","Desenhar as saídas de duto de lareiras e churrasqueiras","Curvas de nível do terreno","Acessos e áreas de estacionamento","Localização e projeção das áreas cobertas","A localização das caixas d'água","Detalhes da cobertura das edificações","Orientação do escoamento das águas pluviais","Tipos de telha","Grau de inclinação das águas, em porcentagem","Mostrar onde passam as linhas de cortes transversais e longitudinais","Cotar a largura dos beirais","Nome da rua"])},
+    {id:"imp",nome:"Implantação",sub:"Planta de implantação",itens:I(["Implantação por pavimento","Implantação Geral","Vias de acesso","Platôs e taludes principais","Delimitação do perímetro do lote/terreno","Medidas de recuos e afastamentos","Denominação das edificações","Nomenclatura das edificações","Indicação de áreas cobertas","Indicar áreas de estacionamentos","Cotas gerais e cotas de nível principais","Recuos e projeção das coberturas","Áreas permeáveis e impermeáveis","Indicação do norte","Indicação da escala","Locar piscina e/ou benfeitorias complementares"])},
+    {id:"cortes",nome:"Cortes",sub:"Transversal e longitudinal",itens:I(["Criar o corte transversal","Criar o corte longitudinal","Cotar a altura dos pés-direitos","Cotar a altura do telhado","Identificar muros, incluindo os de arrimo","Cotar a altura dos muros, incluindo os de arrimo","Cotar as alturas das esquadrias (portas e janelas) em relação ao piso","Cotar os beirais","Cotar a altura total da edificação","Hachurar as áreas revestidas com cerâmicas","Identificar as áreas permeáveis com tinta lavável","Indicar as diferenças de nível entre os ambientes","Representar a cobertura","Representar calhas","Representar acessos a alçapão","Locar a caixa d’água","Identificar chaminés","Indicar os tipos de telhas","Indicar os tipos de laje","Indicar os forros","Indicar os tipos de pisos","Representar o perfil natural do terreno","Hachura de terra","Cotas de nível (projeto planialtimétrico)","Cotar as medidas da escada","Cotar as medidas da rampa","Cotar as medidas de corrimão e guarda-corpo"])},
+    {id:"fach",nome:"Fachada",sub:"Elevações",itens:I(["+Destaque para as marcações dos acabamentos e diferentes tipos de materiais utilizados","+Identificar tipos de esquadrias, caso seja necessário","Identificar tipo de revestimentos, caso seja necessário","Identificar variação na pintura, caso seja necessário","Identificar formato da cobertura acabada","Níveis da edificação em relação ao perfil natural do terreno"])},
+    {id:"carimbo",nome:"Carimbo",sub:"Carimbo do projeto",itens:I(["+Tipo de projeto","+Número da folha","+Assunto","+Endereço completo","+Bairro e loteamento","+Lote, quadra, quarteirão","+Zoneamento","+Nome do proprietário","+Inscrição cadastral","+Escalas utilizadas na folha","+Data da revisão","+Planta de situação sem escala","+Quadro de áreas","+Assinaturas","+Área em branco destinada aos carimbos da Prefeitura"])},
+    {id:"qa",nome:"Quadro de áreas",sub:"Na prancha",itens:I(["+Área do lote (m²)","+Indicação por pavimentos","+Áreas computáveis","+Total geral (a construir / a regularizar / a demolir)","Áreas não computáveis","Área ocupada","Área livre","Taxa de ocupação","+Coeficiente de aproveitamento","+Taxa de permeabilidade"])},
+    {id:"qe",nome:"Quadro de esquadrias",sub:"Na prancha",itens:I(["+Nome das portas","+Nome das janelas","+Tipo de folhas e aberturas","+Dimensões fechadas","Dimensões das janelas","Dimensões das aberturas","Material","Acabamento","Quantidade","Parapeito"])}
+  ];
+  TEMPLATE[0].itens[0].ex="LEILA";
+
+  function E(n,tipo,l,h,p,al,ah,mat,acab,q){ return {n:n,tipo:tipo,l:l,h:h,p:p,al:al,ah:ah,mat:mat,acab:acab,q:q}; }
+  function R(c,pav,pd,fMin,fProj,aMin,aProj,cIlu,cVen,esq,eq,barra,hb){ return {c:c,pav:pav,pd:pd,fMin:fMin,fProj:fProj,aMin:aMin,aProj:aProj,cIlu:cIlu,cVen:cVen,esq:esq,eq:eq,barra:barra,hb:hb}; }
+
+  var EXAMPLE={
+    example:true, tab:"pain", et:"prancha", onlyPend:false,
+    cli:{contrato:"",nome:"",tel:"",email:"",end:"",civil:"",nasc:"",rg:"",cpf:"",prof:"",nac:"",endImovel:"",origem:"",objetivo:""},
+    resp:{nome:"",reg:"",emp:"",mun:"",prazo:""},
+    etapas:TEMPLATE,
+    areas:{lote:330, perm:38, toMax:60, caMax:1.5, tpMin:14, pavs:[{n:"Pav. Térreo",a:258.64},{n:"Pav. Superior",a:0}], nc:[{n:"Piscina (descoberta)",a:7.53}]},
+    esq:[
+      E("P1","Porta de madeira interna de abrir",0.8,2.1,0,0.8,2.1,"Madeira","Verniz",8),
+      E("P2","Porta pivotante de madeira",1.83,2.3,0,1.83,2.3,"Madeira","Verniz",1),
+      E("P3","Porta de alumínio de abrir",0.8,2.1,0,0.8,2.1,"Alumínio","Tinta esmalte branca",3),
+      E("J1","Veneziana de alumínio de correr - 3 folhas",1.2,1.5,0.9,0.6,1.5,"Alumínio","Tinta esmalte branca",3),
+      E("J2","Janela de alumínio maxim-ar - 2 folhas",0.5,1.6,0.5,0.5,1.6,"Alumínio","Tinta esmalte branca",2),
+      E("J3","Janela de alumínio maxim-ar - 1 folha",0.6,0.8,1.3,0.6,0.8,"Alumínio","Tinta esmalte branca",5)
+    ],
+    ilu:[
+      R("Suíte","Inferior",2.7,2.1,3.8,12,12,0.125,0.0625,"J1",1,"Tinta lavável",2.7),
+      R("Closet","Superior",2.7,1,1,4,4,0.125,0.0625,"",1,"Tinta lavável",2.7),
+      R("Dormitório 1","Superior",2.7,2.1,2.5,10,10,0.125,0.0625,"",1,"Tinta lavável",2.7),
+      R("Dormitório 2","Superior",2.7,2.1,2.5,8,10,0.125,0.0625,"",1,"Tinta lavável",2.7),
+      R("Dormitório 3","Inferior",2.7,2.1,2.5,6,10,0.125,0.0625,"",1,"Tinta lavável",2.7),
+      R("Escritório","Térreo",2.7,1,1.5,2,4,0.125,0.0625,"",1,"Tinta lavável",2.7),
+      R("Sala de TV","Térreo",2.7,2.1,2,4,8,0.125,0.0625,"",1,"Tinta lavável",2.7),
+      R("Sala de Jantar","Térreo",2.7,2.1,2,4,8,0.125,0.0625,"",1,"Tinta lavável",2.7),
+      R("Sala de Estar","Térreo",2.7,2.1,2,4,6,0.125,0.0625,"",1,"Tinta lavável",2.7),
+      R("Cozinha","Térreo",2.7,1.5,2,4,5,0.1,0.0625,"",1,"Azulejo",2.7),
+      R("Área de Serviço","Térreo",2.7,1.2,1.2,2.5,2.5,0.1,0.0625,"",1,"Azulejo",2.7),
+      R("Banho Suíte","Superior",2.7,1.2,1.2,2.5,2.5,0.125,0.0625,"",1,"Azulejo",2.7),
+      R("Banho social","Superior",2.7,1.2,1.2,2.5,2.5,0.125,0.0625,"",1,"Azulejo",2.7),
+      R("Banho área gourmet","Térreo",2.7,1.2,1.2,2.5,2.5,0.125,0.0625,"",1,"Azulejo",2.7),
+      R("Área Gourmet","Térreo",2.7,2.1,3,4,30,0.125,0.0625,"",1,"Azulejo",1.5),
+      R("Lavabo","Térreo",2.7,1.2,1.2,2.5,2.5,0.125,0.0625,"",1,"Tinta lavável",2.7),
+      R("Garagem coberta","Térreo",3.2,5,6,25,36,0.125,0.0625,"",1,"Tinta lavável",2.7)
+    ],
+    obs:""
+  };
+  function EMPTY(){
+    var x=JSON.parse(JSON.stringify(EXAMPLE));
+    x.example=false; x.tab="cli"; x.et="prancha";
+    x.etapas.forEach(function(et){ et.itens.forEach(function(it){ it.ok=false; it.ex=""; it.dt=""; it.hr=""; }); });
+    x.areas={lote:"",perm:"",toMax:"",caMax:"",tpMin:"",pavs:[{n:"Pav. Térreo",a:""}],nc:[]};
+    x.esq=[E("","","","","","","","","","")];
+    x.ilu=[R("","","","","","","",0.125,0.0625,"",1,"","")];
+    return x;
+  }
+
+  var st=(function(){ try{ var s=localStorage.getItem(KEY); return s?JSON.parse(s):null; }catch(e){ return null; } })() || JSON.parse(JSON.stringify(EXAMPLE));
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
+
+  /* ---------- utilidades ---------- */
+  function e(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+  function N(v){ if(v===""||v==null) return null; var n=parseFloat(String(v).replace(",",".")); return isFinite(n)?n:null; }
+  function f(n,d){ if(n==null||!isFinite(n)) return "–"; return n.toLocaleString("pt-BR",{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d}); }
+  function pc(n,d){ return n==null?"–":f(n*100,d==null?1:d)+"%"; }
+  function fmtDate(d){ if(!d) return ""; var p=d.split("-"); return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:d; }
+  function today(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+  function has(s){ return s!=null && String(s).trim()!==""; }
+  function get(path){ return path.split(".").reduce(function(o,k){ return o?o[k]:undefined; },st); }
+  function set(path,v){ var p=path.split("."), o=st; for(var i=0;i<p.length-1;i++){ if(!o[p[i]]) o[p[i]]={}; o=o[p[i]]; } o[p[p.length-1]]=v; }
+  function esqBy(n){ for(var i=0;i<st.esq.length;i++){ if(has(n) && st.esq[i].n===n) return st.esq[i]; } return null; }
+
+  /* ---------- cálculos ---------- */
+  function calc(){
+    var hoje=today(), k={tot:0,done:0,et:[],late:[],next:[],who:{},alerts:[]};
+    st.etapas.forEach(function(et,ei){
+      var n=et.itens.length, d=et.itens.filter(function(i){return i.ok;}).length;
+      k.tot+=n; k.done+=d;
+      k.et.push({i:ei,id:et.id,nome:et.nome,n:n,d:d,p:n?d/n:0});
+      et.itens.forEach(function(it,ii){
+        if(it.ok) return;
+        var exn=has(it.ex)?it.ex.trim().toUpperCase():"Sem executor";
+        k.who[exn]=(k.who[exn]||0)+1;
+        if(it.dt){ var o={et:et.nome,ei:ei,ii:ii,t:it.t,dt:it.dt,hr:it.hr,ex:it.ex}; k.next.push(o); if(it.dt<hoje) k.late.push(o); }
+      });
+    });
+    k.p=k.tot?k.done/k.tot:0;
+    k.next.sort(function(a,b){ return (a.dt+(a.hr||"")).localeCompare(b.dt+(b.hr||"")); });
+    k.etDone=k.et.filter(function(x){return x.n&&x.d===x.n;}).length;
+    var nextEt=k.et.filter(function(x){return x.d<x.n;})[0]; k.nextEt=nextEt?nextEt.nome:null;
+
+    /* áreas (mesmas fórmulas da planilha) */
+    var A=st.areas, a={lote:N(A.lote),perm:N(A.perm),toMax:N(A.toMax),caMax:N(A.caMax),tpMin:N(A.tpMin)};
+    a.total=A.pavs.reduce(function(s,p){ return s+(N(p.a)||0); },0);
+    a.proj=A.pavs.length?(N(A.pavs[0].a)||0):0;
+    a.nc=A.nc.reduce(function(s,p){ return s+(N(p.a)||0); },0);
+    a.ocup=a.proj+a.nc;
+    a.livre=a.lote!=null?a.lote-a.ocup:null;
+    a.to=a.lote?a.proj/a.lote:null;
+    a.ca=a.lote?a.total/a.lote:null;
+    a.tp=a.lote&&a.perm!=null?a.perm/a.lote:null;
+    a.toM2=a.lote!=null&&a.toMax!=null?a.lote*a.toMax/100:null;
+    a.caM2=a.lote!=null&&a.caMax!=null?a.lote*a.caMax:null;
+    a.tpM2=a.lote!=null&&a.tpMin!=null?a.lote*a.tpMin/100:null;
+    a.okTo=a.to==null||a.toMax==null?null:a.to<=a.toMax/100+1e-9;
+    a.okCa=a.ca==null||a.caMax==null?null:a.ca<=a.caMax+1e-9;
+    a.okTp=a.tp==null||a.tpMin==null?null:a.tp>=a.tpMin/100-1e-9;
+    k.a=a;
+    if(a.okTo===false) k.alerts.push({lv:"crit",t:"<b>Taxa de ocupação acima da lei:</b> "+pc(a.to)+" no projeto para máximo de "+f(a.toMax,0)+"%. A projeção pode ter até "+f(a.toM2)+" m², o projeto tem "+f(a.proj)+" m² ("+f(a.proj-a.toM2)+" m² a mais).",tab:"are"});
+    if(a.okCa===false) k.alerts.push({lv:"crit",t:"<b>Coeficiente de aproveitamento acima da lei:</b> "+f(a.ca)+" no projeto para máximo de "+f(a.caMax)+". Área computável máxima: "+f(a.caM2)+" m².",tab:"are"});
+    if(a.okTp===false) k.alerts.push({lv:"crit",t:"<b>Taxa de permeabilidade abaixo do mínimo:</b> "+pc(a.tp)+" para mínimo de "+f(a.tpMin,0)+"%. Faltam "+f(a.tpM2-a.perm)+" m² de área permeável.",tab:"are"});
+    if(a.lote==null||a.toMax==null||a.caMax==null||a.tpMin==null) k.alerts.push({lv:"info",t:"<b>Quadro de áreas incompleto.</b> Preencha a área do lote e os índices da legislação municipal para conferir o projeto.",tab:"are"});
+
+    /* esquadrias */
+    k.esq=st.esq.map(function(x){ var l=N(x.l),h=N(x.h),al=N(x.al),ah=N(x.ah); return {ilu:l!=null&&h!=null?l*h:null, ven:al!=null&&ah!=null?al*ah:null}; });
+
+    /* iluminação e ventilação */
+    var semEsq=[], falhas=[];
+    k.ilu=st.ilu.map(function(r){
+      var area=N(r.aProj), ci=N(r.cIlu), cv=N(r.cVen), q=N(r.eq); if(q==null) q=1;
+      var es=esqBy(r.esq), eIlu=null, eVen=null;
+      if(es){ var l=N(es.l),h=N(es.h),al=N(es.al),ah=N(es.ah); eIlu=l!=null&&h!=null?l*h*q:null; eVen=al!=null&&ah!=null?al*ah*q:null; }
+      var o={kI:area!=null&&ci!=null?area*ci:null, lI:eIlu, kV:area!=null&&cv!=null?area*cv:null, lV:eVen};
+      o.okM= N(r.fMin)==null||N(r.fProj)==null?null:N(r.fProj)>=N(r.fMin);
+      o.okA= N(r.aMin)==null||area==null?null:area>=N(r.aMin);
+      o.okI= o.kI==null||o.lI==null?null:o.lI>=o.kI-1e-9;
+      o.okV= o.kV==null||o.lV==null?null:o.lV>=o.kV-1e-9;
+      o.sem=!es;
+      var bad=[o.okM,o.okA,o.okI,o.okV].indexOf(false)>=0;
+      o.st= bad?"crit": o.sem?"warn": (o.okI&&o.okV&&o.okM!==false&&o.okA!==false)?"ok":"warn";
+      if(has(r.c)){ if(bad) falhas.push(r.c); else if(o.sem) semEsq.push(r.c); }
+      return o;
+    });
+    k.iluFail=falhas.length; k.iluSem=semEsq.length; k.iluOk=k.ilu.filter(function(o){return o.st==="ok";}).length;
+    if(falhas.length) k.alerts.push({lv:"crit",t:"<b>Cômodos abaixo do Código de Obras:</b> "+e(falhas.join(", "))+". Revise medida, área ou esquadria.",tab:"ilu"});
+    if(semEsq.length) k.alerts.push({lv:"warn",t:"<b>"+semEsq.length+" cômodo"+(semEsq.length>1?"s":"")+" sem esquadria vinculada:</b> "+e(semEsq.join(", "))+". Sem o vínculo não dá para conferir iluminação e ventilação.",tab:"ilu"});
+    if(k.late.length) k.alerts.push({lv:"warn",t:"<b>"+k.late.length+" tarefa"+(k.late.length>1?"s":"")+" com prazo vencido</b>: "+e(k.late.slice(0,3).map(function(x){return x.t;}).join("; "))+(k.late.length>3?"...":""),tab:"tar"});
+    if(!has(st.cli.nome)) k.alerts.push({lv:"info",t:"<b>Ficha do cliente em branco.</b> O nome do cliente vai no carimbo e no relatório.",tab:"cli"});
+    k.nc=(a.okTo===false?1:0)+(a.okCa===false?1:0)+(a.okTp===false?1:0)+falhas.length;
+    return k;
+  }
+
+  /* ---------- painel ---------- */
+  function ring(p){
+    var r=30, c=2*Math.PI*r, off=c*(1-p);
+    return '<svg class="ring" viewBox="0 0 74 74" role="img" aria-label="'+Math.round(p*100)+'% concluído"><circle cx="37" cy="37" r="'+r+'" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="8"/><circle cx="37" cy="37" r="'+r+'" fill="none" stroke="#e8a33d" stroke-width="8" stroke-linecap="round" stroke-dasharray="'+c.toFixed(2)+'" stroke-dashoffset="'+off.toFixed(2)+'" transform="rotate(-90 37 37)"/><text x="37" y="42" text-anchor="middle" fill="#ffffff" font-size="16" font-weight="800" font-family="-apple-system,Segoe UI,Roboto,sans-serif">'+Math.round(p*100)+'%</text></svg>';
+  }
+  function meter(label,valTxt,p,cls,lim){
+    return '<div class="meter-top"><b>'+label+'</b><span class="num">'+valTxt+'</span></div><div class="track '+cls+'"><i style="width:'+Math.max(0,Math.min(100,p*100)).toFixed(1)+'%"></i>'+(lim!=null?'<span class="lim" style="left:calc('+Math.min(100,lim*100).toFixed(1)+'% - 1px)"></span>':'')+'</div>';
+  }
+  function lawMeters(a){
+    var h="";
+    function one(label,val,lim,isMax,fmtV,fmtL){
+      if(val==null||lim==null){ return '<div class="meter">'+meter(label,"preencha o quadro de áreas",0,"m-na",null)+'</div>'; }
+      var scale=Math.max(val,lim)*1.25||1, ok=isMax?val<=lim+1e-9:val>=lim-1e-9;
+      return '<div class="meter">'+meter(label+' <span class="pill '+(ok?'p-ok':'p-crit')+'">'+(ok?'atende':'não atende')+'</span>', fmtV(val)+' · '+(isMax?'máx. ':'mín. ')+fmtL(lim), val/scale, ok?'m-ok':'m-crit', lim/scale)+'</div>';
+    }
+    h+=one("Taxa de ocupação",a.to,a.toMax!=null?a.toMax/100:null,true,function(v){return pc(v);},function(v){return pc(v,0);});
+    h+=one("Coef. de aproveitamento",a.ca,a.caMax,true,function(v){return f(v);},function(v){return f(v);});
+    h+=one("Taxa de permeabilidade",a.tp,a.tpMin!=null?a.tpMin/100:null,false,function(v){return pc(v);},function(v){return pc(v,0);});
+    return h;
+  }
+  function renderPain(k){
+    var title= k.p>=1?"Projeto pronto para protocolo": k.p===0?"Projeto ainda não iniciado":"Projeto em elaboração";
+    if(k.p>=1 && k.nc) title="Pranchas prontas, com pendências legais";
+    var txt=k.done+" de "+k.tot+" itens concluídos em "+st.etapas.length+" etapas."+(k.nextEt?" Próxima etapa a fechar: <b style=\"color:#fff\">"+e(k.nextEt)+"</b>.":"")+(k.nc?" Há "+k.nc+" ponto"+(k.nc>1?"s":"")+" fora da legislação.":"");
+    document.getElementById("verdict").innerHTML=ring(k.p)+'<div class="vt"><div class="vk">Projeto legal'+(has(st.cli.nome)?' · '+e(st.cli.nome):'')+'</div><h3>'+title+'</h3><p>'+txt+'</p></div>';
+    var hoje=today();
+    document.getElementById("kpis").innerHTML=
+      '<div class="kpi hl"><div class="l">Itens concluídos</div><div class="v">'+k.done+'<span style="font-size:14px;color:var(--muted)"> / '+k.tot+'</span></div><div class="s">'+(k.tot-k.done)+' aguardando</div></div>'+
+      '<div class="kpi"><div class="l">Pranchas fechadas</div><div class="v">'+k.etDone+'<span style="font-size:14px;color:var(--muted)"> / '+k.et.length+'</span></div><div class="s">etapas 100% concluídas</div></div>'+
+      '<div class="kpi'+(k.late.length?' bad':'')+'"><div class="l">Prazos vencidos</div><div class="v">'+k.late.length+'</div><div class="s">'+(st.resp.prazo?'protocolo em '+fmtDate(st.resp.prazo):'defina datas nas tarefas')+'</div></div>'+
+      '<div class="kpi'+(k.nc?' bad':'')+'"><div class="l">Fora da lei</div><div class="v">'+k.nc+'</div><div class="s">índices e cômodos</div></div>';
+    document.getElementById("etMeters").innerHTML=k.et.map(function(x){
+      var cls=x.n&&x.d===x.n?"m-ok":x.d?"m-run":"m-na";
+      return '<div class="meter"><button type="button" class="mlink" data-goet="'+x.i+'">'+meter(e(x.nome),x.d+'/'+x.n+' · '+Math.round(x.p*100)+'%',x.p,cls,null)+'</button></div>';
+    }).join("");
+    document.getElementById("lawMeters").innerHTML=lawMeters(k.a);
+    var nl=k.next.slice(0,6);
+    document.getElementById("nextList").innerHTML= nl.length? nl.map(function(x){
+      var late=x.dt<hoje;
+      return '<li><span class="pill '+(late?'p-crit':'p-info')+'">'+fmtDate(x.dt).slice(0,5)+(x.hr?' '+e(x.hr):'')+'</span><span><b>'+e(x.t)+'</b><br><span style="color:var(--muted);font-size:12.5px">'+e(x.et)+(has(x.ex)?' · '+e(x.ex):'')+'</span></span></li>';
+    }).join("") : '<li><span class="pill p-na">sem datas</span><span>Nenhuma tarefa pendente com data. Defina datas na aba Tarefas para montar o cronograma.</span></li>';
+    var w=Object.keys(k.who).sort(function(a,b){return k.who[b]-k.who[a];});
+    document.getElementById("whoList").innerHTML= w.length? '<span style="border:none;background:none;padding:4px 0;color:var(--muted)">Pendências por executor:</span>'+w.map(function(n){ return '<span>'+e(n)+' <b>'+k.who[n]+'</b></span>'; }).join(""):"";
+    var lvOrd={crit:0,warn:1,info:2}, al=k.alerts.slice().sort(function(a,b){return lvOrd[a.lv]-lvOrd[b.lv];});
+    var lbl={crit:"crítico",warn:"atenção",info:"completar"}, pcl={crit:"p-crit",warn:"p-warn",info:"p-info"};
+    document.getElementById("ressalvas").innerHTML= al.length? al.map(function(x){ return '<li><span class="pill '+pcl[x.lv]+'">'+lbl[x.lv]+'</span><span>'+x.t+' <button type="button" class="btn small" style="margin-left:4px;padding:2px 9px" data-gotab="'+x.tab+'">Abrir</button></span></li>'; }).join("") : '<li><span class="pill p-ok">ok</span><span>Nenhuma pendência legal com os dados informados.</span></li>';
+  }
+  function renderHeader(k){
+    document.getElementById("hdProg").textContent=Math.round(k.p*100)+"% concluído";
+    document.getElementById("hdSub").textContent=k.done+" de "+k.tot+" itens";
+    document.getElementById("exampleBar").hidden=!st.example;
+  }
+
+  /* ---------- cliente ---------- */
+  function renderCli(){
+    document.querySelectorAll("[data-k]").forEach(function(el){ var v=get(el.dataset.k); el.value=v==null?"":v; });
+  }
+
+  /* ---------- tarefas ---------- */
+  function etIndex(){ for(var i=0;i<st.etapas.length;i++){ if(st.etapas[i].id===st.et) return i; } st.et=st.etapas[0]?st.etapas[0].id:""; return 0; }
+  function renderChips(){
+    var cur=etIndex();
+    document.getElementById("chips").innerHTML=st.etapas.map(function(et,i){
+      var n=et.itens.length,d=et.itens.filter(function(x){return x.ok;}).length,p=n?d/n:0;
+      var cls=n&&d===n?"m-ok":d?"m-run":"m-na";
+      return '<button type="button" class="chip'+(i===cur?' active':'')+'" data-et="'+i+'" role="tab" aria-selected="'+(i===cur)+'"><b>'+e(et.nome||"Sem nome")+'</b><small>'+d+'/'+n+' · '+Math.round(p*100)+'%</small><span class="track '+cls+'"><i style="width:'+(p*100).toFixed(1)+'%"></i></span></button>';
+    }).join("")+'<button type="button" class="chip add" id="etAdd">+ Nova etapa</button>';
+    var ex={}; st.etapas.forEach(function(et){ et.itens.forEach(function(it){ if(has(it.ex)) ex[it.ex.trim()]=1; }); });
+    document.getElementById("exList").innerHTML=Object.keys(ex).map(function(x){ return '<option value="'+e(x)+'">'; }).join("");
+  }
+  function taskRow(it,ii,ei,hoje){
+    var late=!it.ok&&it.dt&&it.dt<hoje;
+    return '<tr class="'+(it.ok?'done':'')+(late?' late':'')+'"><td class="ck"><input type="checkbox" id="ck_'+ei+'_'+ii+'" data-it="'+ii+'" data-f="ok"'+(it.ok?' checked':'')+' aria-label="Concluído"></td>'+
+      '<td class="no">'+(ii+1)+'</td>'+
+      '<td class="it"><input id="it_'+ei+'_'+ii+'" data-it="'+ii+'" data-f="t" value="'+e(it.t)+'" aria-label="Item"></td>'+
+      '<td class="ex"><input id="ex_'+ei+'_'+ii+'" data-it="'+ii+'" data-f="ex" value="'+e(it.ex)+'" list="exList" placeholder="Quem" aria-label="Executor"></td>'+
+      '<td class="dt"><input id="dt_'+ei+'_'+ii+'" type="date" data-it="'+ii+'" data-f="dt" value="'+e(it.dt)+'" aria-label="Data"></td>'+
+      '<td class="hr"><input id="hr_'+ei+'_'+ii+'" type="time" data-it="'+ii+'" data-f="hr" value="'+e(it.hr)+'" aria-label="Horário"></td>'+
+      '<td><span class="pill '+(it.ok?'p-ok':late?'p-crit':'p-warn')+'">'+(it.ok?'Concluído':late?'Atrasado':'Aguardando')+'</span></td>'+
+      '<td><button type="button" class="btn x" data-itdel="'+ii+'" aria-label="Remover item">✕</button></td></tr>';
+  }
+  function renderEtCard(){
+    var ei=etIndex(), et=st.etapas[ei], card=document.getElementById("etCard");
+    if(!et){ card.innerHTML='<div class="empty">Nenhuma etapa. Crie uma em “+ Nova etapa”.</div>'; return; }
+    var n=et.itens.length,d=et.itens.filter(function(x){return x.ok;}).length,p=n?d/n:0, hoje=today();
+    var rows=et.itens.map(function(it,ii){ return st.onlyPend&&it.ok?"":taskRow(it,ii,ei,hoje); }).join("");
+    card.innerHTML='<div class="et-head"><div class="ttl"><input class="et-name" id="etName_'+ei+'" data-etf="nome" value="'+e(et.nome)+'" aria-label="Nome da etapa"><p class="sub" style="margin:0;color:var(--muted);font-size:13.5px">'+e(et.sub||"Checklist da etapa")+'</p></div><div class="et-prog">'+Math.round(p*100)+'%<small>'+d+' de '+n+' concluídos</small></div></div>'+
+      '<div class="track '+(n&&d===n?'m-ok':d?'m-run':'m-na')+'" style="margin-top:12px"><i style="width:'+(p*100).toFixed(1)+'%"></i></div>'+
+      '<div class="toolbar"><label class="toggle"><input type="checkbox" id="onlyPend"'+(st.onlyPend?' checked':'')+'> Mostrar só pendentes</label><button type="button" class="btn small" id="allOk">Marcar todos</button><button type="button" class="btn small" id="allNo">Desmarcar todos</button></div>'+
+      '<div class="tbl-wrap"><table class="t tasks"><thead><tr><th>✓</th><th>Nº</th><th>Item</th><th>Executor</th><th>Data</th><th>Horário</th><th>Situação</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan="8" class="empty">'+(n?'Tudo concluído nesta etapa.':'Etapa sem itens. Adicione o primeiro abaixo.')+'</td></tr>')+'</tbody></table></div>'+
+      '<div class="btn-row"><button type="button" class="btn small dark" id="itAdd">+ Item</button><span id="etDelWrap" style="margin-left:auto"><button type="button" class="btn small danger" id="etDel">Excluir etapa</button></span></div>';
+  }
+
+  /* ---------- áreas ---------- */
+  function renderAreFields(){
+    var A=st.areas;
+    ["lote","perm","toMax","caMax","tpMin"].forEach(function(k){ var el=document.querySelector('[data-ar="'+k+'"]'); el.value=A[k]==null?"":A[k]; });
+    function list(arr,key){ return arr.map(function(p,i){ return '<div class="r"><input id="'+key+'n_'+i+'" data-'+key+'="'+i+'" data-f="n" value="'+e(p.n)+'" placeholder="Nome" aria-label="Nome"><input id="'+key+'a_'+i+'" type="number" step="any" data-'+key+'="'+i+'" data-f="a" value="'+e(p.a)+'" placeholder="m²" aria-label="Área em m²"><button type="button" class="btn x" data-'+key+'del="'+i+'" aria-label="Remover">✕</button></div>'; }).join("") || '<p class="hint">Nenhuma área.</p>'; }
+    document.getElementById("pavList").innerHTML=list(A.pavs,"pav");
+    document.getElementById("ncList").innerHTML=list(A.nc,"nc");
+  }
+  function qaRows(a){
+    var rows=[["Terreno / Lote",f(a.lote)+" m²"]];
+    st.areas.pavs.forEach(function(p){ rows.push([p.n||"Pavimento",f(N(p.a))+" m²"]); });
+    rows.push(["Total geral (computável)",f(a.total)+" m²"]);
+    st.areas.nc.forEach(function(p){ rows.push([p.n||"Não computável",f(N(p.a))+" m²"]); });
+    rows.push(["Área ocupada",f(a.ocup)+" m²"],["Área livre",f(a.livre)+" m²"],["Taxa de ocupação",pc(a.to,2)],["Coef. de aproveitamento",f(a.ca)],["Área permeável",f(a.perm)+" m²"],["Taxa de permeabilidade",pc(a.tp,2)]);
+    return rows;
+  }
+  function renderAreCalc(k){
+    var a=k.a;
+    document.getElementById("resTbl").innerHTML='<tbody>'+qaRows(a).map(function(r){ return '<tr><td class="k">'+e(r[0])+'</td><td class="v">'+r[1]+'</td></tr>'; }).join("")+'</tbody>';
+    var lim='<table class="t res-tbl" style="margin-top:14px"><tbody>'+
+      '<tr><td class="k">Projeção máxima pela T.O.</td><td class="v">'+f(a.toM2)+' m²</td></tr>'+
+      '<tr><td class="k">Área computável máxima pelo C.A.</td><td class="v">'+f(a.caM2)+' m²</td></tr>'+
+      '<tr><td class="k">Área permeável mínima</td><td class="v">'+f(a.tpM2)+' m²</td></tr></tbody></table>';
+    document.getElementById("areMeters").innerHTML=lawMeters(a)+lim;
+  }
+
+  /* ---------- esquadrias ---------- */
+  var ESQF=[["n","Código","text",62],["tipo","Tipo","text",190],["l","Largura (m)","number"],["h","Altura (m)","number"],["p","Peitoril (m)","number"],["al","Abertura larg. (m)","number"],["ah","Abertura alt. (m)","number"]];
+  function renderEsq(k){
+    var h='<thead><tr>'+ESQF.map(function(c){return '<th'+(c[2]==="number"?' class="num"':'')+'>'+c[1]+'</th>';}).join("")+'<th class="num">Ilum. (m²)</th><th class="num">Vent. (m²)</th><th>Material</th><th>Acabamento</th><th class="num">Qtd</th><th></th></tr></thead><tbody>';
+    h+=st.esq.map(function(x,i){
+      return '<tr>'+ESQF.map(function(c){ return '<td><input id="esq_'+c[0]+'_'+i+'" data-esq="'+i+'" data-f="'+c[0]+'"'+(c[2]==="number"?' type="number" step="any"':' style="min-width:'+c[3]+'px"')+' value="'+e(x[c[0]])+'"></td>'; }).join("")+
+        '<td class="num" id="esqI_'+i+'">'+f(k.esq[i].ilu)+'</td><td class="num" id="esqV_'+i+'">'+f(k.esq[i].ven)+'</td>'+
+        '<td><input id="esq_mat_'+i+'" data-esq="'+i+'" data-f="mat" value="'+e(x.mat)+'" style="min-width:90px"></td>'+
+        '<td><input id="esq_acab_'+i+'" data-esq="'+i+'" data-f="acab" value="'+e(x.acab)+'" style="min-width:130px"></td>'+
+        '<td><input id="esq_q_'+i+'" type="number" step="1" min="0" data-esq="'+i+'" data-f="q" value="'+e(x.q)+'" style="width:56px"></td>'+
+        '<td><button type="button" class="btn x" data-esqdel="'+i+'" aria-label="Remover esquadria">✕</button></td></tr>';
+    }).join("")+'</tbody>';
+    document.getElementById("esqTbl").innerHTML=h;
+  }
+  function updEsq(k){ k.esq.forEach(function(o,i){ var a=document.getElementById("esqI_"+i), b=document.getElementById("esqV_"+i); if(a) a.textContent=f(o.ilu); if(b) b.textContent=f(o.ven); }); }
+
+  /* ---------- iluminação ---------- */
+  function okPill(v){ return v==null?'<span class="pill p-na">–</span>':v?'<span class="pill p-ok">ok</span>':'<span class="pill p-crit">baixo</span>'; }
+  function stPill(o){ return o.st==="ok"?'<span class="pill p-ok">atende</span>':o.st==="crit"?'<span class="pill p-crit">não atende</span>':'<span class="pill p-warn">'+(o.sem?'vincular esquadria':'conferir')+'</span>'; }
+  function renderIlu(k){
+    var opts=st.esq.filter(function(x){return has(x.n);}).map(function(x){return x.n;});
+    function inp(i,f,v,w,num){ return '<input id="ilu_'+f+'_'+i+'" data-ilu="'+i+'" data-f="'+f+'"'+(num?' type="number" step="any"':'')+' value="'+e(v)+'" style="'+(w?'min-width:'+w+'px':'')+'">'; }
+    var h='<thead><tr><th rowspan="2">Cômodo</th><th rowspan="2">Pavimento</th><th rowspan="2" class="num">Pé-direito</th><th colspan="2" class="grp">Medida mínima (m)</th><th colspan="2" class="grp">Área útil (m²)</th><th colspan="2" class="grp">Esquadria</th><th colspan="4" class="grp">Iluminação (m²)</th><th colspan="4" class="grp">Ventilação (m²)</th><th rowspan="2">Barra impermeável</th><th rowspan="2" class="num">Altura barra</th><th rowspan="2">Situação</th><th rowspan="2"></th></tr>'+
+      '<tr><th class="num">Código</th><th class="num">Projeto</th><th class="num">Código</th><th class="num">Projeto</th><th>Tipo</th><th class="num">Qtd</th><th class="num">Coef.</th><th class="num">Exigida</th><th class="num">Projeto</th><th></th><th class="num">Coef.</th><th class="num">Exigida</th><th class="num">Projeto</th><th></th></tr></thead><tbody>';
+    h+=st.ilu.map(function(r,i){
+      var o=k.ilu[i];
+      var sel='<select id="ilu_esq_'+i+'" data-ilu="'+i+'" data-f="esq" style="min-width:76px"><option value="">–</option>'+opts.map(function(n){return '<option'+(n===r.esq?' selected':'')+'>'+e(n)+'</option>';}).join("")+(has(r.esq)&&opts.indexOf(r.esq)<0?'<option selected value="'+e(r.esq)+'">'+e(r.esq)+' (removida)</option>':'')+'</select>';
+      return '<tr><td>'+inp(i,"c",r.c,130)+'</td><td>'+inp(i,"pav",r.pav,86)+'</td><td>'+inp(i,"pd",r.pd,0,1)+'</td>'+
+        '<td>'+inp(i,"fMin",r.fMin,0,1)+'</td><td>'+inp(i,"fProj",r.fProj,0,1)+'</td>'+
+        '<td>'+inp(i,"aMin",r.aMin,0,1)+'</td><td>'+inp(i,"aProj",r.aProj,0,1)+'</td>'+
+        '<td>'+sel+'</td><td>'+inp(i,"eq",r.eq,0,1)+'</td>'+
+        '<td>'+inp(i,"cIlu",r.cIlu,0,1)+'</td><td class="num" id="iluKI_'+i+'">'+f(o.kI)+'</td><td class="num" id="iluLI_'+i+'">'+f(o.lI)+'</td><td id="iluOI_'+i+'">'+okPill(o.okI)+'</td>'+
+        '<td>'+inp(i,"cVen",r.cVen,0,1)+'</td><td class="num" id="iluKV_'+i+'">'+f(o.kV)+'</td><td class="num" id="iluLV_'+i+'">'+f(o.lV)+'</td><td id="iluOV_'+i+'">'+okPill(o.okV)+'</td>'+
+        '<td>'+inp(i,"barra",r.barra,110)+'</td><td>'+inp(i,"hb",r.hb,0,1)+'</td><td id="iluST_'+i+'">'+stPill(o)+'</td>'+
+        '<td><button type="button" class="btn x" data-iludel="'+i+'" aria-label="Remover cômodo">✕</button></td></tr>';
+    }).join("")+'</tbody>';
+    document.getElementById("iluTbl").innerHTML=h;
+    markIlu(k);
+  }
+  function markIlu(k){
+    k.ilu.forEach(function(o,i){
+      function S(id,v){ var el=document.getElementById(id); if(el) el.innerHTML=v; }
+      S("iluKI_"+i,f(o.kI)); S("iluLI_"+i,f(o.lI)); S("iluOI_"+i,okPill(o.okI));
+      S("iluKV_"+i,f(o.kV)); S("iluLV_"+i,f(o.lV)); S("iluOV_"+i,okPill(o.okV)); S("iluST_"+i,stPill(o));
+      var fp=document.getElementById("ilu_fProj_"+i), ap=document.getElementById("ilu_aProj_"+i);
+      if(fp) fp.style.borderColor=o.okM===false?"var(--red)":""; if(ap) ap.style.borderColor=o.okA===false?"var(--red)":"";
+    });
+  }
+
+  /* ---------- relatório ---------- */
+  function tag(v,okT,badT){ return v==null?'<span class="tag t-na">sem dados</span>':v?'<span class="tag t-ok">'+(okT||'atende')+'</span>':'<span class="tag t-crit">'+(badT||'não atende')+'</span>'; }
+  function reportHTML(k){
+    var c=st.cli, r=st.resp, a=k.a, h="";
+    h+='<div class="r-head"><div><div class="r-kick">Relatório de andamento · Projeto legal</div><h1>'+e(c.nome||"Cliente")+'</h1><div style="color:#5b6672;font-size:11.5px;margin-top:2px">'+e(c.endImovel||"Endereço do imóvel não informado")+'</div></div><div class="r-meta">Emitido em <b>'+fmtDate(today())+'</b>'+(c.contrato?'<br>Contrato nº <b>'+e(c.contrato)+'</b>':'')+(r.mun?'<br>Prefeitura de <b>'+e(r.mun)+'</b>':'')+(r.emp?'<br>'+e(r.emp):'')+'</div></div>';
+    h+='<div class="r-block"><div class="r-sum"><div class="big">'+Math.round(k.p*100)+'%</div><p><b>'+k.done+' de '+k.tot+' itens do projeto concluídos.</b> '+k.etDone+' de '+k.et.length+' etapas finalizadas.'+(r.prazo?' Previsão de protocolo na Prefeitura: <b>'+fmtDate(r.prazo)+'</b>.':'')+'</p></div></div>';
+    h+='<div class="r-block"><h2>1. Identificação</h2><table><tbody>'+
+      '<tr><td class="k">Proprietário</td><td>'+e(c.nome)+'</td><td class="k">CPF</td><td>'+e(c.cpf)+'</td></tr>'+
+      '<tr><td class="k">Telefone</td><td>'+e(c.tel)+'</td><td class="k">E-mail</td><td>'+e(c.email)+'</td></tr>'+
+      '<tr><td class="k">Imóvel</td><td colspan="3">'+e(c.endImovel)+'</td></tr>'+
+      '<tr><td class="k">Objetivo</td><td colspan="3">'+e(c.objetivo)+'</td></tr>'+
+      '<tr><td class="k">Responsável técnico</td><td colspan="3">'+e(r.nome)+(r.reg?' · CREA/CAU '+e(r.reg):'')+'</td></tr></tbody></table></div>';
+    h+='<div class="r-block"><h2>2. Andamento por etapa</h2><table><thead><tr><th>Etapa</th><th class="n">Concluídos</th><th style="width:34%">Progresso</th><th>Situação</th></tr></thead><tbody>'+k.et.map(function(x){
+      var done=x.n&&x.d===x.n; return '<tr><td>'+e(x.nome)+'</td><td class="n">'+x.d+'/'+x.n+'</td><td><div class="bar"><i class="'+(done?'':'run')+'" style="width:'+(x.p*100).toFixed(1)+'%"></i></div></td><td>'+(done?'<span class="tag t-ok">concluída</span>':x.d?'<span class="tag t-warn">em andamento</span>':'<span class="tag t-na">a iniciar</span>')+'</td></tr>';
+    }).join("")+'</tbody></table>';
+    var pend=st.etapas.map(function(et){ var p=et.itens.filter(function(i){return !i.ok;}); return p.length?'<p class="pend"><b>'+e(et.nome)+':</b> '+p.map(function(i){return e(i.t)+(i.dt?' ('+fmtDate(i.dt)+')':'');}).join(" · ")+'</p>':''; }).join("");
+    h+=(pend?'<div style="margin-top:8px;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#5b6672;font-weight:800">Itens pendentes</div>'+pend:'<p class="pend">Todos os itens concluídos.</p>')+'</div>';
+    h+='<div class="r-block"><h2>3. Quadro de áreas e índices urbanísticos</h2><table><thead><tr><th>Item</th><th class="n">Projeto</th><th class="n">Legislação</th><th>Situação</th></tr></thead><tbody>'+
+      '<tr><td>Área do lote</td><td class="n">'+f(a.lote)+' m²</td><td class="n">–</td><td></td></tr>'+
+      st.areas.pavs.map(function(p){ return '<tr><td>'+e(p.n)+'</td><td class="n">'+f(N(p.a))+' m²</td><td class="n">–</td><td></td></tr>'; }).join("")+
+      '<tr><td><b>Total computável</b></td><td class="n"><b>'+f(a.total)+' m²</b></td><td class="n">máx. '+f(a.caM2)+' m²</td><td></td></tr>'+
+      st.areas.nc.map(function(p){ return '<tr><td>'+e(p.n)+'</td><td class="n">'+f(N(p.a))+' m²</td><td class="n">–</td><td></td></tr>'; }).join("")+
+      '<tr><td>Área ocupada / livre</td><td class="n">'+f(a.ocup)+' / '+f(a.livre)+' m²</td><td class="n">–</td><td></td></tr>'+
+      '<tr><td>Taxa de ocupação</td><td class="n">'+pc(a.to,2)+'</td><td class="n">máx. '+(a.toMax!=null?f(a.toMax,0)+'%':'–')+'</td><td>'+tag(a.okTo)+'</td></tr>'+
+      '<tr><td>Coeficiente de aproveitamento</td><td class="n">'+f(a.ca)+'</td><td class="n">máx. '+f(a.caMax)+'</td><td>'+tag(a.okCa)+'</td></tr>'+
+      '<tr><td>Taxa de permeabilidade</td><td class="n">'+pc(a.tp,2)+'</td><td class="n">mín. '+(a.tpMin!=null?f(a.tpMin,0)+'%':'–')+'</td><td>'+tag(a.okTp)+'</td></tr></tbody></table></div>';
+    var es=st.esq.filter(function(x){return has(x.n)||has(x.tipo);});
+    if(es.length) h+='<div class="r-block"><h2>4. Quadro de esquadrias</h2><table><thead><tr><th>Cód.</th><th>Tipo</th><th class="n">L × A (m)</th><th class="n">Peitoril</th><th class="n">Ilum. m²</th><th class="n">Vent. m²</th><th>Material / acabamento</th><th class="n">Qtd</th></tr></thead><tbody>'+st.esq.map(function(x,i){ if(!(has(x.n)||has(x.tipo))) return ""; return '<tr><td>'+e(x.n)+'</td><td>'+e(x.tipo)+'</td><td class="n">'+f(N(x.l))+' × '+f(N(x.h))+'</td><td class="n">'+f(N(x.p))+'</td><td class="n">'+f(k.esq[i].ilu)+'</td><td class="n">'+f(k.esq[i].ven)+'</td><td>'+e([x.mat,x.acab].filter(has).join(" · "))+'</td><td class="n">'+e(x.q)+'</td></tr>'; }).join("")+'</tbody></table></div>';
+    var il=st.ilu.filter(function(x){return has(x.c);});
+    if(il.length) h+='<div class="r-block"><h2>5. Iluminação e ventilação</h2><table><thead><tr><th>Cômodo</th><th class="n">Área m²</th><th>Esq.</th><th class="n">Ilum. exig. / proj.</th><th class="n">Vent. exig. / proj.</th><th>Situação</th></tr></thead><tbody>'+st.ilu.map(function(x,i){ if(!has(x.c)) return ""; var o=k.ilu[i]; return '<tr><td>'+e(x.c)+(has(x.pav)?' <span style="color:#5b6672">('+e(x.pav)+')</span>':'')+'</td><td class="n">'+f(N(x.aProj))+'</td><td>'+(has(x.esq)?e(x.esq)+(N(x.eq)>1?' ×'+N(x.eq):''):'–')+'</td><td class="n">'+f(o.kI)+' / '+f(o.lI)+'</td><td class="n">'+f(o.kV)+' / '+f(o.lV)+'</td><td>'+(o.st==="ok"?'<span class="tag t-ok">atende</span>':o.st==="crit"?'<span class="tag t-crit">não atende</span>':'<span class="tag t-warn">'+(o.sem?'a vincular':'conferir')+'</span>')+'</td></tr>'; }).join("")+'</tbody></table></div>';
+    var al=k.alerts.filter(function(x){return x.lv!=="info";});
+    h+='<div class="r-block"><h2>6. Pontos de atenção</h2>'+(al.length?'<ul>'+al.map(function(x){return '<li>'+x.t+'</li>';}).join("")+'</ul>':'<p>Nenhum ponto de atenção com os dados informados.</p>')+(has(st.obs)?'<p style="margin-top:8px"><b>Observações:</b> '+e(st.obs)+'</p>':'')+'</div>';
+    h+='<div class="r-sign"><div>'+e(r.nome||"Responsável técnico")+(r.reg?"<br>CREA/CAU "+e(r.reg):"")+'</div><div>'+e(c.nome||"Cliente")+'<br>Ciente</div></div>';
+    h+='<div class="r-foot">Relatório de andamento do projeto legal com base nos dados informados na data de emissão. Índices urbanísticos e exigências de iluminação e ventilação seguem a legislação municipal vigente. A aprovação final depende da análise da Prefeitura.</div>';
+    return h;
+  }
+  function renderRel(k){ document.getElementById("rep").innerHTML=reportHTML(k); document.getElementById("obs").value=st.obs||""; }
+
+  /* ---------- downloads ---------- */
+  function fileBase(){ var c=(st.cli&&st.cli.nome)||"cliente"; return "Projeto Legal - "+c.replace(/[\\/:*?"<>|]/g,"").slice(0,60); }
+  var dlCap=null;
+  try{ if(window.claude && window.claude.use) window.claude.use("downloads").then(function(d){ dlCap=d; }).catch(function(){}); }catch(err){}
+  function saveFile(name,data,mime){
+    if(dlCap) return dlCap.save({filename:name,data:data});
+    var framed=true; try{ framed=window.self!==window.top; }catch(err){}
+    if(!framed){
+      var b=data instanceof Blob?data:new Blob([data],{type:mime});
+      var u=URL.createObjectURL(b), a=document.createElement("a"); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(u);},4000);
+      return Promise.resolve({status:"saved"});
+    }
+    return Promise.reject({code:"unavailable"});
+  }
+  function dlErr(err){
+    var c=err&&err.code, msg=c==="declined"?"Download cancelado.":c==="rate_limited"?"Já existe um download aguardando confirmação.":"Download indisponível nesta visualização. Abra o arquivo HTML da ferramenta no navegador para baixar.";
+    document.getElementById("dlMsg").textContent=msg;
+  }
+  function standaloneDoc(k){
+    return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>'+e(fileBase())+'</title><style>body{margin:0;background:#e7ebf0;padding:20px 0;}@media print{body{background:#fff;padding:0}.rep{box-shadow:none;max-width:none}}'+document.getElementById("repCss").textContent+'</style></head><body><div class="rep">'+reportHTML(k)+'</div>';
+  }
+  document.getElementById("btnHtml").addEventListener("click",function(){
+    document.getElementById("dlMsg").textContent="";
+    saveFile(fileBase()+".html",standaloneDoc(calc()),"text/html").then(function(){ toast("Relatório salvo."); },dlErr);
+  });
+  (function(){ var framed=true; try{ framed=window.self!==window.top; }catch(err){} if(!framed){ var b=document.getElementById("btnPrint"); b.hidden=false; b.addEventListener("click",function(){ renderRel(calc()); window.print(); }); } })();
+
+  /* ---------- navegação ---------- */
+  function renderTab(t){
+    var k=calc(); renderHeader(k);
+    if(t==="pain") renderPain(k);
+    if(t==="cli") renderCli();
+    if(t==="tar"){ renderChips(); renderEtCard(); }
+    if(t==="are"){ renderAreFields(); renderAreCalc(k); }
+    if(t==="esq") renderEsq(k);
+    if(t==="ilu") renderIlu(k);
+    if(t==="rel") renderRel(k);
+  }
+  function setTab(t){
+    st.tab=t; save();
+    TABS.forEach(function(x){ var b=document.getElementById("tab-"+x), p=document.getElementById("panel-"+x); var on=x===t; b.classList.toggle("active",on); b.setAttribute("aria-selected",on); p.hidden=!on; });
+    renderTab(t);
+  }
+  function refresh(){ var k=calc(); renderHeader(k); return k; }
+
+  /* ---------- eventos ---------- */
+  document.addEventListener("input",function(ev){
+    var t=ev.target, d=t.dataset; if(!d) return;
+    if(d.k){ set(d.k,t.value); save(); refresh(); return; }
+    if(d.it!=null && d.f && d.f!=="ok"){ st.etapas[etIndex()].itens[+d.it][d.f]=t.value; save(); if(d.f==="dt") { /* atualiza situação */ } return; }
+    if(d.etf){ st.etapas[etIndex()].nome=t.value; save(); var ch=document.querySelector('.chip.active b'); if(ch) ch.textContent=t.value||"Sem nome"; return; }
+    if(d.ar){ st.areas[d.ar]=t.value; save(); renderAreCalc(refresh()); return; }
+    if(d.pav!=null){ st.areas.pavs[+d.pav][d.f]=t.value; save(); renderAreCalc(refresh()); return; }
+    if(d.nc!=null){ st.areas.nc[+d.nc][d.f]=t.value; save(); renderAreCalc(refresh()); return; }
+    if(d.esq!=null){ st.esq[+d.esq][d.f]=t.value; save(); updEsq(refresh()); return; }
+    if(d.ilu!=null){ st.ilu[+d.ilu][d.f]=t.value; save(); markIlu(refresh()); return; }
+  });
+  document.addEventListener("change",function(ev){
+    var t=ev.target, d=t.dataset;
+    if(t.id==="onlyPend"){ st.onlyPend=t.checked; save(); renderEtCard(); return; }
+    if(d.it!=null && d.f==="ok"){ st.etapas[etIndex()].itens[+d.it].ok=t.checked; save(); refresh(); renderChips(); renderEtCard(); var fc=document.getElementById(t.id); if(fc) fc.focus(); return; }
+    if(d.it!=null && d.f==="dt"){ refresh(); renderEtCard(); return; }
+    if(d.ilu!=null && d.f==="esq"){ st.ilu[+d.ilu].esq=t.value; save(); markIlu(refresh()); return; }
+  });
+  document.addEventListener("click",function(ev){
+    var b=ev.target.closest("button"); if(!b) return; var d=b.dataset;
+    if(b.classList.contains("tab")){ setTab(d.tab); return; }
+    if(d.gotab){ setTab(d.gotab); return; }
+    if(d.goet!=null){ st.et=st.etapas[+d.goet].id; setTab("tar"); return; }
+    if(d.et!=null){ st.et=st.etapas[+d.et].id; save(); renderChips(); renderEtCard(); return; }
+    if(b.id==="etAdd"){ var id="et"+Date.now(); st.etapas.push({id:id,nome:"Nova etapa",sub:"Etapa personalizada",itens:[{t:"",ok:false,ex:"",dt:"",hr:""}]}); st.et=id; save(); refresh(); renderChips(); renderEtCard(); var ni=document.getElementById("etName_"+(st.etapas.length-1)); if(ni){ ni.focus(); ni.select(); } return; }
+    if(b.id==="itAdd"){ var ei=etIndex(); st.etapas[ei].itens.push({t:"",ok:false,ex:"",dt:"",hr:""}); save(); refresh(); renderChips(); renderEtCard(); var li=document.getElementById("it_"+ei+"_"+(st.etapas[ei].itens.length-1)); if(li) li.focus(); return; }
+    if(d.itdel!=null){ st.etapas[etIndex()].itens.splice(+d.itdel,1); save(); refresh(); renderChips(); renderEtCard(); return; }
+    if(b.id==="allOk"||b.id==="allNo"){ st.etapas[etIndex()].itens.forEach(function(i){ i.ok=b.id==="allOk"; }); save(); refresh(); renderChips(); renderEtCard(); return; }
+    if(b.id==="etDel"){ document.getElementById("etDelWrap").innerHTML='<span style="display:inline-flex;gap:8px;align-items:center;color:var(--red);font-weight:600;font-size:13px;flex-wrap:wrap">Excluir esta etapa e todos os itens? <button class="btn small danger" type="button" id="etDelY">Sim, excluir</button><button class="btn small" type="button" id="etDelN">Cancelar</button></span>'; return; }
+    if(b.id==="etDelY"){ st.etapas.splice(etIndex(),1); st.et=st.etapas[0]?st.etapas[0].id:""; save(); refresh(); renderChips(); renderEtCard(); toast("Etapa excluída."); return; }
+    if(b.id==="etDelN"){ renderEtCard(); return; }
+    if(b.id==="pavAdd"){ st.areas.pavs.push({n:"",a:""}); save(); renderAreFields(); renderAreCalc(refresh()); return; }
+    if(b.id==="ncAdd"){ st.areas.nc.push({n:"",a:""}); save(); renderAreFields(); renderAreCalc(refresh()); return; }
+    if(d.pavdel!=null){ st.areas.pavs.splice(+d.pavdel,1); save(); renderAreFields(); renderAreCalc(refresh()); return; }
+    if(d.ncdel!=null){ st.areas.nc.splice(+d.ncdel,1); save(); renderAreFields(); renderAreCalc(refresh()); return; }
+    if(b.id==="esqAdd"){ st.esq.push(E("","","","","","","","","","")); save(); renderEsq(refresh()); return; }
+    if(d.esqdel!=null){ st.esq.splice(+d.esqdel,1); save(); renderEsq(refresh()); return; }
+    if(b.id==="iluAdd"){ st.ilu.push(R("","","","","","","",0.125,0.0625,"",1,"","")); save(); renderIlu(refresh()); return; }
+    if(d.iludel!=null){ st.ilu.splice(+d.iludel,1); save(); renderIlu(refresh()); return; }
+    if(b.id==="btnCopyQa"){
+      var txt=qaRows(calc().a).map(function(r){return r[0]+"\t"+r[1];}).join("\n");
+      try{ navigator.clipboard.writeText(txt).then(function(){ toast("Quadro de áreas copiado."); },function(){ selectRes(); }); }catch(err){ selectRes(); }
+      return;
+    }
+  });
+  function selectRes(){ var r=document.createRange(); r.selectNodeContents(document.getElementById("resTbl")); var s=window.getSelection(); s.removeAllRanges(); s.addRange(r); toast("Quadro selecionado. Use Ctrl/Cmd + C para copiar."); }
+
+  function newProject(){ st=EMPTY(); save(); setTab("cli"); toast("Novo projeto. Comece pela ficha do cliente."); }
+  document.getElementById("btnNew").addEventListener("click",newProject);
+  var rw=document.getElementById("resetWrap");
+  function bindReset(){ document.getElementById("btnReset").addEventListener("click",function(){
+    rw.innerHTML='<span style="display:inline-flex;gap:8px;align-items:center;color:var(--red);font-weight:600;font-size:13px;flex-wrap:wrap">Apagar todo o projeto? <button class="btn small danger" type="button" id="rsY">Sim, limpar</button><button class="btn small" type="button" id="rsN">Cancelar</button></span>';
+    document.getElementById("rsY").onclick=function(){ rw.innerHTML='<button class="btn danger small" type="button" id="btnReset">Limpar projeto</button>'; bindReset(); newProject(); };
+    document.getElementById("rsN").onclick=function(){ rw.innerHTML='<button class="btn danger small" type="button" id="btnReset">Limpar projeto</button>'; bindReset(); };
+  }); }
+  bindReset();
+  var tt; function toast(m){ var el=document.querySelector(".toast"); if(!el){ el=document.createElement("div"); el.className="toast"; el.setAttribute("role","status"); document.body.appendChild(el);} el.textContent=m; el.hidden=false; clearTimeout(tt); tt=setTimeout(function(){el.hidden=true;},2400); }
+
+  setTab(TABS.indexOf(st.tab)>=0?st.tab:"pain");
+})();
+</script>
+
+
+</body></html>

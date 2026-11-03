@@ -1,16 +1,44 @@
 [
     {
-        "name": "Diagnóstico do Imóvel ELO",
+        "name": "01 - Controle do Projeto Legal ELO",
+        "description": "Controle das etapas, informações e andamento do projeto legal.",
+        "slug": "controle-projeto-legal",
+        "url": "/tool/controle-projeto-legal",
+        "is_active": 1
+    },
+    {
+        "name": "02 - Diagnóstico do Imóvel ELO",
         "description": "Diagnóstico do imóvel, levantamento de informações e elaboração de relatórios.",
         "slug": "diagnostico-imovel",
         "url": "/tool/diagnostico-imovel",
         "is_active": 1
     },
     {
-        "name": "INSS de Obra — Planejamento Estratégico",
+        "name": "03 - Precificadora ELO",
+        "description": "Precificação de serviços, composição de escopo e análise de valores.",
+        "slug": "precificadora",
+        "url": "/tool/precificadora",
+        "is_active": 1
+    },
+    {
+        "name": "04 - INSS de Obra · Planejamento Estratégico",
         "description": "Planejamento estratégico do INSS de obra, com simulações e análise de cenários.",
         "slug": "inss-obra-planejamento-estrategico",
         "url": "/tool/inss-obra-planejamento-estrategico",
+        "is_active": 1
+    },
+    {
+        "name": "05 - Simular Cadastrar Aferir INSS de Obra",
+        "description": "Simulação, cadastro e aferição do INSS de obra.",
+        "slug": "inss-obra-simular-cadastrar-aferir",
+        "url": "/tool/inss-obra-simular-cadastrar-aferir",
+        "is_active": 1
+    },
+    {
+        "name": "06 - REURB ELO",
+        "description": "Organização de informações e planejamento da regularização fundiária urbana.",
+        "slug": "reurb",
+        "url": "/tool/reurb",
         "is_active": 1
     }
 ]

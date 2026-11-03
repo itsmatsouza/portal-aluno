@@ -1,0 +1,1200 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>REURB ELO</title>
+<style>
+  :root{
+    color-scheme:light;
+    --graphite:#1f2a37; --graphite-2:#2c3a4b;
+    --amber:#e8a33d; --amber-dark:#b8761a; --amber-soft:#f7e2bd;
+    --ink:#1b232d; --muted:#5b6672; --line:#dde3ea;
+    --bg:#f4f6f9; --white:#ffffff; --soft:#fbfcfe;
+    --red:#b24a25; --red-bg:#fdeee9; --red-line:#f3cdbd;
+    --warn:#9a6512; --warn-bg:#fbf3e6; --warn-line:#f0dcb8;
+    --ok:#1d7a4e; --ok-bg:#eaf6ef; --ok-line:#bfe4cf;
+    --info:#264a6b; --info-bg:#eef4fb; --info-line:#cfe0f2;
+    --opp:#0f6f6a; --opp-bg:#e6f5f3; --opp-line:#b5e0da;
+    --jur:#6a3f8f; --jur-bg:#f3edf9; --jur-line:#dccdea;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;font-size:14px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .wrap{max-width:1000px;margin:0 auto;padding-inline:16px;padding-block:24px 80px;}
+
+  header.brand{background:linear-gradient(135deg,var(--graphite),var(--graphite-2));color:#fff;border-radius:16px;padding:24px 26px;position:relative;overflow:hidden;}
+  header.brand::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(232,163,61,.25),transparent 70%);pointer-events:none;}
+  .logo-row{display:flex;align-items:center;gap:14px;}
+  .logo-badge{width:52px;height:52px;border-radius:12px;background:var(--amber);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--graphite);font-size:20px;letter-spacing:1px;flex:0 0 auto;}
+  .brand-name{font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--amber);font-weight:700;}
+  .brand-sub{font-size:12px;color:#c7d0da;margin-top:2px;}
+  header.brand h1{margin:16px 0 4px;font-size:24px;line-height:1.2;text-wrap:balance;}
+  header.brand p.lead{margin:0;color:#cfd8e2;font-size:14px;max-width:700px;}
+  .route{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;align-items:center;}
+  .route span{background:rgba(232,163,61,.13);border:1px solid rgba(232,163,61,.35);color:#f3d09a;font-size:11.5px;padding:4px 10px;border-radius:999px;font-weight:600;}
+  .route i{color:#8795a5;font-style:normal;font-size:12px;}
+
+  .card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin-top:18px;}
+  .card h2{margin:0 0 4px;font-size:18px;color:var(--graphite);display:flex;align-items:center;gap:9px;}
+  .card h2 .n{min-width:30px;height:30px;padding:0 6px;border-radius:9px;background:var(--graphite);color:var(--amber);display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex:0 0 auto;}
+  .card > p.sub{margin:2px 0 0;color:var(--muted);font-size:13.5px;}
+  .card h3.sec{margin:22px 0 0;font-size:12.5px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--amber-dark);display:flex;gap:8px;align-items:center;}
+  .card h3.sec .sl{width:24px;height:24px;border-radius:7px;background:var(--amber);color:var(--graphite);display:inline-flex;align-items:center;justify-content:center;font-size:12px;}
+  .card h3.sec small{font-weight:600;text-transform:none;letter-spacing:0;color:var(--muted);font-size:12.5px;}
+
+  .example-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--amber-soft);border:1px solid #efcf98;color:#6b4610;border-radius:12px;padding:10px 14px;margin-top:14px;font-size:13px;}
+  .example-bar b{color:var(--graphite);}
+
+  .meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:14px;}
+  .field{display:flex;flex-direction:column;gap:5px;min-width:0;}
+  .field.full{grid-column:1/-1;}
+  .field label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;}
+  input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 10px;background:var(--soft);width:100%;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--amber);background:#fff;box-shadow:0 0 0 3px rgba(232,163,61,.18);}
+  textarea{resize:vertical;min-height:56px;}
+
+  .progress{margin-top:18px;background:var(--white);border:1px solid var(--line);border-radius:14px;padding:14px 18px;}
+  .progress-top{display:flex;justify-content:space-between;gap:10px;font-size:13px;font-weight:700;color:var(--graphite);flex-wrap:wrap;}
+  .progress-top span:last-child{color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums;}
+  .bar{height:8px;border-radius:99px;background:var(--line);margin-top:8px;overflow:hidden;}
+  .bar i{display:block;height:100%;background:var(--amber);border-radius:99px;transition:width .25s;}
+
+  .navwrap{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;margin-top:18px;}
+  .tabs{display:flex;gap:6px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:6px;overflow-x:auto;box-shadow:0 4px 14px rgba(31,42,55,.06);}
+  .subtabs{display:flex;gap:4px;margin-top:6px;background:var(--graphite);border-radius:12px;padding:5px;overflow-x:auto;box-shadow:0 4px 14px rgba(31,42,55,.10);}
+  .subtabs .tab{min-width:84px;color:#c7d0da;font-size:12.5px;padding:7px 8px;}
+  .subtabs .tab .tn{background:rgba(255,255,255,.12);color:#fff;min-width:24px;height:24px;font-size:11px;}
+  .subtabs .tab.active{background:#fff;color:var(--graphite);}
+  .subtabs .tab.active .tn{background:var(--amber);color:var(--graphite);}
+  .subtabs .sub-lbl{flex:0 0 auto;align-self:center;font-size:10.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--amber);padding:0 8px 0 6px;}
+  .tab{flex:1 1 0;min-width:92px;display:flex;align-items:center;gap:6px;padding:9px 8px;border-radius:10px;cursor:pointer;font-weight:700;color:var(--muted);font-size:13.5px;border:none;background:transparent;font-family:inherit;transition:.15s;text-align:left;}
+  .tab .tn{min-width:26px;height:26px;padding:0 4px;border-radius:7px;background:var(--line);color:var(--graphite);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex:0 0 auto;}
+  .tab .tl{display:flex;flex-direction:column;line-height:1.15;}
+  .tab .tl small{display:none;}
+  .tab.active{background:var(--graphite);color:#fff;}
+  .tab.active .tn{background:var(--amber);color:var(--graphite);}
+  .tab .dot{width:8px;height:8px;border-radius:50%;margin-left:auto;flex:0 0 auto;}
+  .tab:focus-visible,.opt:focus-visible,.btn:focus-visible,.chip:focus-visible{outline:3px solid var(--amber);outline-offset:2px;}
+
+  .q{border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:12px;background:var(--soft);}
+  .q.answered{background:#fff;}
+  .q-head{display:flex;gap:10px;align-items:flex-start;}
+  .q-id{flex:0 0 auto;font-size:11px;font-weight:800;color:var(--amber-dark);background:#fff6e8;border:1px solid #f3d7a8;border-radius:6px;padding:2px 7px;margin-top:2px;letter-spacing:.3px;}
+  .q-text{font-size:15px;font-weight:700;color:var(--graphite);}
+  .q-where{margin:8px 0 0;font-size:12.5px;color:var(--muted);}
+  .q-where b{color:var(--graphite);font-weight:700;}
+  .opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+  .opt{font-family:inherit;font-size:14px;font-weight:700;border:1px solid var(--line);background:#fff;color:var(--graphite);border-radius:9px;padding:9px 15px;cursor:pointer;transition:.12s;text-align:left;}
+  .opt small{display:block;font-weight:500;color:var(--muted);font-size:12px;}
+  .opt:hover{border-color:var(--amber);}
+  .opt.on{background:var(--graphite);border-color:var(--graphite);color:#fff;}
+  .opt.on small{color:#c7d0da;}
+  .opt.wide{flex:1 1 240px;}
+  .chip{font-family:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);background:#fff;color:var(--graphite);border-radius:99px;padding:7px 13px;cursor:pointer;}
+  .chip.on{background:var(--amber-soft);border-color:var(--amber);color:#5a3a08;}
+  .chip.on::before{content:"✓ ";}
+  .years{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;}
+  .years .field{flex:0 1 170px;}
+  .flow-note{margin-top:12px;border-radius:10px;padding:10px 13px;font-size:13px;border:1px solid;}
+  .fn-crit{background:var(--red-bg);border-color:var(--red-line);color:var(--red);}
+  .fn-warn{background:var(--warn-bg);border-color:var(--warn-line);color:var(--warn);}
+  .fn-ok{background:var(--ok-bg);border-color:var(--ok-line);color:var(--ok);}
+  .fn-info{background:var(--info-bg);border-color:var(--info-line);color:var(--info);}
+  .fn-opp{background:var(--opp-bg);border-color:var(--opp-line);color:var(--opp);}
+  .flow-note b{color:inherit;}
+  .check{display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding:10px 12px;border:1px dashed #e3c792;border-radius:10px;background:#fffaf1;font-size:13.5px;cursor:pointer;}
+  .check input,.list input,.pq input{width:18px;height:18px;margin:1px 0 0;flex:0 0 auto;accent-color:var(--amber-dark);}
+  .banner{margin-top:14px;border-radius:12px;padding:11px 14px;font-size:13.5px;border:1px solid;}
+  .locked-box{margin-top:12px;border:1px dashed var(--line);border-radius:14px;padding:18px;text-align:center;color:var(--muted);background:#fff;font-size:13.5px;}
+  .locked-box b{color:var(--graphite);}
+
+  /* Roteiro (obra nova / etapas) */
+  .steps{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px;}
+  .steps li{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:11px 13px;background:#fff;font-size:13.5px;}
+  .steps .sn{flex:0 0 auto;font-size:11px;font-weight:800;color:var(--graphite);background:var(--amber-soft);border-radius:6px;padding:2px 7px;margin-top:1px;white-space:nowrap;}
+  .steps li b{color:var(--graphite);}
+  .steps li small{display:block;color:var(--muted);font-size:12.5px;}
+
+  /* Pesquisa */
+  .pq-group{margin-top:16px;border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  .pq-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:11px 15px;background:var(--soft);border-bottom:1px solid var(--line);}
+  .pq-head b{font-size:13.5px;color:var(--graphite);}
+  .pq{display:flex;gap:11px;align-items:flex-start;padding:10px 15px;border-bottom:1px solid var(--line);font-size:13.5px;cursor:pointer;background:#fff;}
+  .pq:last-child{border-bottom:none;}
+  .pq .pn{flex:0 0 auto;font-size:11px;font-weight:800;color:var(--amber-dark);min-width:22px;margin-top:2px;font-variant-numeric:tabular-nums;}
+  .pq small{display:block;color:var(--muted);font-size:12px;}
+  .pq.done span.tx{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(91,102,114,.4);}
+
+  /* Dossiê */
+  .dossie{width:100%;border-collapse:collapse;margin-top:12px;font-size:13.5px;}
+  .dossie th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);}
+  .dossie td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+  .tbl-wrap{overflow-x:auto;}
+
+  .btn{font-family:inherit;font-size:14px;font-weight:700;border-radius:9px;padding:10px 16px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--graphite);}
+  .btn.primary{background:var(--amber);border-color:var(--amber);color:var(--graphite);}
+  .btn.primary:hover{background:var(--amber-dark);border-color:var(--amber-dark);color:#fff;}
+  .btn.dark{background:var(--graphite);border-color:var(--graphite);color:#fff;}
+  .btn.small{padding:6px 12px;font-size:12.5px;}
+  .btn.danger{color:var(--red);border-color:var(--red-line);}
+  .btn-row{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;align-items:center;}
+  .confirm{display:inline-flex;gap:8px;align-items:center;font-size:13px;color:var(--red);font-weight:600;flex-wrap:wrap;}
+
+  /* Diagnóstico */
+  .etapas{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px;}
+  .et{border:1px solid var(--line);border-radius:12px;padding:12px 13px;background:#fff;border-top:4px solid var(--line);cursor:pointer;text-align:left;font-family:inherit;color:inherit;}
+  .et .ek{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);}
+  .et .en{font-size:14.5px;font-weight:700;color:var(--graphite);margin:2px 0 8px;line-height:1.25;}
+  .et.s-crit{border-top-color:var(--red);} .et.s-warn{border-top-color:var(--amber);} .et.s-ok{border-top-color:var(--ok);} .et.s-pend{border-top-color:#8aa3bd;} .et.s-info{border-top-color:#3a6ea5;}
+  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px;}
+  .sum{border-radius:12px;padding:10px 13px;border:1px solid;}
+  .sum .k{font-size:24px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums;}
+  .sum .l{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;}
+  .s-crit-t{background:var(--red-bg);border-color:var(--red-line);color:var(--red);}
+  .s-warn-t{background:var(--warn-bg);border-color:var(--warn-line);color:var(--warn);}
+  .s-opp-t{background:var(--opp-bg);border-color:var(--opp-line);color:var(--opp);}
+  .s-pend-t{background:var(--info-bg);border-color:var(--info-line);color:var(--info);}
+
+  .verdict{margin-top:14px;border-radius:14px;padding:16px 18px;background:var(--graphite);color:#fff;}
+  .verdict .vk{font-size:11.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--amber);}
+  .verdict h3{margin:4px 0 4px;font-size:19px;text-wrap:balance;}
+  .verdict p{margin:0;color:#cfd8e2;font-size:13.5px;}
+
+  .grp-title{margin:22px 0 0;font-size:12.5px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--graphite);display:flex;align-items:center;gap:8px;}
+  .grp-title::after{content:"";flex:1;height:1px;background:var(--line);}
+  .find{border:1px solid var(--line);border-left-width:5px;border-radius:12px;padding:13px 15px;margin-top:10px;background:#fff;}
+  .find.crit{border-left-color:var(--red);} .find.warn{border-left-color:var(--amber);} .find.ok{border-left-color:var(--ok);} .find.info{border-left-color:#3a6ea5;} .find.opp{border-left-color:var(--opp);}
+  .find-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;}
+  .find-sit{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);}
+  .find h4{margin:2px 0 4px;font-size:15px;color:var(--graphite);}
+  .find p{margin:0;font-size:13.5px;}
+  .pill{display:inline-block;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:99px;border:1px solid;white-space:nowrap;text-transform:uppercase;letter-spacing:.4px;}
+  .p-crit{background:var(--red-bg);border-color:var(--red-line);color:var(--red);}
+  .p-warn{background:var(--warn-bg);border-color:var(--warn-line);color:var(--warn);}
+  .p-ok{background:var(--ok-bg);border-color:var(--ok-line);color:var(--ok);}
+  .p-info{background:var(--info-bg);border-color:var(--info-line);color:var(--info);}
+  .p-opp{background:var(--opp-bg);border-color:var(--opp-line);color:var(--opp);}
+  .p-pend{background:#f1f4f8;border-color:#d5dde7;color:#4a5a6c;}
+  .svc{margin:9px 0 0;padding-left:18px;font-size:13px;}
+  .svc li{margin:2px 0;}
+  .strats{margin-top:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:8px;}
+  .strat{border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:var(--soft);font-size:13px;}
+  .strat b{display:block;color:var(--graphite);font-size:13.5px;}
+  .strat span{color:var(--muted);font-size:12px;}
+  .who{display:inline-block;font-size:10.5px;font-weight:800;border-radius:6px;padding:2px 7px;margin-top:5px;margin-right:4px;letter-spacing:.3px;border:1px solid;}
+  .w-tec{background:#fff6e8;border-color:#f3d7a8;color:var(--amber-dark);}
+  .w-jur{background:var(--jur-bg);border-color:var(--jur-line);color:var(--jur);}
+  .next{margin-top:10px;padding-top:9px;border-top:1px dashed var(--line);font-size:13px;color:var(--muted);}
+  .next b{color:var(--graphite);}
+
+  .scope-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px;}
+  .scope{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--soft);}
+  .scope h5{margin:0 0 2px;font-size:13px;text-transform:uppercase;letter-spacing:.5px;}
+  .scope .hint{font-size:12px;color:var(--muted);margin:0 0 8px;}
+  .scope ul{margin:0;padding-left:18px;font-size:13.5px;}
+  .scope li{margin:4px 0;}
+  .scope .et-lbl{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin:10px 0 2px;}
+  .scope .et-lbl:first-of-type{margin-top:0;}
+  .scope .empty{font-size:13px;color:var(--muted);font-style:italic;}
+  .sc-tec h5{color:var(--amber-dark);} .sc-jur h5{color:var(--jur);} .sc-cli h5{color:var(--red);} .sc-org h5{color:var(--info);}
+
+  .list{margin:10px 0 0;padding:0;list-style:none;}
+  .list li{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px;}
+  .list li:last-child{border-bottom:none;}
+  .list .dot{width:8px;height:8px;border-radius:50%;background:#3a6ea5;margin-top:7px;flex:0 0 auto;}
+  .list .go{margin-left:auto;flex:0 0 auto;}
+  .list .et-tag{font-size:10.5px;font-weight:800;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:1px 6px;margin-right:6px;white-space:nowrap;}
+  .args li::before{content:"→";color:var(--amber-dark);font-weight:800;margin-right:2px;}
+  .muted{color:var(--muted);}
+  .legal{margin-top:18px;font-size:12px;color:var(--muted);}
+  .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--graphite);color:#fff;padding:10px 16px;border-radius:10px;font-size:13.5px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.2);z-index:10;}
+  .copy-fallback{width:100%;min-height:220px;margin-top:12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;}
+
+  @media (max-width:760px){
+    .etapas,.summary{grid-template-columns:repeat(2,1fr);}
+    .scope-grid{grid-template-columns:1fr;}
+    header.brand{padding:20px;}
+    header.brand h1{font-size:21px;}
+  }
+  @media (max-width:560px){
+    .subtabs .tab{min-width:auto;flex:0 0 auto;}
+    .subtabs .tab .tl small,.subtabs .sub-lbl{display:none;}
+    .tabs .tab{min-width:auto;}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+  @media print{
+    body{background:#fff;}
+    .wrap{padding:0;max-width:none;}
+    .navwrap,.tabs,.progress,.btn-row,.example-bar,.no-print,.toast{display:none!important;}
+    .tab-panel{display:none!important;}
+    #panel-d,#panel-preco{display:block!important;}
+    .card,.find,.scope,.et{break-inside:avoid;}
+    .verdict{background:#fff;color:var(--ink);border:2px solid var(--graphite);}
+    .verdict p{color:var(--ink);}
+  }
+
+  .hlp{flex:0 0 auto;width:22px;height:22px;border-radius:50%;border:1px solid #e3c792;background:#fff6e8;color:var(--amber-dark);font-weight:800;font-size:12.5px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit;padding:0;margin-left:6px;vertical-align:middle;}
+  .hlp[aria-expanded="true"]{background:var(--amber);border-color:var(--amber);color:var(--graphite);}
+  .hlp:focus-visible{outline:3px solid var(--amber);outline-offset:2px;}
+  .hbox{margin-top:8px;border-radius:10px;padding:10px 13px;font-size:13px;background:#fffaf1;border:1px solid #f0dcb8;color:#5a3f12;}
+  .hbox b{color:var(--graphite);}
+  .field label{display:flex;align-items:center;gap:2px;}
+  .lbl-row{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+  .q-text{display:flex;align-items:flex-start;gap:4px;}
+  .res-card{margin-top:14px;border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:var(--soft);}
+  .res-card h3{margin:0 0 6px;font-size:15px;color:var(--graphite);}
+  .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:10px;}
+  .kv > div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;}
+  .kv .k{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);}
+  .kv .v{font-size:15px;font-weight:800;color:var(--graphite);margin-top:2px;line-height:1.25;}
+  .kv .s{font-size:12.5px;color:var(--muted);margin-top:3px;}
+  .phase{border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:12px;background:#fff;border-left:5px solid var(--line);}
+  .phase.s-and{border-left-color:var(--amber);} .phase.s-ok{border-left-color:var(--ok);}
+  .phase h4{margin:0;font-size:15px;color:var(--graphite);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .phase .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+  .phase .meta span{font-size:12px;background:var(--soft);border:1px solid var(--line);border-radius:7px;padding:2px 8px;color:var(--muted);}
+  .phase .meta b{color:var(--graphite);}
+  .phase select{width:auto;padding:6px 8px;font-size:13px;}
+  .phase textarea{margin-top:8px;min-height:44px;font-size:13px;}
+  .peca{display:flex;gap:11px;align-items:flex-start;padding:11px 14px;border:1px solid var(--line);border-radius:12px;margin-top:8px;background:#fff;font-size:13.5px;}
+  .peca input[type=checkbox]{width:18px;height:18px;margin:2px 0 0;flex:0 0 auto;accent-color:var(--amber-dark);}
+  .peca .pc{flex:0 0 auto;font-size:11px;font-weight:800;color:var(--amber-dark);background:#fff6e8;border:1px solid #f3d7a8;border-radius:6px;padding:1px 6px;margin-top:1px;}
+  .peca .pb{flex:1;min-width:0;}
+  .peca .pb b{color:var(--graphite);}
+  .peca .pb small{display:block;color:var(--muted);font-size:12px;margin-top:2px;}
+  .peca.done .pb b{text-decoration:line-through;text-decoration-color:rgba(91,102,114,.45);color:var(--muted);}
+  .w-pref{background:var(--info-bg);border-color:var(--info-line);color:var(--info);}
+  .w-ocup{background:#f1f4f8;border-color:#d5dde7;color:#4a5a6c;}
+  .occ{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:10px;background:#fff;}
+  .occ-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+  .occ-top b{color:var(--graphite);font-size:14px;}
+  .occ .meta-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin-top:10px;}
+  .occ input,.occ select{padding:7px 8px;font-size:13px;}
+  .tpl-wrap{display:grid;grid-template-columns:260px 1fr;gap:14px;margin-top:14px;align-items:start;}
+  .tpl-list{display:flex;flex-direction:column;gap:6px;}
+  .tpl-list button{font-family:inherit;text-align:left;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 11px;cursor:pointer;font-size:13px;color:var(--graphite);font-weight:700;}
+  .tpl-list button small{display:block;font-weight:500;color:var(--muted);font-size:11.5px;}
+  .tpl-list button.on{background:var(--graphite);color:#fff;border-color:var(--graphite);}
+  .tpl-list button.on small{color:#c7d0da;}
+  .tpl-list .tg{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--amber-dark);margin:8px 0 0;}
+  .tpl-doc{border:1px solid var(--line);border-radius:12px;background:#fff;padding:22px 24px;font-family:Georgia,"Times New Roman",serif;font-size:14px;line-height:1.6;white-space:pre-wrap;color:#1b232d;max-height:72vh;overflow:auto;}
+  .tpl-doc mark{background:#fdeccd;color:#6b4610;border-radius:3px;padding:0 2px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:12.5px;}
+  .law{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px;}
+  .law th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);}
+  .law td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top;}
+  .law td:first-child{font-weight:700;color:var(--graphite);width:24%;}
+  .law ul{margin:0;padding-left:16px;}
+  .law li{margin:2px 0;}
+  .st-pill{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:99px;border:1px solid;white-space:nowrap;text-transform:uppercase;letter-spacing:.3px;}
+  .calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:14px;}
+  .calc > div{border-radius:12px;padding:11px 13px;border:1px solid var(--line);background:#fff;}
+  .calc .k{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700;}
+  .calc .v{font-size:20px;font-weight:800;color:var(--graphite);font-variant-numeric:tabular-nums;}
+  .calc .s{font-size:12px;color:var(--muted);}
+  @media (max-width:760px){ .tpl-wrap{grid-template-columns:1fr;} .tpl-doc{padding:16px;max-height:none;} .law td:first-child{width:auto;} }
+  @media (max-width:560px){ .tabs .tab{min-width:auto;flex:0 0 auto;} .tabs .tab .tl small{display:none;} }
+  @media print{ #panel-res{display:block!important;} }
+  .tabs .tab{flex:0 0 auto;min-width:auto;padding:8px 11px;white-space:nowrap;} .tabs .tab .tl small{display:none;} .tabs .tab .dot{margin-left:4px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="brand">
+    <div class="logo-row">
+      <div class="logo-badge">ELO</div>
+      <div>
+        <div class="brand-name">Formação ELO</div>
+        <div class="brand-sub">Estrategista Legal de Obras · Método ELO</div>
+      </div>
+    </div>
+    <h1>Regularização Fundiária Urbana · REURB</h1>
+    <p class="lead">Do primeiro contato com o núcleo até o registro da CRF. Responda e a ferramenta indica a modalidade, o tipo de procedimento, os instrumentos, as peças técnicas, o modelo de negócio e gera as minutas dos documentos. Toque no <b style="color:var(--amber)">?</b> de cada campo para ver o que preencher.</p>
+    <div class="route" aria-label="Caminho">
+      <span>Núcleo</span><i>›</i><span>Enquadramento</span><i>›</i><span>Procedimento</span><i>›</i><span>Peças técnicas</span><i>›</i><span>Ocupantes</span><i>›</i><span>Negócio</span><i>›</i><span>Modelos</span><i>›</i><span>Resumo</span>
+    </div>
+  </header>
+
+  <div class="example-bar no-print" id="exampleBar" hidden>
+    <span><b>Caso de exemplo fictício carregado.</b> Explore as abas para entender o raciocínio e depois comece o seu.</span>
+    <button class="btn small dark" type="button" id="btnStartOwn">Começar meu caso</button>
+  </div>
+
+  <div class="progress no-print">
+    <div class="progress-top"><span id="progLabel">Enquadramento em andamento</span><span id="progCount"></span></div>
+    <div class="bar"><i id="progBar" style="width:0%"></i></div>
+  </div>
+
+  <div class="navwrap no-print">
+    <nav class="tabs" role="tablist" aria-label="Etapas da REURB">
+      <button class="tab" role="tab" data-tab="nuc" id="tab-nuc"><span class="tn">N</span><span class="tl">Núcleo<small>Ficha do caso</small></span><span class="dot" id="dot-nuc"></span></button>
+      <button class="tab" role="tab" data-tab="enq" id="tab-enq"><span class="tn">E</span><span class="tl">Enquadramento<small>É REURB? Qual?</small></span><span class="dot" id="dot-enq"></span></button>
+      <button class="tab" role="tab" data-tab="fas" id="tab-fas"><span class="tn">F</span><span class="tl">Procedimento<small>Fases da lei</small></span><span class="dot" id="dot-fas"></span></button>
+      <button class="tab" role="tab" data-tab="pec" id="tab-pec"><span class="tn">T</span><span class="tl">Peças técnicas<small>Seu escopo</small></span><span class="dot" id="dot-pec"></span></button>
+      <button class="tab" role="tab" data-tab="ocu" id="tab-ocu"><span class="tn">O</span><span class="tl">Ocupantes<small>Cadastro</small></span><span class="dot" id="dot-ocu"></span></button>
+      <button class="tab" role="tab" data-tab="neg" id="tab-neg"><span class="tn">R$</span><span class="tl">Negócio<small>Quem paga</small></span></button>
+      <button class="tab" role="tab" data-tab="mod" id="tab-mod"><span class="tn">M</span><span class="tl">Modelos<small>Minutas</small></span></button>
+      <button class="tab" role="tab" data-tab="nor" id="tab-nor"><span class="tn">§</span><span class="tl">Normas<small>Em vigor</small></span></button>
+      <button class="tab" role="tab" data-tab="res" id="tab-res"><span class="tn">✓</span><span class="tl">Resumo<small>e proposta</small></span></button>
+    </nav>
+  </div>
+
+  <section class="tab-panel card" id="panel-nuc" role="tabpanel">
+    <h2><span class="n">N</span>Ficha do núcleo</h2>
+    <p class="sub">Quem é o cliente, onde fica o núcleo e qual o tamanho. Esses dados preenchem automaticamente as minutas da aba Modelos.</p>
+    <div class="meta-grid" id="nucFields"></div>
+  </section>
+
+  <section class="tab-panel card" id="panel-enq" role="tabpanel" hidden>
+    <h2><span class="n">E</span>Enquadramento</h2>
+    <p class="sub">As respostas definem se o caso é REURB, a modalidade (S ou E), o tipo de procedimento e os instrumentos jurídicos.</p>
+    <div id="enqQs"></div>
+    <div id="enqRes"></div>
+  </section>
+
+  <section class="tab-panel card" id="panel-fas" role="tabpanel" hidden>
+    <h2><span class="n">F</span>Procedimento da REURB</h2>
+    <p class="sub">As fases da Lei 13.465/2017 (art. 28), com prazos legais, quem faz e o que cada fase exige. Marque o andamento para acompanhar o processo.</p>
+    <div id="fasBox"></div>
+  </section>
+
+  <section class="tab-panel card" id="panel-pec" role="tabpanel" hidden>
+    <h2><span class="n">T</span>Peças técnicas</h2>
+    <p class="sub">O que precisa ser produzido, conforme o enquadramento. É a base do seu escopo e dos seus honorários.</p>
+    <div id="pecBox"></div>
+  </section>
+
+  <section class="tab-panel card" id="panel-ocu" role="tabpanel" hidden>
+    <h2><span class="n">O</span>Cadastro dos ocupantes</h2>
+    <p class="sub">Um cartão por unidade. O cadastro mede a renda (REURB-S ou E), controla a adesão e gera a listagem qualificada que vai na CRF (art. 41, VI).</p>
+    <div id="ocuBox"></div>
+  </section>
+
+  <section class="tab-panel card" id="panel-neg" role="tabpanel" hidden>
+    <h2><span class="n">R$</span>Modelo de negócio</h2>
+    <p class="sub">Quem paga, quanto e quando. A conta mostra se a adesão mínima cobre seus custos antes de começar, para você não financiar o processo sozinho.</p>
+    <div id="negBox"></div>
+  </section>
+
+  <section class="tab-panel card" id="panel-mod" role="tabpanel" hidden>
+    <h2><span class="n">M</span>Modelos de documentos</h2>
+    <p class="sub">Minutas preenchidas com os dados do caso. O que estiver <mark style="background:#fdeccd;color:#6b4610;border-radius:3px;padding:0 3px">[entre colchetes]</mark> ainda precisa ser completado.</p>
+    <div class="banner fn-warn"><b>Minutas-base.</b> Antes de usar, adapte à lei municipal de REURB, às normas da Corregedoria do seu estado e às exigências do Cartório de RGI, e peça a revisão de um advogado. Contratos e declarações têm efeito jurídico.</div>
+    <div class="tpl-wrap"><div class="tpl-list" id="tplList"></div><div><div class="btn-row" style="margin-top:0"><button class="btn primary small" type="button" id="tplCopy">Copiar texto</button><button class="btn small" type="button" id="tplDoc">Baixar para Word (.doc)</button><span class="q-where" id="tplMsg" style="margin:0"></span></div><div class="tpl-doc" id="tplDoc_" style="margin-top:10px"></div></div></div>
+  </section>
+
+  <section class="tab-panel card" id="panel-nor" role="tabpanel" hidden>
+    <h2><span class="n">§</span>Normas em vigor</h2>
+    <p class="sub">Análise das normas que regem a REURB, conferida em 23/10/2026. Antes de cada caso, confirme se houve alteração e consulte a lei municipal e as normas da Corregedoria do seu estado.</p>
+    <div id="norBox"></div>
+  </section>
+
+  <section class="tab-panel" id="panel-res" role="tabpanel" hidden>
+    <div class="card">
+      <h2><span class="n">✓</span>Resumo do caso</h2>
+      <p class="sub" id="resCaso"></p>
+      <div id="resBox"></div>
+    </div>
+    <div class="btn-row no-print">
+      <button class="btn primary" type="button" id="btnCopy">Copiar resumo (texto para WhatsApp ou proposta)</button>
+      <button class="btn dark" type="button" id="btnPrint" hidden>Imprimir / salvar em PDF</button>
+    </div>
+    <textarea class="copy-fallback no-print" id="copyFallback" hidden readonly aria-label="Texto do resumo"></textarea>
+  </section>
+
+  <div class="btn-row no-print">
+    <button class="btn" type="button" id="btnPrev">← Voltar</button>
+    <button class="btn primary" type="button" id="btnNext">Avançar →</button>
+    <span style="flex:1"></span>
+    <span id="resetWrap"><button class="btn danger small" type="button" id="btnReset">Limpar caso</button></span>
+  </div>
+
+  <p class="legal">Ferramenta de apoio da Formação ELO. Base: Lei 13.465/2017 e alterações (Leis 14.118/2021, 14.382/2022, 14.620/2023 e 14.757/2023), Decreto 9.310/2018, Código Civil (direito de laje), Lei 6.015/1973, Lei 12.651/2012 e Lei 6.766/1979, conferidas em 23/10/2026. É uma indicação técnica preliminar: a classificação, a aprovação e a CRF são do Município, o registro é do Cartório de RGI e a estratégia jurídica deve ser validada por advogado.</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var STORE="elo-reurb-v1";
+  function has(o,k){ var v=o[k]; return v!==undefined && v!==null && v!=="" && !(Array.isArray(v)&&!v.length); }
+  function inx(v,arr){ return (arr||[]).indexOf(v)>=0; }
+  function num(v){ var x=parseFloat(String(v==null?"":v).replace(/\./g,"").replace(",",".")); return isFinite(x)?x:0; }
+  function numRaw(v){ var x=parseFloat(String(v==null?"":v).replace(",",".")); return isFinite(x)?x:0; }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
+  function BRL(v){ return "R$ "+(Math.round(v*100)/100).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function BRL0(v){ return "R$ "+Math.round(v).toLocaleString("pt-BR"); }
+  var HID=0, LASTH="";
+  function hlp(h){ if(!h) return ""; HID++; LASTH=h; return '<button type="button" class="hlp" aria-expanded="false" aria-controls="h'+HID+'" aria-label="O que preencher">?</button>'; }
+  function hbox(h){ if(h==="x") h=LASTH; return h ? '<div class="hbox" id="h'+HID+'" hidden>'+h+'</div>' : ""; }
+
+  /* ================= FICHA DO NÚCLEO ================= */
+  var FIELDS=[
+    {k:"nome", l:"Nome do núcleo", ph:"Ex.: Jardim Esperança", h:"Nome pelo qual o núcleo é conhecido pela Prefeitura e pelos moradores. Use o mesmo nome em todos os documentos: ele vai na CRF (Lei 13.465/2017, art. 41, I)."},
+    {k:"municipio", l:"Município / UF", ph:"Ex.: Guarujá/SP", h:"O Município classifica a modalidade, processa, aprova o projeto e emite a CRF (art. 30). Pergunte na Prefeitura qual secretaria cuida da REURB e se existe lei municipal sobre o tema."},
+    {k:"local", l:"Localização", ph:"Bairro, vias de acesso, ponto de referência", h:"Descrição que vai na CRF (art. 41, II). Anote também as coordenadas de um ponto central (Google Earth): ajudam a Prefeitura e o Cartório a localizar o núcleo."},
+    {k:"area", l:"Área aproximada (m²)", ph:"Ex.: 24000", num:true, h:"Estimativa pela imagem de satélite, antes do levantamento. Serve para orçar a topografia e o projeto. A área exata sai do levantamento planialtimétrico (art. 35, I)."},
+    {k:"unid", l:"Número de lotes ou unidades", ph:"Ex.: 48", num:true, h:"Conte cada lote, casa ou apartamento que vai ganhar matrícula própria. É a base dos honorários por unidade, da adesão mínima e do prazo."},
+    {k:"familias", l:"Número de famílias", ph:"Ex.: 55", num:true, h:"Pode ser maior que o número de lotes quando há mais de uma casa no lote ou construções sobrepostas. Esses casos pedem condomínio urbano simples ou direito de laje."},
+    {k:"matriculas", l:"Matrículas ou transcrições atingidas", ph:"Ex.: 12.345 e 12.346", h:"Todas as matrículas e transcrições que o perímetro do núcleo alcança. Peça certidões atualizadas de inteiro teor ao Cartório de RGI. Elas vão na planta do perímetro (art. 35, II). Se não localizar nenhuma, o Cartório faz buscas nas serventias anteriores (art. 31, §7º)."},
+    {k:"cartorio", l:"Cartório de RGI", ph:"Ex.: Oficial de Registro de Imóveis de Guarujá", h:"Cartório da circunscrição do núcleo. Se o núcleo estiver em mais de uma circunscrição, o registro corre em cada uma (art. 43)."},
+    {k:"requerente", l:"Requerente (quem assina o pedido)", ph:"Ex.: Associação de Moradores do Jardim Esperança", h:"Um dos legitimados do art. 14: o Município, os moradores (individualmente ou por associação ou cooperativa), o proprietário, loteador ou incorporador, a Defensoria Pública ou o Ministério Público. Na maior parte dos casos privados, é a associação de moradores."},
+    {k:"doc", l:"CNPJ ou CPF do requerente", ph:"00.000.000/0001-00", h:"Vai no requerimento, na ata e no contrato. Se for associação, confira se o estatuto está registrado e se a diretoria está com mandato vigente."},
+    {k:"repres", l:"Representante legal", ph:"Nome do presidente ou procurador", h:"Quem assina pela associação ou pela empresa. Peça a ata de eleição da diretoria e o documento pessoal."},
+    {k:"sede", l:"Endereço do requerente", ph:"Rua, nº, bairro, cidade", h:"Endereço para notificações e para o contrato."},
+    {k:"contato", l:"Telefone e e-mail", ph:"(13) 99999-0000 · email", h:"Contato do representante para o cronograma de reuniões e assembleias."},
+    {k:"resp", l:"Responsável técnico (você)", ph:"Seu nome", h:"Você assina o levantamento, as plantas, os memoriais e o projeto urbanístico, com ART (CREA) ou RRT (CAU) (art. 35, I, e art. 36, §5º)."},
+    {k:"reg", l:"CREA / CAU", ph:"Ex.: CREA-SP 000000000", h:"Registro profissional que vai em todas as peças técnicas e na ART/RRT."},
+    {k:"empresa", l:"Sua empresa (razão social e CNPJ)", ph:"Opcional", h:"Se você contrata como pessoa jurídica, os dados entram no contrato e na proposta."},
+    {k:"obs", l:"Observações da visita", ta:true, ph:"O que você viu no local e ouviu dos moradores", h:"Registre tudo o que pode mudar o enquadramento: córregos, encostas, linhas de transmissão, casas sobrepostas, comércios, quem vendeu os lotes e se os moradores têm contratos."}
+  ];
+
+  /* ================= PERGUNTAS DO ENQUADRAMENTO ================= */
+  var Q=[
+    {id:"e_nucleo", code:"E1", text:"O núcleo é clandestino, irregular ou os ocupantes não conseguem passar os lotes para o próprio nome?",
+      h:"Núcleo urbano informal é o assentamento <b>clandestino</b> (nunca aprovado), <b>irregular</b> (aprovado, mas executado diferente ou sem registro) ou aquele em que <b>não foi possível titular os ocupantes</b> (Lei 13.465/2017, art. 11, II). Exemplo do último caso: loteamento registrado, com matrícula de cada lote, em que o loteador morreu ou sumiu e os compradores nunca receberam escritura. <b>Ter matrícula não tira o núcleo da REURB:</b> se os ocupantes não conseguem a titulação, ele é informal para a lei.",
+      opts:[["sim","Sim","inclui loteamento com matrícula, mas sem titulação dos ocupantes"],["nao","Não","os lotes já estão no nome de quem ocupa"],["nao_sei","Não sei"]], wide:true,
+      show:function(){return true;}},
+    {id:"e_urbano", code:"E2", text:"O assentamento tem uso e características urbanas?",
+      h:"O que conta é o <b>uso</b>, não a zona do plano diretor (art. 11, I). Lotes de moradia, comércio e ruas configuram uso urbano, mesmo em área classificada como rural. Chácaras de produção agrícola, não.",
+      opts:[["sim","Sim"],["nao","Não, uso rural"]],
+      show:function(a){return a.e_nucleo==="sim";}},
+    {id:"e_data", code:"E3", text:"Quando o núcleo foi implantado?",
+      h:"Duas datas mudam o caminho:<br>• <b>Antes de 19/12/1979</b> (data da Lei 6.766): o parcelamento implantado e integrado à cidade pode ser registrado direto no Cartório, sem projeto nem CRF (art. 69).<br>• <b>Até 22/12/2016</b>: admite a <b>legitimação fundiária</b> (art. 9º, §2º, e art. 23). Depois dessa data a REURB continua possível, mas com outros instrumentos, como a legitimação de posse.<br><b>Como comprovar:</b> imagens históricas do Google Earth, fotos aéreas (Emplasa, IBGE ou Prefeitura), cadastro antigo de IPTU, contas de luz e água, contratos.",
+      opts:[["antes1979","Antes de 19/12/1979"],["ate2016","Entre 1979 e 22/12/2016"],["depois2016","Depois de 22/12/2016"],["nao_sei","Não sei"]],
+      show:function(a){return a.e_nucleo==="sim";}},
+    {id:"e_integ", code:"E4", text:"O parcelamento antigo está implantado e integrado à cidade?",
+      h:"Requisito do art. 69: vias abertas, lotes ocupados e ligação com a malha urbana. O Município precisa atestar por documento que o parcelamento foi implantado antes de 19/12/1979 e está integrado à cidade (art. 69, §1º).",
+      opts:[["sim","Sim"],["nao","Não"],["nao_sei","Não sei"]],
+      show:function(a){return a.e_nucleo==="sim" && a.e_data==="antes1979";}},
+    {id:"e_consol", code:"E5", text:"O núcleo está consolidado, ou seja, é de difícil reversão?",
+      h:"Art. 11, III: considera o tempo de ocupação, o tipo das construções, as vias, os equipamentos públicos e outras circunstâncias. Quem avalia é o Município. É requisito da <b>legitimação fundiária</b> (art. 23).",
+      opts:[["sim","Sim"],["nao","Não"],["nao_sei","Não sei"]],
+      show:function(a){return a.e_nucleo==="sim" && a.e_data!=="antes1979";}},
+    {id:"e_reg", code:"E6", text:"Qual a situação do núcleo no Cartório de RGI?",
+      h:"<b>Onde conferir:</b> certidão de inteiro teor das matrículas atingidas.<br>• <b>Loteamento registrado com lotes na matrícula</b>: o parcelamento já existe no papel e falta passar cada lote para quem ocupa. É a <b>REURB titulatória</b>, que dispensa o projeto de regularização fundiária (Decreto 9.310/2018, art. 21, §2º, II).<br>• <b>Só a matrícula da gleba</b>: o parcelamento nunca foi registrado.<br>• <b>Gleba em condomínio</b>: os ocupantes compraram frações ideais (por exemplo, 1/48 da área). O Município pode indicar o lote de cada fração (art. 45).<br>• <b>Sem matrícula</b>: o Cartório faz buscas nas serventias anteriores (art. 31, §7º) e, se nada aparecer, abre matrícula com o perímetro da CRF (art. 51, parágrafo único).",
+      opts:[["lotes","Loteamento registrado","lotes já descritos na matrícula"],["gleba","Só a matrícula da gleba","parcelamento sem registro"],["fracoes","Gleba em condomínio","ocupantes com frações ideais"],["sem","Sem matrícula localizada"],["nao_sei","Não sei"]], wide:true,
+      show:function(a){return a.e_nucleo==="sim";}},
+    {id:"e_dom", code:"E7", text:"De quem é a área?",
+      h:"Define os instrumentos jurídicos:<br>• <b>Área particular</b>: legitimação fundiária, legitimação de posse, usucapião, compra e venda.<br>• <b>Área pública</b>: não cabe usucapião nem legitimação de posse (art. 25, §2º). Cabem legitimação fundiária, concessão de uso especial para fins de moradia (CUEM), concessão de direito real de uso (CDRU), doação e compra e venda (art. 15). Na REURB-E sobre área pública, o ocupante paga o justo valor da unidade (art. 16).<br>• <b>Área da União</b> (terreno de marinha, margens de rios federais): a Secretaria do Patrimônio da União (SPU) participa como titular.",
+      opts:[["privado","Particular, titular identificado"],["privado_nid","Particular, titular não identificado","ou falecido, ou empresa extinta"],["mun","Do Município"],["est","Do Estado"],["uniao","Da União"],["misto","Parte pública, parte particular"],["nao_sei","Não sei"]],
+      show:function(a){return a.e_nucleo==="sim";}},
+    {id:"e_renda", code:"E8", text:"Qual a renda predominante dos ocupantes?",
+      h:"<b>REURB-S</b>: núcleo ocupado predominantemente por população de baixa renda. <b>REURB-E</b>: os demais casos (art. 13). O Município fixa a faixa de renda, que não pode passar de <b>5 salários mínimos de renda familiar</b> (Decreto 9.310/2018, art. 6º). Um mesmo núcleo pode ter partes em S e partes em E. Use a aba <b>Ocupantes</b> para medir com dados reais.",
+      opts:[["baixa","Baixa renda","até o limite municipal"],["nao_baixa","Acima do limite"],["mista","Misto","parte baixa renda, parte não"],["nao_sei","Ainda não sei"]],
+      show:function(a){return a.e_nucleo==="sim";}},
+    {id:"e_uso", code:"E9", text:"Qual o uso das unidades?",
+      h:"A REURB admite uso misto (art. 13, §4º). Na REURB-S, a legitimação fundiária de imóvel não residencial exige que o Município reconheça o interesse público da ocupação (art. 23, §1º).",
+      opts:[["res","Residencial"],["misto","Misto","moradia e comércio"],["nres","Predominantemente não residencial"]],
+      show:function(a){return a.e_nucleo==="sim";}},
+    {id:"e_req", code:"E10", text:"Quem vai requerer a REURB?",
+      h:"Legitimados do art. 14: <b>I</b> União, Estados, DF e Municípios; <b>II</b> os beneficiários, individual ou coletivamente, diretamente ou por cooperativas, associações de moradores e outras entidades civis; <b>III</b> proprietários, loteadores ou incorporadores; <b>IV</b> Defensoria Pública, em nome de beneficiários hipossuficientes; <b>V</b> Ministério Público. Mesmo quando um morador pede individualmente, o pedido é de REURB do núcleo, e não do lote dele. O loteador que deu causa ao núcleo informal continua responsável administrativa, civil e criminalmente mesmo pedindo a REURB.",
+      opts:[["associacao","Associação ou cooperativa de moradores"],["moradores","Moradores","em nome do núcleo, não só do próprio lote"],["loteador","Proprietário, loteador ou incorporador"],["prefeitura","Prefeitura"],["defensoria","Defensoria Pública"],["mp","Ministério Público"],["ente","Estado ou União"]],
+      show:function(a){return a.e_nucleo==="sim";}},
+    {id:"e_pref", code:"E11", text:"A Prefeitura já trabalha com a REURB deste núcleo?",
+      h:"Se a Prefeitura já instaurou e executa com equipe própria, seu papel muda: você pode ser contratado por ela (licitação) ou atender os moradores depois da CRF (averbação das casas, condomínio, laje, venda e financiamento).",
+      opts:[["nao","Não"],["programa","Tem programa, mas não para este núcleo"],["instaurada","Já instaurou para este núcleo"],["nao_sei","Não sei"]],
+      show:function(a){return a.e_nucleo==="sim";}},
+    {id:"e_lei", code:"E12", text:"O município tem lei própria de REURB?",
+      h:"Não é obrigatória: a falta de lei municipal não impede a REURB (art. 28, parágrafo único). Mas, quando existe, ela define a renda da REURB-S, as taxas, os documentos e o padrão das plantas. Peça na Prefeitura ou procure no site da Câmara Municipal.",
+      opts:[["sim","Sim"],["nao","Não"],["nao_sei","Não sei"]],
+      show:function(a){return a.e_nucleo==="sim";}},
+    {id:"e_contr", code:"E13", text:"Os ocupantes têm contratos com quem vendeu os lotes?",
+      h:"Compromissos de compra e venda, cessões e promessas de cessão valem como título para registrar a unidade em nome do ocupante atual, desde que haja prova da quitação (art. 52, parágrafo único). Na REURB titulatória, esses contratos são a principal prova.",
+      opts:[["maioria","A maioria, com preço quitado"],["alguns","Alguns"],["nao","Quase nenhum"]],
+      show:function(a){return a.e_nucleo==="sim";}},
+    {id:"e_rest", code:"E14", type:"multi", excl:["nenhuma","nao_sei"], text:"O núcleo tem alguma destas restrições? Marque todas.",
+      h:"Cada restrição exige um estudo a mais no projeto:<br>• <b>APP, mananciais ou unidade de conservação de uso sustentável</b>: estudo técnico ambiental obrigatório (art. 11, §2º; Lei 12.651/2012, arts. 64 e 65). Em unidade de conservação, também a anuência do órgão gestor (art. 11, §3º).<br>• <b>Área de risco</b>: estudo técnico de risco. As medidas indicadas são condição para aprovar. Na REURB-S, se o risco não puder ser eliminado, corrigido ou administrado, os ocupantes são realocados (art. 39).<br>• <b>Faixa não edificável e bem tombado</b>: consulta ao órgão responsável.",
+      opts:[["app","APP (rio, córrego, nascente)"],["manancial","Área de proteção de mananciais"],["uc","Unidade de conservação"],["risco","Área de risco (encosta, inundação)"],["faixa","Faixa não edificável (rodovia, ferrovia, linha de transmissão)"],["tombado","Bem tombado ou área envoltória"],["nenhuma","Nenhuma"],["nao_sei","Não sei"]],
+      show:function(a){return a.e_nucleo==="sim";}},
+    {id:"e_edif", code:"E15", type:"multi", excl:["nenhuma"], text:"Como são as construções? Marque todas que existem.",
+      h:"Define instrumentos extras dentro da REURB:<br>• <b>Mais de uma casa no lote</b>: condomínio urbano simples (arts. 61 a 63), que vale inclusive para a REURB.<br>• <b>Construções sobrepostas</b>: direito real de laje (Código Civil, arts. 1.510-A a 1.510-E). Na REURB-S, o primeiro registro da laje é isento (art. 13, §1º, VII).<br>• <b>Prédios</b>: o registro da CRF pode instituir e especificar o condomínio, com convenção facultativa (art. 48).<br>• <b>Conjunto habitacional construído para venda</b>: dispensa o Habite-se e, na REURB-S, as certidões de tributos e previdenciárias (art. 60).",
+      opts:[["uma","Uma casa por lote"],["casas","Mais de uma casa no mesmo lote"],["sobre","Construções sobrepostas"],["predio","Prédios com apartamentos"],["conjunto","Conjunto habitacional construído para venda"],["comercio","Comércios ou serviços"]],
+      show:function(a){return a.e_nucleo==="sim";}},
+    {id:"e_infra", code:"E16", type:"multi", excl:["nenhuma"], text:"Que infraestrutura o núcleo já tem? Marque o que existe.",
+      h:"Infraestrutura essencial (art. 36, §1º): água potável, esgotamento sanitário, energia elétrica domiciliar e drenagem, quando necessária. O que falta entra no cronograma de obras do projeto (art. 35, IX). Na REURB-S, cabe ao poder público implantar (art. 37). Na REURB-E, cabe a quem a aprovação indicar, inclusive aos beneficiários (art. 38). As obras podem acontecer antes, durante ou depois da REURB (art. 36, §3º).",
+      opts:[["agua","Água potável"],["esgoto","Esgoto"],["energia","Energia elétrica"],["drenagem","Drenagem"],["vias","Vias abertas"],["nenhuma","Nenhuma"]],
+      show:function(a){return a.e_nucleo==="sim";}},
+    {id:"e_confl", code:"E17", text:"Há conflito sobre a área?",
+      h:"Disputa entre ocupantes, oposição do proprietário ou ação judicial. Na REURB, a impugnação abre a composição extrajudicial (art. 31, §3º), e o Município pode usar câmaras de prevenção e resolução de conflitos e a mediação (art. 34). Ações judiciais sobre a área precisam ser informadas.",
+      opts:[["nao","Não"],["sim","Sim"],["nao_sei","Não sei"]],
+      show:function(a){return a.e_nucleo==="sim";}}
+  ];
+  var QQ={}; Q.forEach(function(q){ QQ[q.id]=q; });
+
+  /* ================= MOTOR DO ENQUADRAMENTO ================= */
+  function occStats(){
+    var O=st.ocup||[], sm=num(st.neg.sm), lim=num(st.neg.lim)||5, teto=sm*lim;
+    var comR=O.filter(function(o){return num(o.renda)>0;}), baixa=teto?comR.filter(function(o){return num(o.renda)<=teto;}).length:0;
+    return {n:O.length, comR:comR.length, baixa:baixa, pctB: comR.length&&teto ? baixa/comR.length : null, teto:teto,
+      ades:O.filter(function(o){return o.ades==="sim";}).length, outro:O.filter(function(o){return o.outro==="sim";}).length,
+      nres:O.filter(function(o){return o.uso==="nres";}).length};
+  }
+  function unidades(){ return num(st.f.unid) || (st.ocup||[]).length; }
+
+  function enq(a){
+    var R={ok:true, alerts:[], inst:[], pend:[]};
+    function al(l,t,p){ R.alerts.push({lvl:l,t:t,p:p}); }
+    if(!has(a,"e_nucleo")){ R.ok=null; return R; }
+    if(a.e_nucleo==="nao"){ R.ok=false; R.motivo="Os lotes já estão no nome de quem ocupa, então não é núcleo urbano informal. A regularização é individual: use o Diagnóstico do Imóvel ELO (matrícula, Prefeitura, Receita e averbação)."; return R; }
+    if(a.e_urbano==="nao"){ R.ok=false; R.motivo="Uso rural. A REURB é para núcleos com uso e características urbanas (art. 11, I). Avalie a regularização fundiária rural com o advogado."; return R; }
+    if(a.e_nucleo==="nao_sei") R.pend.push("Confirmar se a área é núcleo urbano informal (E1)");
+
+    /* modalidade */
+    var s=occStats(), m=a.e_renda;
+    if(s.pctB!==null && s.comR>=3){ m = s.pctB>=0.7 ? "baixa" : s.pctB<=0.3 ? "nao_baixa" : "mista"; R.medida=true; }
+    R.mod = m==="baixa"?"S": m==="nao_baixa"?"E": m==="mista"?"SE":null;
+    R.modN = {S:"REURB-S · Interesse Social", E:"REURB-E · Interesse Específico", SE:"REURB-S e REURB-E no mesmo núcleo"}[R.mod] || "A definir";
+    R.modTxt = R.mod==="S" ? "Núcleo ocupado predominantemente por população de baixa renda (art. 13, I). Isenção de custas e emolumentos dos atos do art. 13, §1º. O Município elabora e custeia o projeto e a infraestrutura essencial, mas os legitimados podem fazer as peças por conta própria (art. 33, §1º, I, e §2º)."
+      : R.mod==="E" ? "Ocupantes acima do limite de renda (art. 13, II). A regularização é contratada e custeada pelos beneficiários ou requerentes privados (art. 33, §1º, II). Sem isenção de emolumentos."
+      : R.mod==="SE" ? "Parte do núcleo em REURB-S e parte em REURB-E, classificadas por parcela (Decreto 9.310/2018, art. 5º). Cada parte segue as regras de custeio e isenção da sua modalidade."
+      : "Responda E8 ou preencha a renda dos ocupantes na aba Ocupantes.";
+    if(R.medida) R.modTxt += " Medido no cadastro: "+Math.round(s.pctB*100)+"% das famílias com renda informada estão até "+BRL0(s.teto)+".";
+    if(!R.mod) R.pend.push("Definir a renda predominante (E8) ou cadastrar a renda dos ocupantes");
+
+    /* tipo de procedimento */
+    var antigo = a.e_data==="antes1979" && a.e_integ==="sim" && a.e_reg!=="lotes";
+    if(antigo) R.tipo={k:"inominada", n:"Registro de parcelamento antigo (REURB inominada)", lei:"Lei 13.465/2017, art. 69",
+      p:"Parcelamento implantado antes de 19/12/1979 e integrado à cidade. O registro é pedido direto ao Cartório de RGI com planta, descrição técnica, documento do Município e listagem dos ocupantes. Dispensa projeto de regularização, estudo ambiental, CRF e outras aprovações (art. 69, §2º). É o caminho mais curto quando cabe."};
+    else if(a.e_reg==="lotes") R.tipo={k:"titulatoria", n:"REURB titulatória", lei:"Decreto 9.310/2018, art. 21, §2º, II",
+      p:"O núcleo já está regularizado e registrado e falta titular os ocupantes. O projeto de regularização fundiária é dispensado. O foco é a prova da posse, os contratos quitados (art. 52, parágrafo único) e a listagem qualificada dos ocupantes para a CRF."};
+    else if(a.e_reg==="fracoes") R.tipo={k:"fracoes", n:"REURB com especialização de frações ideais", lei:"Lei 13.465/2017, arts. 35, 36 e 45",
+      p:"Os ocupantes têm frações ideais de uma gleba em condomínio. O Município pode indicar a unidade de cada fração, e as matrículas são abertas sem escritura (art. 45). Se o parcelamento tiver desconformidades, segue com projeto completo."};
+    else if(has(a,"e_reg") && a.e_reg!=="nao_sei") R.tipo={k:"plena", n:"REURB com projeto de regularização fundiária", lei:"Lei 13.465/2017, arts. 35 e 36",
+      p:"Procedimento completo: levantamento, projeto urbanístico, estudos exigidos, aprovação, CRF e registro, com abertura de uma matrícula por unidade."};
+    else { R.tipo={k:"?", n:"A definir", lei:"", p:"Responda E3, E4 e E6."}; R.pend.push("Informar a situação no Cartório de RGI (E6)"); }
+    if(a.e_data==="antes1979" && !has(a,"e_integ")) R.pend.push("Confirmar se o parcelamento antigo está integrado à cidade (E4)");
+
+    /* lote único */
+    var U=unidades();
+    if(U===1){
+      if(R.tipo.k==="titulatoria") al("crit","REURB de um único lote: tema divergente","A regra é a REURB do núcleo inteiro, não do lote isolado. Parte da doutrina admite o lote único só na REURB titulatória, quando o loteamento está registrado com o lote descrito na matrícula e falta só a titulação. Não há previsão expressa na lei e há decisões contrárias. Não ofereça ao cliente sem confirmar antes, por escrito, com a Prefeitura e o Cartório. Os caminhos individuais mais seguros são a adjudicação compulsória extrajudicial (Lei 6.015/73, art. 216-B), quando há contrato quitado, e a usucapião extrajudicial (art. 216-A).");
+      else al("crit","REURB de um único lote fora da titulatória","A REURB é para núcleos (art. 11, I, fala em unidades imobiliárias). Para ocupação isolada há decisões contrárias, como a do TJ-SP (AI 2262738-35.2025.8.26.0000), e o TJMG negou a titulatória quando a matrícula só tinha fração ideal (AC 1.0000.24.021179-7/001, 2024). Avalie usucapião ou adjudicação compulsória.");
+    }
+
+    /* instrumentos */
+    function I(n,lei,p,k){ R.inst.push({n:n,lei:lei,p:p,k:k}); }
+    var pub = inx(a.e_dom,["mun","est","uniao"]), part = inx(a.e_dom,["privado","privado_nid"]) || a.e_dom==="misto", ate16 = a.e_data==="ate2016" || a.e_data==="antes1979";
+    if(R.tipo.k==="inominada") I("Registro do parcelamento (art. 69)","Lei 13.465/2017, art. 69, §1º","Planta e descrição técnica com ART/RRT, documento municipal e listagem dos ocupantes. O direito real de cada ocupante é reconhecido com o registro.","art69");
+    if(a.e_contr==="maioria"||a.e_contr==="alguns") I("Contratos quitados como título","Lei 13.465/2017, art. 52, parágrafo único","Compromissos, cessões e promessas de cessão, com prova de quitação, valem como título para abrir a matrícula em nome do ocupante atual.","contr");
+    if(ate16 && R.tipo.k!=="inominada"){
+      var lfOk = a.e_consol==="sim";
+      I("Legitimação fundiária","Lei 13.465/2017, arts. 9º, §2º, e 23","Aquisição originária da propriedade, concedida pelo poder público só dentro da REURB, a quem detém unidade em núcleo consolidado existente em 22/12/2016. Na REURB-S, o beneficiário não pode ser proprietário exclusivo, concessionário ou foreiro de outro imóvel nem ter sido beneficiado antes por legitimação de posse ou fundiária (art. 23, §1º). A unidade sai livre de ônus anteriores, salvo os do próprio beneficiário."+(lfOk?"":" <b>Confirme a consolidação do núcleo (E5).</b>"),"lf");
+      if(R.mod==="S"||R.mod==="SE"){ var s2=occStats(); if(s2.outro) al("warn","Ocupantes donos de outro imóvel",s2.outro+" ocupante(s) declararam ter outro imóvel. Na REURB-S, eles não podem receber a legitimação fundiária (art. 23, §1º, I). Use outro instrumento para essas unidades."); }
+    }
+    if(part && !pub) I("Legitimação de posse","Lei 13.465/2017, arts. 25 a 27","Reconhece a posse e vira propriedade automaticamente após 5 anos do registro, se cumpridos os requisitos do art. 183 da Constituição (área urbana até 250 m², moradia, não ser dono de outro imóvel). Fora disso, converte-se a pedido, cumpridos os requisitos de usucapião. Não cabe em área pública (art. 25, §2º).","lp");
+    if(part) I("Usucapião","Lei 13.465/2017, art. 15, II","Pode ser usada dentro da REURB para unidades em que a legitimação não se aplica. Não cabe em área pública.","usu");
+    if(a.e_dom==="privado_nid"||a.e_reg==="sem") I("Demarcação urbanística","Lei 13.465/2017, arts. 19 a 22","Procedimento do poder público para identificar os imóveis atingidos, notificar titulares e confrontantes (30 dias) e averbar o auto de demarcação. Útil quando o titular não é identificado ou a área não tem matrícula. Não é condição para a REURB.","dem");
+    if(pub){
+      I("Concessão de uso especial para fins de moradia (CUEM)","MP 2.220/2001, art. 1º, e Lei 13.465/2017, art. 15","Para quem possuía como seu, até 22/12/2016, por 5 anos, sem oposição, imóvel público urbano de até 250 m² usado como moradia, e não é dono nem concessionário de outro imóvel.","cuem");
+      I("Concessão de direito real de uso, doação ou compra e venda","Lei 13.465/2017, arts. 15 a 17","Na REURB-E em área pública, a aquisição depende do pagamento do justo valor da unidade, sem contar as benfeitorias do ocupante (art. 16). Na REURB-S, o registro do projeto e dos direitos pode ser feito em ato único (art. 17).","cdru");
+    }
+    if(a.e_dom==="uniao") al("warn","Área da União","A Secretaria do Patrimônio da União (SPU) é a titular e precisa participar do procedimento. Consulte a SPU pelo SPUnet antes de fechar escopo e prazo.");
+    if(R.tipo.k==="fracoes") I("Especialização das frações ideais","Lei 13.465/2017, art. 45","O Município indica as unidades que correspondem às frações registradas. Sem essa indicação no projeto, as matrículas são abertas por requerimento de especialização, sem escritura pública.","esp");
+    var ed=a.e_edif||[];
+    if(inx("casas",ed)) I("Condomínio urbano simples","Lei 13.465/2017, arts. 61 a 63","Para casas ou cômodos no mesmo lote, inclusive na REURB. Identifica partes comuns e unidades, abre matrícula por unidade e dispensa convenção. Nenhuma unidade pode ficar sem acesso à via pública.","cus");
+    if(inx("sobre",ed)) I("Direito real de laje","Código Civil, arts. 1.510-A a 1.510-E; Decreto 9.310/2018, art. 58; Lei 13.465/2017, art. 13, §1º, VII","Unidade sobreposta com matrícula própria, sem fração ideal do terreno. Exige acesso independente (Decreto 9.310/2018, art. 58, §7º). Na REURB-S, o primeiro registro da laje é isento.","laje");
+    if(inx("predio",ed)) I("Instituição de condomínio pela CRF","Lei 13.465/2017, art. 48","O registro da CRF pode produzir o efeito de instituição e especificação de condomínio, com convenção facultativa.","cond");
+    if(inx("conjunto",ed)) I("Regras de conjunto habitacional","Lei 13.465/2017, arts. 59 e 60; Decreto 9.310/2018, arts. 67 e 68","Núcleo construído para vender unidades prontas. Dispensa o Habite-se na aprovação e no registro e, na REURB-S, as certidões negativas de tributos e previdenciárias.","conj");
+    if(a.e_uso==="nres"||a.e_uso==="misto"||inx("comercio",ed)) al("info","Unidades não residenciais","Na REURB-S, a legitimação fundiária de imóvel não residencial exige reconhecimento do interesse público pelo Município (art. 23, §1º, III).");
+
+    /* restrições */
+    var rs=a.e_rest||[];
+    if(inx("app",rs)||inx("manancial",rs)||inx("uc",rs)) al("crit","Restrição ambiental","Estudo técnico ambiental obrigatório, demonstrando a melhoria das condições ambientais (art. 11, §2º; Lei 12.651/2012, arts. 64 e 65)."+(inx("uc",rs)?" Em unidade de conservação de uso sustentável, também a anuência do órgão gestor (art. 11, §3º).":"")+" O licenciamento é do Município se ele tiver órgão ambiental capacitado; senão, do Estado (art. 12).");
+    if(inx("risco",rs)) al("crit","Área de risco","Estudo técnico para eliminar, corrigir ou administrar o risco. A execução das medidas é condição para aprovar a REURB. Na REURB-S, se o risco não puder ser tratado, o Município realoca os ocupantes (art. 39).");
+    if(inx("faixa",rs)) al("warn","Faixa não edificável","Consulte o órgão responsável (DNIT, DER, ferrovia ou concessionária). Unidades dentro da faixa podem precisar de relocação no projeto urbanístico (art. 36, VII).");
+    if(inx("tombado",rs)) al("warn","Patrimônio histórico","Obras e aprovação dependem também do órgão de patrimônio (IPHAN, órgão estadual ou conselho municipal).");
+    if(inx("nao_sei",rs)) R.pend.push("Verificar restrições ambientais e de risco (E14)");
+
+    /* conflito, prefeitura, lei */
+    if(a.e_confl==="sim") al("warn","Conflito sobre a área","Impugnações abrem a composição extrajudicial (art. 31, §3º). O Município pode usar câmaras de conciliação e mediação (art. 34), e o acordo condiciona a CRF. Inclua o parceiro jurídico desde o início.");
+    if(a.e_pref==="instaurada") al("info","Prefeitura já conduz este núcleo","Seu papel: ser contratado pela Prefeitura (licitação, Lei 14.133/2021) para peças técnicas, ou atender os moradores depois da CRF (averbação das casas, condomínio urbano simples, laje, venda e financiamento).");
+    if(a.e_lei==="nao") al("info","Sem lei municipal de REURB","A falta de lei municipal não impede a REURB (art. 28, parágrafo único). Siga a lei federal e o Decreto 9.310/2018 e combine com a Prefeitura os padrões de planta e documentos.");
+    if(a.e_data==="depois2016") al("warn","Núcleo posterior a 22/12/2016","Sem legitimação fundiária (art. 9º, §2º). A REURB continua possível com legitimação de posse, usucapião, compra e venda e os demais instrumentos do art. 15.");
+    if(a.e_data==="nao_sei") R.pend.push("Comprovar a data de implantação do núcleo (E3)");
+
+    /* custeio */
+    R.custeio = R.mod==="E" ? "REURB-E: os beneficiários ou requerentes privados contratam e custeiam o projeto (art. 33, §1º, II). As responsabilidades por sistema viário, infraestrutura e compensações são definidas na aprovação e podem ser atribuídas aos beneficiários (art. 38)."
+      : R.mod==="S" ? "REURB-S: o Município elabora e custeia o projeto e a infraestrutura essencial (art. 33, §1º, I), mas os legitimados podem promover as peças técnicas e até as obras por conta própria (art. 33, §2º). É isso que permite a associação contratar você."
+      : R.mod==="SE" ? "Misto: a parte em REURB-S segue o art. 33, §1º, I e §2º. A parte em REURB-E é custeada pelos beneficiários (art. 33, §1º, II)." : "";
+    return R;
+  }
+
+  /* ================= FASES ================= */
+  function fases(R){
+    var a=st.a, k=R.tipo?R.tipo.k:"?";
+    if(k==="inominada") return [
+      {id:"i1", code:"F1", t:"Documento do Município", quem:"pref", prazo:"conforme o Município", lei:"art. 69, §1º, III",
+        h:"Peça à Prefeitura uma certidão ou declaração atestando que o parcelamento foi implantado antes de 19/12/1979 e está integrado à cidade. Leve as provas da data (fotos aéreas, cadastro antigo de IPTU, plantas antigas).", docs:["Requerimento à Prefeitura","Provas da data de implantação"]},
+      {id:"i2", code:"F2", t:"Planta e descrição técnica", quem:"tec", prazo:"seu cronograma", lei:"art. 69, §1º, I e II",
+        h:"Planta com perímetro, quadras, lotes e áreas públicas, com dimensões e numeração, assinada pelo interessado e por você com ART/RRT. Descrição técnica do perímetro, dos lotes e das áreas públicas.", docs:["Levantamento","Planta","Descrição técnica","ART/RRT"]},
+      {id:"i3", code:"F3", t:"Listagem dos ocupantes", quem:"tec", prazo:"seu cronograma", lei:"art. 69, §1º, IV",
+        h:"Lista dos ocupantes com a unidade de cada um, para o reconhecimento do direito real. Gere na aba Modelos a partir do cadastro.", docs:["Cadastro dos ocupantes","Listagem qualificada"]},
+      {id:"i4", code:"F4", t:"Requerimento ao Cartório de RGI", quem:"tec", prazo:"prenotação e qualificação pelo Cartório", lei:"art. 69, §§1º e 2º",
+        h:"O interessado requer ao Oficial o registro do parcelamento, com os documentos acima. Dispensa projeto de regularização, estudo ambiental, CRF e outras aprovações (art. 69, §2º). Confira as normas da Corregedoria do seu estado.", docs:["Requerimento de registro do parcelamento (aba Modelos)"]},
+      {id:"i5", code:"F5", t:"Depois do registro", quem:"tec", prazo:"por unidade", lei:"Lei 6.015/73",
+        h:"Com a matrícula de cada lote aberta, cada ocupante pode averbar a construção (Prefeitura, CND da obra e Cartório). É o mercado do Diagnóstico do Imóvel ELO.", docs:["Diagnóstico do Imóvel por unidade"]}
+    ];
+    var L=[
+      {id:"f1", code:"F1", t:"Requerimento", quem:"tec", prazo:"início", lei:"arts. 14, 28, I, e 32",
+        h:"O legitimado protocola o pedido escrito de instauração na Prefeitura, indicando o núcleo, a modalidade pretendida e os instrumentos. Você prepara o requerimento e os anexos. Se a associação for a requerente, junte a ata da assembleia que autorizou o pedido.", docs:["Requerimento de instauração (aba Modelos)","Ata da assembleia","Estatuto e ata de eleição da associação","Planta de localização e perímetro preliminar","Certidões das matrículas atingidas"]},
+      {id:"f2", code:"F2", t:"Classificação da modalidade", quem:"pref", prazo:"até 180 dias", lei:"art. 30, I e §§2º e 3º",
+        h:"O Município classifica caso a caso em REURB-S ou REURB-E, ou indefere de forma fundamentada, em até 180 dias. Se não decidir no prazo, fica fixada a modalidade indicada pelo requerente e o procedimento segue (art. 30, §3º). Se indeferir, a decisão deve indicar o que corrigir (art. 32, parágrafo único).", docs:["Protocolo com data (para contar os 180 dias)"]},
+      {id:"f3", code:"F3", t:"Buscas e notificações", quem:"pref", prazo:"30 dias para impugnar", lei:"art. 31",
+        h:"O Município busca os titulares e notifica titulares de domínio, responsáveis pela implantação, confrontantes e terceiros interessados, por correio com aviso de recebimento ou edital. Têm <b>30 dias</b> para impugnar. O silêncio vale como concordância (art. 31, §6º). Impugnação abre a composição extrajudicial (art. 31, §3º; art. 34). Se a demarcação urbanística for usada, esta fase é dispensada (art. 31, §9º). Você ajuda levantando nomes e endereços dos confrontantes.", docs:["Lista de titulares e confrontantes com endereços","Termos de anuência já colhidos (aceleram)"]},
+      {id:"f4", code:"F4", t:"Projeto de regularização fundiária", quem:"tec", prazo:"seu cronograma", lei:"arts. 35 e 36",
+        h:k==="titulatoria"?"Na titulatória o projeto é dispensado (Decreto 9.310/2018, art. 21, §2º, II). Prepare a listagem qualificada, as provas de posse e os contratos.":"É o coração do seu trabalho: levantamento, projeto urbanístico, memoriais, estudos exigidos, cronograma de obras e termo de compromisso. Veja a aba Peças técnicas.", docs:["Peças técnicas (aba Peças)"]},
+      {id:"f5", code:"F5", t:"Saneamento", quem:"pref", prazo:"exigências da Prefeitura", lei:"art. 28, IV",
+        h:"A Prefeitura analisa e pede correções (comunique-se). Você responde às exigências técnicas. Responda rápido: cada exigência parada atrasa a CRF.", docs:["Respostas às exigências"]},
+      {id:"f6", code:"F6", t:"Decisão e aprovação", quem:"pref", prazo:"com publicidade", lei:"arts. 28, V, e 40",
+        h:"A autoridade aprova o projeto, indica as intervenções e identifica os ocupantes de cada unidade e seus direitos reais. A decisão é publicada.", docs:["Publicação da decisão"]},
+      {id:"f7", code:"F7", t:"Expedição da CRF", quem:"pref", prazo:"após a aprovação", lei:"art. 41",
+        h:"A Certidão de Regularização Fundiária contém, no mínimo: nome do núcleo, localização, modalidade, responsáveis pelas obras do cronograma, numeração das unidades e a listagem dos ocupantes com estado civil, profissão, CPF, RG e filiação (art. 41, I a VI). Confira tudo antes de levar ao Cartório: erro na CRF vira nota devolutiva.", docs:["CRF","Projeto aprovado"]},
+      {id:"f8", code:"F8", t:"Registro no Cartório de RGI", quem:"tec", prazo:"15 dias para exigir ou registrar; 60 dias para concluir", lei:"arts. 42 a 54",
+        h:"O registro é pedido direto ao Oficial, sem decisão judicial (art. 42). O Cartório prenota e, em <b>15 dias</b>, emite nota de exigência ou registra (art. 44). O procedimento deve terminar em <b>60 dias</b>, prorrogáveis por igual período (art. 44, §5º). Abre-se uma matrícula para cada unidade (art. 52). Vias e áreas públicas passam ao Município (art. 53). Não se exige prova de pagamento de tributos dos legitimados (art. 44, §3º)."+(R.mod==="S"?" Na REURB-S, os atos do art. 13, §1º, são isentos.":""), docs:["Requerimento de registro da CRF (aba Modelos)","CRF e projeto aprovado"]},
+      {id:"f9", code:"F9", t:"Depois do registro: construções e unidades", quem:"tec", prazo:"por unidade", lei:"art. 63; arts. 61 e 62; CC, art. 1.510-A",
+        h:(R.mod==="S"?"Na REURB-S, a averbação das construções pode ser feita por mera notícia, a requerimento do interessado, com área construída e número da unidade, sem Habite-se nem certidões de tributos e previdenciárias (art. 63). A primeira averbação de construção residencial de até 70 m² é isenta (art. 13, §1º, V). ":"Na REURB-E, a averbação das construções segue o caminho comum: aprovação na Prefeitura, CND da obra na Receita Federal e averbação. Em conjunto habitacional, o Habite-se é dispensado (art. 60). ")+"Casas no mesmo lote: condomínio urbano simples. Sobrepostas: direito de laje. É um segundo contrato com cada morador.", docs:["Diagnóstico do Imóvel por unidade"]}
+    ];
+    return L;
+  }
+
+  /* ================= PEÇAS TÉCNICAS ================= */
+  function pecas(R){
+    var a=st.a, k=R.tipo?R.tipo.k:"?", rs=a.e_rest||[], ed=a.e_edif||[], P=[];
+    function p(id,n,quem,lei,h){ P.push({id:id,n:n,quem:quem,lei:lei,h:h}); }
+    if(k==="inominada"){
+      p("in1","Levantamento planialtimétrico e cadastral do parcelamento","tec","art. 69, §1º, I","Base da planta. Georreferencie se o Cartório ou a Prefeitura exigirem.");
+      p("in2","Planta da área com perímetro, quadras, lotes e áreas públicas, dimensões e numeração","tec","art. 69, §1º, I","Assinada pelo interessado e por você, com ART/RRT.");
+      p("in3","Descrição técnica do perímetro, dos lotes, das áreas públicas e de outras áreas com destinação específica","tec","art. 69, §1º, II","Memoriais descritivos. Modelo na aba Modelos.");
+      p("in4","Documento do Município atestando implantação antes de 19/12/1979 e integração à cidade","pref","art. 69, §1º, III","Você reúne as provas da data e pede à Prefeitura.");
+      p("in5","Listagem dos ocupantes com a indicação das unidades","tec","art. 69, §1º, IV","Gerada a partir da aba Ocupantes.");
+      p("in6","ART ou RRT das peças","tec","art. 69, §1º, I","Dispensada se o responsável técnico for servidor público.");
+      return P;
+    }
+    p("c1","Cadastro físico e social dos ocupantes","tec","art. 41, VI","Visita a cada unidade com a ficha cadastral (aba Modelos): nome, CPF, RG, estado civil, profissão, filiação, renda, tempo de posse e documentos. Alimenta a listagem da CRF.");
+    p("c2","Certidões atualizadas das matrículas e transcrições atingidas","tec","art. 35, II","Inteiro teor. Se não houver matrícula, peça busca nas serventias anteriores (art. 31, §7º).");
+    if(k==="titulatoria"){
+      p("t1","Planta de localização dos lotes do loteamento registrado com a ocupação atual","tec","Decreto 9.310/2018, art. 21, §2º, II","Mostra que a ocupação corresponde aos lotes da matrícula. Se houver divergência relevante de medidas, o caso deixa de ser só titulatório.");
+      p("t2","Provas de posse e contratos quitados de cada ocupante","ocup","art. 52, parágrafo único","Compromissos, cessões, recibos e termos de quitação. São o título para abrir a matrícula em nome do ocupante atual.");
+      p("t3","Listagem qualificada dos ocupantes para a CRF","tec","art. 41, VI","Estado civil, profissão, CPF, RG e filiação de cada ocupante. Modelo na aba Modelos.");
+    } else {
+      p("p1","Levantamento planialtimétrico e cadastral georreferenciado, com ART/RRT","tec","art. 35, I","Demonstra as unidades, as construções, o sistema viário, as áreas públicas, os acidentes geográficos e os demais elementos do núcleo. Siga o padrão exigido pela Prefeitura (art. 47).");
+      p("p2","Planta do perímetro do núcleo com as matrículas ou transcrições atingidas","tec","art. 35, II","Sobreponha o perímetro às matrículas. Onde não for possível identificar a origem, o registro usa a expressão \"proprietário não identificado\" (art. 50).");
+      p("p3","Estudo preliminar das desconformidades e da situação jurídica, urbanística e ambiental","tec","art. 35, III","Diagnóstico do núcleo: o que diverge da lei urbanística, de quem é a área, quais restrições ambientais existem.");
+      p("p4","Projeto urbanístico","tec","art. 35, IV, e art. 36","Áreas ocupadas, sistema viário e unidades; unidades a regularizar com medidas e confrontações; quadras e lotes; logradouros e áreas públicas; áreas já usucapidas; medidas corretivas; relocação de edificações, se necessária; e obras de infraestrutura essencial (art. 36, I a IX). O Município pode definir parâmetros próprios para o núcleo (art. 11, §1º).");
+      p("p5","Memoriais descritivos do perímetro, das unidades e das áreas públicas","tec","art. 35, V","Modelos na aba Modelos.");
+      p("p6","Proposta de soluções para questões ambientais, urbanísticas e de reassentamento","tec","art. 35, VI","Inclui a relocação de unidades em risco ou em faixa não edificável.");
+      if(inx("risco",rs)) p("p7","Estudo técnico de risco","tec","art. 35, VII, e art. 39","Geotécnico, de inundação ou outro previsto em lei. Indica como eliminar, corrigir ou administrar o risco. As medidas são condição para aprovar.");
+      if(inx("app",rs)||inx("manancial",rs)||inx("uc",rs)) p("p8","Estudo técnico ambiental","tec","art. 35, VIII; art. 11, §2º; Lei 12.651/2012, arts. 64 e 65","Demonstra a melhoria das condições ambientais em relação à situação anterior. Pode ser feito em parceria com profissional da área ambiental.");
+      p("p9","Cronograma físico de obras de infraestrutura essencial e compensações","tec","art. 35, IX, e art. 36, §1º","Água, esgoto, energia e drenagem que faltam, com responsáveis e prazos. Na REURB-E, as responsabilidades podem ser dos beneficiários (art. 38).");
+      p("p10","Termo de compromisso dos responsáveis pelo cronograma","jur","art. 35, X; art. 38, §2º; Decreto 9.310/2018, art. 21, §1º","Assinado com duas testemunhas para valer como título executivo extrajudicial. Modelo na aba Modelos.");
+      p("p11","Listagem qualificada dos ocupantes para a CRF","tec","art. 41, VI","Gerada a partir da aba Ocupantes.");
+      if(k==="fracoes") p("p12","Quadro de correspondência entre frações ideais e lotes","tec","art. 45","Liga cada fração registrada à unidade ocupada, para o Município indicar no projeto.");
+    }
+    if(inx("casas",ed)) p("x1","Planta e quadro do condomínio urbano simples","tec","arts. 61 e 62","Partes comuns ao nível do solo, partes comuns internas (se houver) e unidades autônomas, com acesso de todas à via pública.");
+    if(inx("sobre",ed)) p("x2","Planta e memorial da construção-base e das lajes","tec","CC, art. 1.510-A; Decreto 9.310/2018, art. 58","Identifica cada unidade sobreposta, com acesso independente.");
+    if(inx("predio",ed)) p("x3","Quadro de áreas e frações ideais dos prédios (NBR 12.721)","tec","art. 48","Para o registro da CRF produzir a instituição e especificação do condomínio.");
+    if(inx("faixa",rs)||inx("tombado",rs)) p("x4","Consultas aos órgãos externos (faixa não edificável, patrimônio)","tec","art. 36, VII","Protocolos e respostas, para anexar ao projeto.");
+    p("x5","ART ou RRT de todas as peças","tec","art. 36, §5º","Dispensada só quando o responsável técnico é servidor ou empregado público.");
+    return P;
+  }
+
+  /* ================= MODELOS ================= */
+  function V(v,l){ return (v!==undefined && v!==null && String(v).trim()!=="") ? String(v) : "⟦"+l+"⟧"; }
+  function hoje(){ var d=new Date(); return ("0"+d.getDate()).slice(-2)+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+d.getFullYear(); }
+  function inciso(){ return {associacao:"II",moradores:"II",loteador:"III",prefeitura:"I",ente:"I",defensoria:"IV",mp:"V"}[st.a.e_req]; }
+  function modTxt(R){ return R.mod==="S"?"Regularização Fundiária Urbana de Interesse Social (REURB-S)":R.mod==="E"?"Regularização Fundiária Urbana de Interesse Específico (REURB-E)":R.mod==="SE"?"REURB-S para a parcela ocupada predominantemente por população de baixa renda e REURB-E para o restante":"⟦modalidade: REURB-S ou REURB-E⟧"; }
+  function negCalc(){
+    var n=st.neg, U=unidades(), hon=num(n.hon), ent=num(n.ent)/100, par=Math.max(1,Math.round(num(n.par)||1)), amin=num(n.amin)/100, cus=num(n.custos);
+    var tot=U*hon, uMin=Math.ceil(U*amin), caixaMin=uMin*hon*ent, parc=hon*(1-ent)/par;
+    return {U:U,hon:hon,ent:ent,par:par,amin:amin,cus:cus,tot:tot,uMin:uMin,caixaMin:caixaMin,parc:parc,entU:hon*ent,cobre:caixaMin>=cus};
+  }
+  function servicosTxt(R){ return pecas(R).filter(function(x){return x.quem==="tec";}).map(function(x,i){return "   "+String.fromCharCode(97+i%26)+") "+x.n+";";}).join("\n"); }
+
+  var TPL=[
+    {g:"Início do caso", id:"prop", n:"Proposta comercial", s:"Para a associação ou o loteador", fn:function(R){ var F=st.f, c=negCalc();
+      return "PROPOSTA DE SERVIÇOS TÉCNICOS · REGULARIZAÇÃO FUNDIÁRIA URBANA\n\n"+
+"À "+V(F.requerente,"requerente")+"\nA/C "+V(F.repres,"representante")+"\n\n"+
+"Assunto: Regularização Fundiária Urbana do núcleo "+V(F.nome,"nome do núcleo")+", "+V(F.municipio,"Município/UF")+"\n\n"+
+"1. O QUE É A REURB\nA Regularização Fundiária Urbana (Lei Federal nº 13.465/2017) é o procedimento que integra o núcleo à cidade e termina com a matrícula de cada unidade no Cartório de Registro de Imóveis, em nome de quem ocupa. Com a matrícula, o morador pode vender, financiar, deixar herança e averbar a sua casa.\n\n"+
+"2. ENQUADRAMENTO PRELIMINAR\n• Modalidade indicada: "+modTxt(R)+".\n• Procedimento: "+(R.tipo?R.tipo.n:"⟦tipo⟧")+" ("+(R.tipo&&R.tipo.lei?R.tipo.lei:"⟦base legal⟧")+").\n• Unidades estimadas: "+V(c.U||"","nº de unidades")+".\nA classificação definitiva é feita pelo Município (art. 30 da Lei 13.465/2017).\n\n"+
+"3. ESCOPO DOS SERVIÇOS TÉCNICOS\n"+servicosTxt(R)+"\n   Acompanhamento do processo na Prefeitura até a emissão da CRF e do pedido de registro no Cartório.\n\n"+
+"4. NÃO ESTÃO INCLUÍDOS\n• Assessoria jurídica (indicada à parte, com advogado parceiro).\n• Taxas municipais, emolumentos de cartório"+(R.mod==="S"?" (isentos na REURB-S para os atos do art. 13, §1º)":"")+" e impostos.\n• Obras de infraestrutura e compensações definidas no projeto.\n• Averbação individual das construções depois do registro (contratação individual).\n\n"+
+"5. INVESTIMENTO\n• "+V(c.hon?BRL(c.hon):"","valor")+" por unidade, total estimado de "+V(c.tot?BRL(c.tot):"","total")+" para "+V(c.U||"","nº")+" unidades.\n• Entrada de "+V(c.ent?Math.round(c.ent*100)+"%":"","%")+" ("+V(c.hon?BRL(c.entU):"","valor")+" por unidade) na assinatura do termo de adesão e saldo em "+V(c.par||"","nº")+" parcelas de "+V(c.hon?BRL(c.parc):"","valor")+".\n• Os trabalhos começam quando "+V(c.amin?Math.round(c.amin*100)+"%":"","%")+" das unidades ("+V(c.uMin||"","nº")+") tiverem aderido e pago a entrada.\n\n"+
+"6. PRAZOS\nOs prazos técnicos são de responsabilidade do contratado. Os prazos de análise da Prefeitura (até 180 dias só para classificar a modalidade, art. 30, §2º) e do Cartório (art. 44) não dependem dele.\n\n"+
+"Validade da proposta: "+V(st.neg.valid,"30 dias")+".\n\n"+V(F.municipio?F.municipio.split("/")[0]:"","cidade")+", "+hoje()+".\n\n\n"+V(F.resp,"responsável técnico")+"\n"+V(F.reg,"CREA/CAU")+(F.empresa?"\n"+F.empresa:""); }},
+
+    {g:"Início do caso", id:"ata", n:"Ata de assembleia", s:"Autoriza o pedido e a contratação", fn:function(R){ var F=st.f, c=negCalc();
+      return "ATA DA ASSEMBLEIA GERAL EXTRAORDINÁRIA DA "+V(F.requerente,"nome da associação").toUpperCase()+"\n\n"+
+"Aos "+"⟦dia⟧ dias do mês de ⟦mês⟧ de ⟦ano⟧, às ⟦hora⟧, em ⟦local⟧, reuniram-se em Assembleia Geral Extraordinária os associados da "+V(F.requerente,"associação")+", inscrita no CNPJ sob o nº "+V(F.doc,"CNPJ")+", convocados por edital publicado em ⟦data e meio de convocação, conforme o estatuto⟧, com a presença de ⟦nº⟧ associados, conforme lista de presença anexa, atingido o quórum previsto no art. ⟦nº⟧ do Estatuto Social.\n\n"+
+"Assumiu a presidência dos trabalhos "+V(F.repres,"presidente")+", que convidou ⟦nome⟧ para secretariar. Foi lida a ordem do dia:\n\n"+
+"1. Autorizar a Associação a requerer ao Município de "+V(F.municipio,"Município")+" a instauração da Regularização Fundiária Urbana (REURB) do núcleo "+V(F.nome,"núcleo")+", na qualidade de legitimada (art. 14, II, da Lei Federal nº 13.465/2017);\n"+
+"2. Aprovar a contratação de "+V(F.empresa||F.resp,"profissional ou empresa")+", "+V(F.reg,"CREA/CAU")+", para os serviços técnicos da REURB, nos termos da proposta apresentada;\n"+
+"3. Aprovar a forma de custeio: adesão individual e voluntária de cada ocupante, por termo de adesão, no valor de "+V(c.hon?BRL(c.hon):"","valor")+" por unidade, com entrada de "+V(c.ent?Math.round(c.ent*100)+"%":"","%")+" e saldo em "+V(c.par||"","nº")+" parcelas, com início dos trabalhos após a adesão de "+V(c.amin?Math.round(c.amin*100)+"%":"","%")+" das unidades;\n"+
+"4. Autorizar o(a) presidente a assinar o requerimento, o contrato e os demais documentos necessários.\n\n"+
+"Após a apresentação da proposta e os esclarecimentos, os itens foram colocados em votação e aprovados por ⟦unanimidade ou nº de votos favoráveis, contrários e abstenções⟧.\n\n"+
+"Nada mais havendo a tratar, foi encerrada a assembleia e lavrada esta ata, que vai assinada pelo(a) presidente e pelo(a) secretário(a).\n\n"+
+V(F.municipio?F.municipio.split("/")[0]:"","cidade")+", ⟦data⟧.\n\n\n____________________________\n"+V(F.repres,"Presidente")+"\nPresidente\n\n____________________________\n⟦Secretário(a)⟧\nSecretário(a)\n\nAnexo: lista de presença assinada.\nObservação: registre a ata no Cartório de Registro Civil de Pessoas Jurídicas se o estatuto ou o Município exigir."; }},
+
+    {g:"Início do caso", id:"contr", n:"Contrato de serviços técnicos", s:"Com a associação ou o loteador", fn:function(R){ var F=st.f, c=negCalc();
+      return "CONTRATO DE PRESTAÇÃO DE SERVIÇOS TÉCNICOS DE ENGENHARIA/ARQUITETURA PARA REGULARIZAÇÃO FUNDIÁRIA URBANA\n\n"+
+"CONTRATANTE: "+V(F.requerente,"nome")+", inscrita no CNPJ/CPF sob o nº "+V(F.doc,"CNPJ/CPF")+", com sede em "+V(F.sede,"endereço")+", neste ato representada por "+V(F.repres,"representante")+", conforme ⟦ata de assembleia de dd/mm/aaaa / contrato social⟧.\n\n"+
+"CONTRATADO(A): "+V(F.empresa||F.resp,"nome ou razão social")+", "+V(F.reg,"CREA/CAU")+", inscrito(a) no CNPJ/CPF sob o nº ⟦nº⟧, com endereço em ⟦endereço⟧.\n\n"+
+"CLÁUSULA 1ª · OBJETO\nPrestação de serviços técnicos de engenharia/arquitetura para a Regularização Fundiária Urbana do núcleo "+V(F.nome,"núcleo")+", localizado em "+V(F.local,"localização")+", "+V(F.municipio,"Município/UF")+", com aproximadamente "+V(c.U||"","nº")+" unidades, nos termos da Lei Federal nº 13.465/2017 e do Decreto nº 9.310/2018, compreendendo:\n"+servicosTxt(R)+"\n   Acompanhamento técnico do procedimento na Prefeitura até a expedição da Certidão de Regularização Fundiária (CRF) e protocolo do pedido de registro no Cartório de Registro de Imóveis.\n\n"+
+"CLÁUSULA 2ª · SERVIÇOS NÃO INCLUÍDOS\nNão estão incluídos: (a) assessoria e representação jurídica; (b) taxas, emolumentos, impostos e custas de qualquer órgão; (c) obras de infraestrutura, compensações e medidas definidas no projeto aprovado; (d) estudos de outras especialidades não listados na Cláusula 1ª, que serão orçados à parte se exigidos; (e) averbação individual de construções após o registro.\n\n"+
+"CLÁUSULA 3ª · CONDIÇÃO PARA INÍCIO\nOs serviços terão início quando "+V(c.amin?Math.round(c.amin*100)+"%":"","%")+" das unidades ("+V(c.uMin||"","nº")+" unidades) tiverem assinado o Termo de Adesão e pago a entrada. Não atingida a adesão mínima em ⟦prazo⟧ dias, qualquer das partes poderá encerrar este contrato, com devolução integral das entradas recebidas, ⟦descontadas / sem desconto de⟧ despesas comprovadas.\n\n"+
+"CLÁUSULA 4ª · HONORÁRIOS\nO valor é de "+V(c.hon?BRL(c.hon):"","valor")+" por unidade, pago por cada ocupante aderente, com entrada de "+V(c.ent?Math.round(c.ent*100)+"%":"","%")+" na assinatura do Termo de Adesão e saldo em "+V(c.par||"","nº")+" parcelas mensais de "+V(c.hon?BRL(c.parc):"","valor")+". ⟦Definir se a Contratante responde solidariamente pelos aderentes ou se cada aderente responde só pela sua parte.⟧ Atraso: multa de ⟦2⟧% e juros de ⟦1⟧% ao mês.\n\n"+
+"CLÁUSULA 5ª · OBRIGAÇÕES DA CONTRATANTE\n(a) fornecer os documentos do núcleo e dos associados; (b) convocar e organizar reuniões e assembleias; (c) garantir o acesso às unidades para levantamento e cadastro; (d) assinar o requerimento de instauração e os demais atos como legitimada; (e) comunicar aos ocupantes as etapas do processo.\n\n"+
+"CLÁUSULA 6ª · OBRIGAÇÕES DO(A) CONTRATADO(A)\n(a) executar os serviços conforme as normas técnicas e as exigências do Município; (b) emitir as ARTs/RRTs; (c) responder às exigências técnicas no prazo de ⟦15⟧ dias; (d) informar o andamento à Contratante ⟦mensalmente⟧.\n\n"+
+"CLÁUSULA 7ª · PRAZOS E NATUREZA DA OBRIGAÇÃO\nOs prazos técnicos do(a) Contratado(a) constam do cronograma anexo. Os prazos de análise e decisão do Município, do Cartório e de outros órgãos não dependem do(a) Contratado(a). A classificação da modalidade, a aprovação do projeto, a expedição da CRF e o registro são atos do poder público e do Oficial de Registro, de modo que o(a) Contratado(a) assume obrigação de meio quanto a esses resultados.\n\n"+
+"CLÁUSULA 8ª · DADOS PESSOAIS\nOs dados dos ocupantes serão tratados apenas para a execução da REURB, na forma da Lei nº 13.709/2018 (LGPD), e compartilhados somente com o Município, o Cartório e os demais órgãos envolvidos.\n\n"+
+"CLÁUSULA 9ª · RESCISÃO\nEm caso de rescisão, serão devidos os honorários proporcionais aos serviços já executados, conforme o cronograma.\n\n"+
+"CLÁUSULA 10ª · FORO\nFica eleito o foro da Comarca de "+V(F.municipio?F.municipio.split("/")[0]:"","comarca")+".\n\n"+
+V(F.municipio?F.municipio.split("/")[0]:"","cidade")+", ⟦data⟧.\n\n____________________________\nCONTRATANTE\n\n____________________________\nCONTRATADO(A)\n\nTestemunhas:\n1. ____________________ CPF ⟦nº⟧\n2. ____________________ CPF ⟦nº⟧"; }},
+
+    {g:"Início do caso", id:"ades", n:"Termo de adesão do ocupante", s:"Um por unidade", fn:function(R){ var F=st.f, c=negCalc();
+      return "TERMO DE ADESÃO INDIVIDUAL · REURB DO NÚCLEO "+V(F.nome,"núcleo").toUpperCase()+"\n\n"+
+"Eu, ⟦nome completo⟧, ⟦nacionalidade⟧, ⟦estado civil⟧, ⟦profissão⟧, RG nº ⟦nº⟧, CPF nº ⟦nº⟧, ocupante da unidade ⟦quadra/lote/número⟧ do núcleo "+V(F.nome,"núcleo")+", "+V(F.municipio,"Município/UF")+", declaro que:\n\n"+
+"1. Conheço e adiro ao contrato de prestação de serviços técnicos firmado entre "+V(F.requerente,"requerente")+" e "+V(F.empresa||F.resp,"contratado")+" para a Regularização Fundiária Urbana do núcleo.\n"+
+"2. Pagarei "+V(c.hon?BRL(c.hon):"","valor")+" pela minha unidade, com entrada de "+V(c.hon?BRL(c.entU):"","valor")+" nesta data e "+V(c.par||"","nº")+" parcelas de "+V(c.hon?BRL(c.parc):"","valor")+", com vencimento em ⟦dia⟧ de cada mês.\n"+
+"3. Sei que taxas, emolumentos, impostos e obras não estão incluídos nesse valor.\n"+
+"4. Sei que os trabalhos começam quando "+V(c.amin?Math.round(c.amin*100)+"%":"","%")+" das unidades aderirem e que, se a adesão mínima não for atingida, a entrada será devolvida nas condições do contrato.\n"+
+"5. Sei que a aprovação, a CRF e o registro dependem do Município e do Cartório de Registro de Imóveis.\n"+
+"6. Autorizo o uso dos meus dados pessoais e dos documentos que entreguei somente para a REURB, conforme a Lei nº 13.709/2018 (LGPD).\n"+
+"7. Comprometo-me a fornecer os documentos pedidos e a permitir o acesso à unidade para o levantamento.\n\n"+
+V(F.municipio?F.municipio.split("/")[0]:"","cidade")+", ⟦data⟧.\n\n____________________________\nOcupante\n\n____________________________\nCônjuge ou companheiro(a), se houver"; }},
+
+    {g:"Cadastro", id:"ficha", n:"Ficha cadastral e declaração", s:"Preenchida na visita a cada unidade", fn:function(R){ var F=st.f; var lf=(R.mod==="S"||R.mod==="SE");
+      return "FICHA CADASTRAL DO OCUPANTE · REURB "+V(F.nome,"núcleo").toUpperCase()+"\n\n"+
+"UNIDADE\nQuadra: ____  Lote/nº: ____  Endereço: ______________________________\nÁrea aproximada do lote: ______ m²   Área construída: ______ m²\nUso: ( ) moradia  ( ) comércio/serviço  ( ) misto   Pavimentos: ____\nConstruções sobrepostas ou mais de uma casa no lote? ( ) não ( ) sim: ____________\n\n"+
+"OCUPANTE\nNome: ____________________________________  CPF: ______________  RG: ______________\nNacionalidade: __________  Estado civil: __________  Regime de bens: __________\nProfissão: ______________  Filiação: ____________________________________________\nTelefone: ______________  E-mail: ______________________\n\n"+
+"CÔNJUGE OU COMPANHEIRO(A)\nNome: ____________________________________  CPF: ______________  RG: ______________\nProfissão: ______________  Filiação: ____________________________________________\n\n"+
+"FAMÍLIA E RENDA\nNº de moradores: ____   Renda familiar mensal: R$ __________\n\n"+
+"POSSE\nDesde quando ocupa (mês/ano): ______  Como adquiriu: ( ) compra ( ) cessão ( ) herança ( ) ocupação ( ) outro: ______\nDe quem adquiriu: ____________________  Preço quitado? ( ) sim ( ) não\nDocumentos apresentados: ( ) contrato ( ) recibos ( ) IPTU ( ) contas de água/luz ( ) fotos ( ) outros: ______\n\n"+
+"DECLARAÇÃO DO OCUPANTE\nDeclaro, sob as penas da lei, que as informações acima são verdadeiras, que exerço a posse da unidade de forma mansa e pacífica desde a data informada"+(lf?", que não sou proprietário(a) exclusivo(a), concessionário(a) ou foreiro(a) de outro imóvel urbano ou rural e que não fui beneficiado(a) antes por legitimação de posse ou fundiária de imóvel urbano com a mesma finalidade (Lei 13.465/2017, art. 23, §1º)":"")+". Autorizo o uso destes dados somente para a REURB (Lei 13.709/2018).\n\n"+
+V(F.municipio?F.municipio.split("/")[0]:"","cidade")+", ____/____/______\n\n____________________________\nOcupante\n\n____________________________\nCônjuge ou companheiro(a)\n\nCadastrador: ______________________  Data da visita: ____/____/______\nFotos da unidade: ( ) fachada ( ) interior ( ) divisas"; }},
+
+    {g:"Cadastro", id:"anu", n:"Termo de anuência", s:"Confrontante ou titular da matrícula", fn:function(R){ var F=st.f;
+      return "TERMO DE ANUÊNCIA · REURB DO NÚCLEO "+V(F.nome,"núcleo").toUpperCase()+"\n\n"+
+"Eu, ⟦nome⟧, ⟦qualificação completa⟧, na qualidade de ⟦titular do domínio / confrontante / titular de direito real⟧ do imóvel ⟦descrição e matrícula nº⟧ do "+V(F.cartorio,"Cartório de RGI")+", declaro que tomei conhecimento da Regularização Fundiária Urbana do núcleo "+V(F.nome,"núcleo")+", em "+V(F.municipio,"Município/UF")+", requerida por "+V(F.requerente,"requerente")+", e do levantamento e da planta do perímetro que me foram apresentados, e que CONCORDO com a regularização e com as divisas indicadas, nada tendo a opor.\n\n"+
+"Esta anuência é dada para os fins do art. 31 da Lei Federal nº 13.465/2017 e pode ser apresentada ao Município e ao Cartório de Registro de Imóveis.\n\n"+
+"⟦cidade⟧, ⟦data⟧.\n\n____________________________\n⟦nome⟧ (firma reconhecida, se exigida)\n\n____________________________\nCônjuge, se houver\n\nObservação: a notificação formal dos titulares e confrontantes é feita pelo Município, e o silêncio no prazo de 30 dias vale como concordância (art. 31, §6º). A anuência assinada antes acelera a fase de notificações."; }},
+
+    {g:"Prefeitura", id:"req", n:"Requerimento de instauração", s:"Pedido inicial ao Município", fn:function(R){ var F=st.f, a=st.a;
+      var inst=R.inst.map(function(i){return i.n;}).join("; ");
+      var sit={lotes:"loteamento registrado, com os lotes descritos na matrícula, pendente apenas a titulação dos ocupantes",gleba:"gleba registrada sem registro do parcelamento",fracoes:"gleba registrada em condomínio, com os ocupantes titulares de frações ideais",sem:"área sem matrícula ou transcrição localizada"}[a.e_reg]||"⟦situação registral⟧";
+      return "EXCELENTÍSSIMO(A) SENHOR(A) PREFEITO(A) DO MUNICÍPIO DE "+V(F.municipio,"Município/UF").toUpperCase()+"\n⟦Secretaria responsável pela regularização fundiária⟧\n\n"+
+"Assunto: Requerimento de instauração de Regularização Fundiária Urbana (REURB)\n\n"+
+V(F.requerente,"requerente")+", inscrito(a) no CNPJ/CPF sob o nº "+V(F.doc,"nº")+", com endereço em "+V(F.sede,"endereço")+", neste ato representado(a) por "+V(F.repres,"representante")+", na qualidade de legitimado(a) nos termos do art. 14, "+V(inciso(),"inciso")+", da Lei Federal nº 13.465/2017, vem requerer a instauração de Regularização Fundiária Urbana do núcleo urbano informal abaixo descrito, nos termos dos arts. 28 e 32 da mesma lei e do Decreto nº 9.310/2018.\n\n"+
+"1. DO NÚCLEO\nDenominação: "+V(F.nome,"nome")+"\nLocalização: "+V(F.local,"localização")+"\nÁrea aproximada: "+V(F.area?num(F.area).toLocaleString("pt-BR")+" m²":"","área")+"\nUnidades: "+V(F.unid,"nº")+" · Famílias: "+V(F.familias,"nº")+"\nImplantação: "+({antes1979:"anterior a 19/12/1979",ate2016:"entre 1979 e 22/12/2016",depois2016:"posterior a 22/12/2016"}[a.e_data]||"⟦período⟧")+"\nUso predominante: "+({res:"residencial",misto:"misto",nres:"não residencial"}[a.e_uso]||"⟦uso⟧")+"\n\n"+
+"2. DA SITUAÇÃO REGISTRAL\nMatrícula(s) ou transcrição(ões) atingida(s): "+V(F.matriculas,"nº")+", do "+V(F.cartorio,"Cartório de RGI")+". Situação: "+sit+".\n\n"+
+"3. DA MODALIDADE\nRequer-se a classificação como "+modTxt(R)+", nos termos do art. 13 da Lei nº 13.465/2017"+(R.mod==="S"?", por se tratar de núcleo ocupado predominantemente por população de baixa renda, conforme o cadastro preliminar anexo":"")+", ressalvada a competência do Município para a classificação (art. 30, I), no prazo de até 180 dias (art. 30, §2º).\n\n"+
+"4. DOS INSTRUMENTOS\nIndica-se a utilização de: "+V(inst,"instrumentos")+", sem prejuízo de outros admitidos no art. 15 da Lei nº 13.465/2017.\n\n"+
+"5. DO CUSTEIO\n"+(R.mod==="S"?"Nos termos do art. 33, §2º, da Lei nº 13.465/2017, o(a) requerente promoverá, às suas expensas, os projetos e documentos técnicos necessários, por meio de profissional habilitado.":R.mod==="E"?"Nos termos do art. 33, §1º, II, da Lei nº 13.465/2017, a regularização será contratada e custeada pelos beneficiários.":"⟦custeio conforme o art. 33⟧")+"\n\n"+
+"6. DOS PEDIDOS\nDiante do exposto, requer:\na) a instauração da REURB do núcleo "+V(F.nome,"núcleo")+" (art. 32);\nb) a classificação da modalidade (art. 30, I e §2º);\nc) as buscas e notificações dos titulares, confrontantes e terceiros interessados (art. 31);\nd) a análise e a aprovação do projeto de regularização fundiária a ser apresentado (arts. 35 e 36);\ne) ao final, a expedição da Certidão de Regularização Fundiária (art. 41) para registro.\n\n"+
+"Responsável técnico: "+V(F.resp,"nome")+", "+V(F.reg,"CREA/CAU")+".\n\n"+
+"ANEXOS\n1. Documentos do(a) requerente (estatuto, ata de eleição e ata da assembleia que autorizou o pedido, se associação)\n2. Certidões das matrículas ou transcrições atingidas\n3. Planta de localização e perímetro preliminar\n4. Cadastro preliminar dos ocupantes\n5. Provas da data de implantação do núcleo\n\n"+
+"Termos em que pede deferimento.\n\n"+V(F.municipio?F.municipio.split("/")[0]:"","cidade")+", "+hoje()+".\n\n____________________________\n"+V(F.repres,"representante")+"\n"+V(F.requerente,"requerente"); }},
+
+    {g:"Prefeitura", id:"memp", n:"Memorial descritivo do perímetro", s:"Do núcleo", fn:function(R){ var F=st.f;
+      return "MEMORIAL DESCRITIVO DO PERÍMETRO\nNúcleo: "+V(F.nome,"núcleo")+"\nMunicípio: "+V(F.municipio,"Município/UF")+"\nMatrícula(s) atingida(s): "+V(F.matriculas,"nº")+" · "+V(F.cartorio,"Cartório de RGI")+"\nÁrea: ⟦área⟧ m² · Perímetro: ⟦perímetro⟧ m\nSistema de referência: SIRGAS 2000, projeção UTM, fuso ⟦nº⟧, meridiano central ⟦nº⟧ W\n\n"+
+"DESCRIÇÃO\nInicia-se a descrição deste perímetro no vértice V1, de coordenadas N ⟦0.000.000,000⟧ m e E ⟦000.000,000⟧ m, situado ⟦referência física: no alinhamento da Rua X com a divisa de Y⟧; deste, segue com azimute de ⟦000°00'00\"⟧ e distância de ⟦00,00⟧ m, confrontando com ⟦confrontante e matrícula⟧, até o vértice V2, de coordenadas N ⟦⟧ m e E ⟦⟧ m; deste, segue com azimute de ⟦⟧ e distância de ⟦⟧ m, confrontando com ⟦⟧, até o vértice V3 ⟦...repetir para cada vértice...⟧; deste, segue com azimute de ⟦⟧ e distância de ⟦⟧ m, confrontando com ⟦⟧, até o vértice V1, ponto inicial da descrição deste perímetro.\n\n"+
+"QUADRO DE CONFRONTANTES\nTrecho V1–V2: ⟦confrontante, matrícula⟧\nTrecho V2–V3: ⟦confrontante, matrícula⟧\n\n"+
+"Todas as coordenadas aqui descritas estão georreferenciadas ao Sistema Geodésico Brasileiro. Azimutes e distâncias calculados no plano de projeção UTM.\n\n"+V(F.municipio?F.municipio.split("/")[0]:"","cidade")+", ⟦data⟧.\n\n____________________________\n"+V(F.resp,"responsável técnico")+"\n"+V(F.reg,"CREA/CAU")+" · ART/RRT nº ⟦nº⟧\n\nNota: siga o padrão de memorial exigido pelo Município (art. 47 da Lei 13.465/2017) e, se exigida, a descrição georreferenciada conforme as normas do CNJ."; }},
+
+    {g:"Prefeitura", id:"meml", n:"Memorial descritivo de unidade", s:"Um por lote ou unidade", fn:function(R){ var F=st.f;
+      return "MEMORIAL DESCRITIVO DE UNIDADE IMOBILIÁRIA\nNúcleo: "+V(F.nome,"núcleo")+" · "+V(F.municipio,"Município/UF")+"\nQuadra ⟦nº⟧ · Lote ⟦nº⟧\nÁrea do lote: ⟦0,00⟧ m² · Área construída: ⟦0,00⟧ m²\nOcupante: ⟦nome⟧\n\n"+
+"DESCRIÇÃO\nLote de terreno sob nº ⟦⟧ da quadra ⟦⟧, situado ⟦do lado par/ímpar⟧ da ⟦Rua⟧, distante ⟦00,00⟧ m da esquina com a ⟦Rua⟧, medindo ⟦00,00⟧ m de frente para a ⟦Rua⟧; ⟦00,00⟧ m do lado direito, de quem da rua olha para o imóvel, confrontando com o lote ⟦nº⟧; ⟦00,00⟧ m do lado esquerdo, confrontando com o lote ⟦nº⟧; e ⟦00,00⟧ m nos fundos, confrontando com ⟦⟧, encerrando a área de ⟦0,00⟧ m².\n\n"+
+"⟦Se houver condomínio urbano simples ou laje, descreva a unidade autônoma, as partes comuns e o acesso à via pública.⟧\n\n"+V(F.municipio?F.municipio.split("/")[0]:"","cidade")+", ⟦data⟧.\n\n____________________________\n"+V(F.resp,"responsável técnico")+"\n"+V(F.reg,"CREA/CAU")+" · ART/RRT nº ⟦nº⟧"; }},
+
+    {g:"Prefeitura", id:"lista", n:"Listagem qualificada dos ocupantes", s:"Gerada do cadastro · vai na CRF", fn:function(R){ var F=st.f, O=st.ocup||[];
+      var head="LISTAGEM QUALIFICADA DOS OCUPANTES\nNúcleo: "+V(F.nome,"núcleo")+" · "+V(F.municipio,"Município/UF")+"\nModalidade: "+modTxt(R)+"\nBase: Lei 13.465/2017, art. 41, VI (estado civil, profissão, CPF, RG e filiação)\n\n";
+      if(!O.length) return head+"⟦Cadastre os ocupantes na aba Ocupantes para gerar a listagem.⟧";
+      return head+O.map(function(o,i){ return (i+1)+". Unidade "+V(o.un,"quadra/lote")+"\n   "+V(o.nome,"nome")+", "+V(o.civil,"estado civil")+(o.conj?", cônjuge/companheiro(a) "+o.conj:"")+", "+V(o.prof,"profissão")+", CPF "+V(o.cpf,"CPF")+", RG "+V(o.rg,"RG")+", filiação: "+V(o.fil,"filiação")+".\n   Uso: "+({res:"residencial",nres:"não residencial",misto:"misto"}[o.uso]||"⟦uso⟧")+" · Posse desde: "+V(o.desde,"ano")+" · Direito: ⟦legitimação fundiária / título do art. 52 / outro⟧"; }).join("\n\n")+"\n\n"+V(F.municipio?F.municipio.split("/")[0]:"","cidade")+", "+hoje()+".\n\n____________________________\n"+V(F.resp,"responsável técnico"); }},
+
+    {g:"Prefeitura", id:"comp", n:"Termo de compromisso", s:"Cronograma de obras e compensações", fn:function(R){ var F=st.f, inf=st.a.e_infra||[];
+      var falta=[["agua","abastecimento de água potável"],["esgoto","coleta e tratamento de esgoto"],["energia","energia elétrica domiciliar"],["drenagem","drenagem de águas pluviais"],["vias","adequação do sistema viário"]].filter(function(x){return !inx(x[0],inf);}).map(function(x){return x[1];});
+      return "TERMO DE COMPROMISSO · REURB DO NÚCLEO "+V(F.nome,"núcleo").toUpperCase()+"\n\n"+
+"Pelo presente, ⟦nome do(s) responsável(is): Município, loteador, associação ou beneficiários⟧, ⟦qualificação⟧, assume(m) perante o Município de "+V(F.municipio,"Município/UF")+" o compromisso de executar as obras de infraestrutura essencial, as medidas de mitigação e compensação urbanística e ambiental e os estudos técnicos previstos no projeto de regularização fundiária do núcleo "+V(F.nome,"núcleo")+", conforme o cronograma físico anexo, nos termos dos arts. 35, X, e 38, §2º, da Lei nº 13.465/2017 e do art. 21, §1º, do Decreto nº 9.310/2018.\n\n"+
+"1. OBRAS E MEDIDAS\n"+(falta.length?falta.map(function(x,i){return "1."+(i+1)+" "+x.charAt(0).toUpperCase()+x.slice(1)+": responsável ⟦⟧, prazo ⟦⟧.";}).join("\n"):"⟦Liste as obras e medidas do projeto, com responsável e prazo.⟧")+"\n\n"+
+"2. PRAZO\nAs obras serão executadas conforme o cronograma físico anexo, que integra este termo, podendo ocorrer antes, durante ou depois da conclusão da REURB (art. 36, §3º).\n\n"+
+"3. TÍTULO EXECUTIVO\nEste termo, assinado por duas testemunhas, constitui título executivo extrajudicial (Decreto nº 9.310/2018, art. 21, §1º).\n\n"+
+V(F.municipio?F.municipio.split("/")[0]:"","cidade")+", ⟦data⟧.\n\n____________________________\nCompromissário(s)\n\n____________________________\nMunicípio\n\nTestemunhas:\n1. ____________________ CPF ⟦⟧\n2. ____________________ CPF ⟦⟧"; }},
+
+    {g:"Cartório", id:"regcrf", n:"Requerimento de registro da CRF", s:"Ao Oficial de Registro de Imóveis", fn:function(R){ var F=st.f;
+      return "ILUSTRÍSSIMO(A) SENHOR(A) OFICIAL DO "+V(F.cartorio,"Cartório de Registro de Imóveis").toUpperCase()+"\n\n"+
+V(F.requerente,"requerente")+", inscrito(a) no CNPJ/CPF sob o nº "+V(F.doc,"nº")+", representado(a) por "+V(F.repres,"representante")+", legitimado(a) nos termos do art. 14, "+V(inciso(),"inciso")+", e §1º, da Lei nº 13.465/2017, vem requerer o REGISTRO da Certidão de Regularização Fundiária (CRF) nº ⟦nº⟧, expedida pelo Município de "+V(F.municipio,"Município/UF")+" em ⟦data⟧, e do projeto de regularização fundiária aprovado do núcleo "+V(F.nome,"núcleo")+", nos termos dos arts. 42 a 54 da mesma lei, com:\n\n"+
+"a) o registro nas matrículas atingidas: "+V(F.matriculas,"nº")+" (art. 49);\nb) a abertura de matrícula para cada unidade regularizada (arts. 44, §1º, e 52) e para as áreas públicas (art. 53, parágrafo único);\nc) o registro dos direitos reais indicados na CRF em favor dos ocupantes listados (art. 44, §1º, III)"+(inx("predio",st.a.e_edif||[])?";\nd) a instituição e especificação de condomínio, nos termos do art. 48":"")+".\n\n"+
+(R.mod==="S"?"Tratando-se de REURB-S, requer a isenção de custas e emolumentos dos atos previstos no art. 13, §1º, da Lei nº 13.465/2017.\n\n":"")+
+"Informa que as notificações foram realizadas pelo Município (art. 31), sendo dispensada nova notificação (art. 44, §6º).\n\nAnexos: CRF; projeto de regularização fundiária aprovado; listagem dos ocupantes; plantas e memoriais com ART/RRT.\n\n"+
+V(F.municipio?F.municipio.split("/")[0]:"","cidade")+", ⟦data⟧.\n\n____________________________\n"+V(F.repres,"representante")+"\n\nObservação: o Oficial tem 15 dias para emitir nota de exigência ou praticar os atos (art. 44) e o procedimento deve terminar em 60 dias, prorrogáveis por igual período (art. 44, §5º)."; }},
+
+    {g:"Cartório", id:"reg69", n:"Registro de parcelamento antigo", s:"Art. 69 · antes de 19/12/1979", fn:function(R){ var F=st.f;
+      return "ILUSTRÍSSIMO(A) SENHOR(A) OFICIAL DO "+V(F.cartorio,"Cartório de Registro de Imóveis").toUpperCase()+"\n\n"+
+V(F.requerente,"interessado")+", ⟦qualificação⟧, vem requerer o REGISTRO DO PARCELAMENTO denominado "+V(F.nome,"núcleo")+", localizado em "+V(F.local,"localização")+", "+V(F.municipio,"Município/UF")+", implantado anteriormente a 19 de dezembro de 1979 e integrado à cidade, nos termos do art. 69 da Lei nº 13.465/2017, área objeto da(s) matrícula(s)/transcrição(ões) "+V(F.matriculas,"nº")+".\n\n"+
+"Para tanto, apresenta (art. 69, §1º):\nI · planta da área em regularização, assinada pelo interessado e pelo responsável técnico "+V(F.resp,"nome")+", "+V(F.reg,"CREA/CAU")+", com ART/RRT nº ⟦nº⟧, contendo o perímetro, as quadras, os lotes e as áreas públicas, com dimensões e numeração;\nII · descrição técnica do perímetro, dos lotes, das áreas públicas e das demais áreas com destinação específica;\nIII · documento expedido pelo Município atestando que o parcelamento foi implantado antes de 19/12/1979 e está integrado à cidade;\nIV · listagem dos ocupantes, com a indicação das respectivas unidades, para o reconhecimento do direito real.\n\n"+
+"Nos termos do art. 69, §2º, a apresentação desses documentos dispensa o projeto de regularização fundiária, o estudo técnico ambiental, a CRF e quaisquer outras manifestações, aprovações, licenças ou alvarás.\n\n"+
+"Requer a abertura de matrícula para cada lote e para as áreas públicas.\n\n"+V(F.municipio?F.municipio.split("/")[0]:"","cidade")+", ⟦data⟧.\n\n____________________________\n"+V(F.repres||F.requerente,"interessado")+"\n\nObservação: confira as normas da Corregedoria do seu estado sobre este registro antes do protocolo."; }},
+
+    {g:"Cartório", id:"cus", n:"Instituição de condomínio urbano simples", s:"Casas ou cômodos no mesmo lote", fn:function(R){ var F=st.f;
+      return "ILUSTRÍSSIMO(A) SENHOR(A) OFICIAL DO "+V(F.cartorio,"Cartório de Registro de Imóveis").toUpperCase()+"\n\n"+
+"⟦Nome(s) do(s) titular(es) do lote⟧, ⟦qualificação completa⟧, proprietário(s) do imóvel da matrícula nº ⟦nº⟧, vem(êm) requerer a INSTITUIÇÃO DE CONDOMÍNIO URBANO SIMPLES, nos termos dos arts. 61 a 63 da Lei nº 13.465/2017"+(R.mod?", no âmbito da REURB do núcleo "+V(F.nome,"núcleo"):"")+", com as seguintes características:\n\n"+
+"1. UNIDADES AUTÔNOMAS\nUnidade 1: ⟦descrição, área privativa, fração ideal⟧\nUnidade 2: ⟦descrição, área privativa, fração ideal⟧\n\n"+
+"2. PARTES COMUNS\nAo nível do solo: ⟦corredor de acesso, quintal, etc., com área⟧\nInternas à edificação, se houver: ⟦escada, caixa d'água, etc.⟧\n\n"+
+"3. ACESSO\nTodas as unidades têm acesso ao logradouro público por ⟦descrição⟧, nenhuma ficando privada desse acesso.\n\n"+
+"4. CONVENÇÃO\nDispensada a apresentação de convenção de condomínio (art. 62). A gestão das partes comuns será feita de comum acordo entre os condôminos, podendo ser formalizada por instrumento particular.\n\n"+
+"Requer a abertura de matrícula para cada unidade autônoma.\n\nAnexos: planta e memorial descritivo das unidades e das partes comuns, com ART/RRT de "+V(F.resp,"responsável técnico")+", "+V(F.reg,"CREA/CAU")+"; documentos dos titulares (e cônjuges); "+(R.mod==="S"?"comprovação da REURB-S, se for o caso.":"construções regularizadas e averbadas.")+"\n\n⟦cidade⟧, ⟦data⟧.\n\n____________________________\nTitular(es)\n\nObservação: confirme com o Município e o Cartório se o instituto já é aplicado na sua cidade e quais parâmetros urbanísticos locais se aplicam (art. 61)."; }},
+
+    {g:"Cartório", id:"laje", n:"Quadro de direitos de laje", s:"Para o projeto e a CRF", fn:function(R){ var F=st.f;
+      return "QUADRO DE UNIDADES SOBREPOSTAS · DIREITO REAL DE LAJE\nNúcleo: "+V(F.nome,"núcleo")+" · "+V(F.municipio,"Município/UF")+"\nBase: Código Civil, arts. 1.510-A a 1.510-E; Decreto 9.310/2018, art. 58; Lei 6.015/73, art. 176, §9º"+(R.mod==="S"?"; isenção do primeiro registro na REURB-S (Lei 13.465/2017, art. 13, §1º, VII)":"")+"\n\n"+
+"LOTE ⟦quadra/lote⟧\nConstrução-base: ⟦nome do titular⟧ · área construída ⟦m²⟧ · pavimento ⟦térreo⟧\nLaje 1: ⟦nome do titular⟧ · área ⟦m²⟧ · pavimento ⟦superior⟧ · acesso independente por ⟦escada externa pela Rua X⟧\nLaje 2 (sucessiva, se houver): ⟦nome⟧ · ⟦m²⟧ · ⟦pavimento⟧ · acesso por ⟦⟧ · autorização expressa dos titulares da construção-base e da laje 1\n\n"+
+"REGRAS A OBSERVAR\n• A laje não recebe fração ideal do terreno nem participação nas áreas já edificadas (CC, art. 1.510-A, §4º).\n• Cada unidade precisa de acesso independente (Decreto 9.310/2018, art. 58, §7º).\n• A laje sucessiva exige autorização expressa dos titulares da construção-base e das demais lajes (CC, art. 1.510-A, §6º).\n• O Município pode dispor sobre posturas edilícias e urbanísticas da laje (CC, art. 1.510-A, §5º).\n• No registro, abre-se matrícula própria para a laje, com averbação na matrícula da construção-base (Lei 6.015/73, art. 176, §9º).\n\n____________________________\n"+V(F.resp,"responsável técnico")+" · "+V(F.reg,"CREA/CAU"); }}
+  ];
+
+  /* ================= NORMAS ================= */
+  var NORMAS=[
+    {n:"Lei 13.465/2017 · Título II (REURB)", st:"ok", stt:"Em vigor", q:"Regra geral da REURB em todo o país.",
+      a:["Arts. 9º a 14: objetivos, definições (art. 11), modalidades S e E (art. 13), isenções da REURB-S (art. 13, §1º) e legitimados (art. 14)","Art. 15: instrumentos (legitimação fundiária e de posse, usucapião, CUEM, CDRU, doação, compra e venda e outros)","Arts. 19 a 27: demarcação urbanística, legitimação fundiária (marco de 22/12/2016) e legitimação de posse","Arts. 28 a 41: fases, classificação em até 180 dias, notificações com prazo de 30 dias, custeio, conteúdo do projeto, áreas de risco, decisão e CRF","Arts. 42 a 54: registro da CRF (15 dias para exigir ou registrar, 60 dias para concluir) e abertura de matrículas","Arts. 59 a 63: conjuntos habitacionais (sem Habite-se), condomínio urbano simples e averbação por mera notícia na REURB-S","Art. 69: registro de parcelamento implantado antes de 19/12/1979"],
+      alt:"Alterada pela Lei 14.118/2021 (arts. 12, 23 e 33), Lei 14.382/2022 (art. 76), Lei 14.620/2023 (arts. 30, 36, 37, 37-A e 44) e Lei 14.757/2023 (art. 3º-A, rural). Nenhuma alteração posterior a 2023 localizada até 23/10/2026."},
+    {n:"Decreto 9.310/2018", st:"ok", stt:"Em vigor", q:"Regulamenta a REURB.",
+      a:["Arts. 5º e 6º: REURB-S e REURB-E; renda da REURB-S fixada pelo Município, no máximo 5 salários mínimos de renda familiar","Art. 7º: legitimados e direito de regresso contra quem implantou o núcleo","Art. 21: fases; §1º termo de compromisso com duas testemunhas (título executivo); §2º dispensa do projeto no parcelamento antigo (art. 69 da lei) e no núcleo já registrado com titulação pendente (REURB titulatória)","Arts. 23 a 25: classificação, notificações e instauração","Art. 58: direito real de laje (acesso independente, §7º)","Arts. 67 e 68: conjuntos habitacionais","Capítulo IX: condomínio urbano simples"],
+      alt:"Confira a versão compilada no Planalto antes de citar artigos em documentos."},
+    {n:"Código Civil · arts. 1.510-A a 1.510-E", st:"ok", stt:"Em vigor", q:"Direito real de laje.",
+      a:["Unidade sobreposta com matrícula própria, sem fração ideal do terreno","Laje sucessiva com autorização expressa dos titulares","Município pode dispor sobre posturas edilícias da laje"], alt:"Incluídos pela Lei 13.465/2017."},
+    {n:"Lei 6.015/1973 · Registros Públicos", st:"ok", stt:"Em vigor", q:"Registro e alternativas à REURB.",
+      a:["Art. 176, §9º: matrícula própria da laje","Art. 216-A: usucapião extrajudicial","Art. 216-B: adjudicação compulsória extrajudicial (incluído pela Lei 14.382/2022)","Art. 247-A: dispensa de Habite-se para casa térrea residencial unifamiliar urbana pronta há mais de 5 anos em área de baixa renda (Lei 13.865/2019)"], alt:"Útil para casos de um único imóvel, fora da REURB."},
+    {n:"Lei 12.651/2012 · Código Florestal", st:"ok", stt:"Em vigor", q:"APP dentro da REURB.",
+      a:["Arts. 64 e 65: regularização ambiental de núcleos em APP, com estudo técnico","Art. 4º, §10: faixas marginais em área urbana consolidada definidas por lei municipal (Lei 14.285/2021)"], alt:""},
+    {n:"Lei 6.766/1979 · Parcelamento do solo", st:"ok", stt:"Em vigor", q:"Data de corte do art. 69 e regularização de loteamentos.",
+      a:["Publicada em 19/12/1979: marco do registro de parcelamento antigo","Art. 40: o Município pode regularizar loteamento não autorizado ou executado em desacordo"], alt:""},
+    {n:"MP 2.220/2001", st:"ok", stt:"Em vigor", q:"Concessão de uso especial para fins de moradia (CUEM) em área pública.", a:["Art. 1º: posse até 22/12/2016, por 5 anos, até 250 m², moradia (redação da Lei 13.465/2017)"], alt:""},
+    {n:"Lei 14.133/2021 · Licitações", st:"ok", stt:"Em vigor", q:"Quando a Prefeitura contrata as peças técnicas.", a:["Licitação ou contratação direta nos casos da lei"], alt:""},
+    {n:"Normas do CNJ e da Corregedoria estadual", st:"info", stt:"Consultar", q:"Detalham o registro no Cartório.",
+      a:["Código Nacional de Normas do CNJ (Provimento 149/2023, alterado por provimentos posteriores, como o 195/2025 sobre descrição georreferenciada)","Normas de Serviço da Corregedoria do seu estado (em SP, Tomo II, Capítulo XX, Registro de Imóveis)"], alt:"Variam por estado. Peça ao Cartório a lista de documentos que ele exige."},
+    {n:"Lei municipal de REURB", st:"info", stt:"Consultar", q:"Renda da REURB-S, taxas, documentos e padrões de planta.", a:["Não é obrigatória (art. 28, parágrafo único, da Lei 13.465/2017)"], alt:"Peça na Prefeitura ou consulte o site da Câmara Municipal."},
+    {n:"PL 972/2025 (Senado)", st:"warn", stt:"Em tramitação", q:"Atualiza o marco legal da REURB.",
+      a:["Temas: reassentamento e indenização em áreas de risco, flexibilidade urbanística, concessões urbanísticas e participação privada, saneamento e marco temporal","Aprovado na CAE em 07/07/2026; na CCJ, aguardando relator (situação em 23/10/2026)"], alt:"Ainda não é lei. Acompanhe: se aprovado, esta ferramenta precisa ser revisada."},
+    {n:"Jurisprudência sobre lote único", st:"warn", stt:"Divergente", q:"REURB de um só imóvel.",
+      a:["TJMG, AC 1.0000.24.021179-7/001 (2024): titulatória negada quando a matrícula tinha só fração ideal, sem lote individualizado","TJ-SP, AI 2262738-35.2025.8.26.0000 (2025): REURB não se presta a ocupação individual isolada (citado em artigo doutrinário)","Doutrina admite o lote único na titulatória e na regularização de edificação em parcelamento já regular"], alt:"Tema em aberto. Confirme com a Prefeitura e o Cartório antes de prometer ao cliente."}
+  ];
+
+  /* ================= ESTADO ================= */
+  var EXAMPLE={
+    f:{nome:"Jardim Esperança (exemplo fictício)", municipio:"Guarujá/SP", local:"Final da Rua das Acácias, bairro Morrinhos", area:"24000", unid:"48", familias:"55", matriculas:"12.345", cartorio:"Oficial de Registro de Imóveis de Guarujá", requerente:"Associação de Moradores do Jardim Esperança", doc:"00.000.000/0001-00", repres:"Maria das Dores Silva", sede:"Rua das Acácias, 10, Guarujá/SP", contato:"(13) 99999-0000", resp:"", reg:"", empresa:"", obs:"Loteamento vendido por contrato de gaveta em 1998. A loteadora encerrou as atividades. Há duas casas sobrepostas e um córrego no fundo das quadras C e D."},
+    a:{e_nucleo:"sim", e_urbano:"sim", e_data:"ate2016", e_consol:"sim", e_reg:"gleba", e_dom:"privado_nid", e_renda:"baixa", e_uso:"misto", e_req:"associacao", e_pref:"nao", e_lei:"sim", e_contr:"maioria", e_rest:["app"], e_edif:["uma","sobre","comercio"], e_infra:["agua","energia","vias"], e_confl:"nao"},
+    fas:{f1:{s:"ok"}}, pec:{c2:true}, ocup:[
+      {un:"Q.A L.01", nome:"José Pereira", cpf:"", rg:"", civil:"casado", conj:"Ana Pereira", prof:"pedreiro", fil:"", renda:"2800", desde:"1999", uso:"res", outro:"nao", ades:"sim"},
+      {un:"Q.A L.02", nome:"Rita Santos", cpf:"", rg:"", civil:"solteira", conj:"", prof:"diarista", fil:"", renda:"1900", desde:"2003", uso:"res", outro:"nao", ades:"sim"},
+      {un:"Q.B L.05", nome:"Carlos Lima", cpf:"", rg:"", civil:"casado", conj:"Joana Lima", prof:"comerciante", fil:"", renda:"6500", desde:"2001", uso:"misto", outro:"nao", ades:"nao"}],
+    neg:{modelo:"associacao", sm:"", lim:"5", hon:"1800", ent:"20", par:"10", amin:"60", custos:"18000", valid:"30 dias"},
+    tab:"res", example:true, tpl:"req"};
+  var BLANK=function(){ return {f:{},a:{},fas:{},pec:{},ocup:[],neg:{lim:"5",ent:"20",par:"10",amin:"60",modelo:"associacao"},tab:"nuc",example:false,tpl:"prop"}; };
+  function load(){ try{ var s=localStorage.getItem(STORE); return s?JSON.parse(s):null; }catch(e){ return null; } }
+  function save(){ try{ localStorage.setItem(STORE,JSON.stringify(st)); }catch(e){} }
+  var st=load(); if(!st) st=JSON.parse(JSON.stringify(EXAMPLE));
+  var B=BLANK(); Object.keys(B).forEach(function(k){ if(st[k]===undefined) st[k]=B[k]; });
+
+  function visible(q){ return q.show(st.a); }
+  function answered(q){ return has(st.a,q.id); }
+  function prune(){}
+  function va(){ var o={}; Q.forEach(function(q){ if(q.show(st.a) && st.a[q.id]!==undefined) o[q.id]=st.a[q.id]; }); return o; }
+
+  /* ================= RENDER ================= */
+  function whoTag(w){ var M={tec:["w-tec","Você executa"],jur:["w-jur","Parceiro jurídico"],pref:["w-pref","Prefeitura"],ocup:["w-ocup","Ocupante entrega"]}[w]; return '<span class="who '+M[0]+'">'+M[1]+'</span>'; }
+
+  function renderNuc(){
+    var h=""; HID=0;
+    FIELDS.forEach(function(f){
+      var b=hlp(f.h), box=hbox(f.h);
+      h+='<div class="field'+(f.ta?' full':'')+'"><label for="f_'+f.k+'">'+f.l+b+'</label>'+box+
+        (f.ta?'<textarea id="f_'+f.k+'" data-f="'+f.k+'" placeholder="'+esc(f.ph||"")+'">'+esc(st.f[f.k]||"")+'</textarea>'
+             :'<input id="f_'+f.k+'" data-f="'+f.k+'"'+(f.num?' inputmode="decimal"':'')+' placeholder="'+esc(f.ph||"")+'" value="'+esc(st.f[f.k]||"")+'">')+'</div>';
+    });
+    document.getElementById("nucFields").innerHTML=h;
+  }
+
+  function qHTML(q){
+    var a=st.a, b=hlp(q.h), html='<div class="q'+(answered(q)?' answered':'')+'"><div class="q-head"><span class="q-id">'+q.code+'</span><div class="q-text"><span>'+q.text+'</span>'+b+'</div></div>'+hbox(q.h);
+    if(q.type==="multi"){ var sel=a[q.id]||[];
+      html+='<div class="opts">'+q.opts.map(function(o){ var on=inx(o[0],sel); return '<button type="button" class="chip'+(on?' on':'')+'" aria-pressed="'+on+'" data-m="'+q.id+'" data-v="'+o[0]+'">'+o[1]+'</button>'; }).join("")+'</div>';
+    } else {
+      html+='<div class="opts" role="radiogroup" aria-label="'+esc(q.text)+'">'+q.opts.map(function(o){ var on=a[q.id]===o[0];
+        return '<button type="button" role="radio" aria-checked="'+on+'" class="opt'+(q.wide?' wide':'')+(on?' on':'')+'" data-q="'+q.id+'" data-v="'+o[0]+'">'+o[1]+(o[2]?'<small>'+o[2]+'</small>':'')+'</button>'; }).join("")+'</div>';
+    }
+    return html+'</div>';
+  }
+
+  function enqResHTML(R){
+    if(R.ok===null) return "";
+    if(R.ok===false) return '<div class="banner fn-crit" style="margin-top:16px"><b>Não é caso de REURB.</b> '+R.motivo+'</div>';
+    var h='<div class="res-card"><h3>Resultado do enquadramento</h3><div class="kv">'+
+      '<div><div class="k">Modalidade</div><div class="v">'+R.modN+'</div><div class="s">'+R.modTxt+'</div></div>'+
+      '<div><div class="k">Procedimento</div><div class="v">'+R.tipo.n+'</div><div class="s">'+(R.tipo.lei?R.tipo.lei+'. ':'')+R.tipo.p+'</div></div></div>';
+    R.alerts.forEach(function(x){ h+='<div class="banner fn-'+(x.lvl==="info"?"info":x.lvl)+'"><b>'+x.t+'.</b> '+x.p+'</div>'; });
+    if(R.inst.length){ h+='<h3 class="sec" style="margin-top:18px">Instrumentos indicados</h3>';
+      R.inst.forEach(function(i){ h+='<article class="find info"><div class="find-sit">'+i.lei+'</div><h4>'+i.n+'</h4><p>'+i.p+'</p></article>'; }); }
+    if(R.custeio) h+='<div class="banner fn-opp"><b>Quem paga.</b> '+R.custeio+'</div>';
+    if(R.pend.length) h+='<div class="banner fn-warn"><b>Falta definir:</b> '+R.pend.join("; ")+'.</div>';
+    return h+'<p class="q-where">Indicação técnica preliminar. A classificação é do Município (art. 30) e a estratégia jurídica deve ser validada pelo advogado parceiro.</p></div>';
+  }
+
+  function renderEnq(){
+    HID=1000; var h="";
+    Q.filter(visible).forEach(function(q){ h+=qHTML(q); });
+    document.getElementById("enqQs").innerHTML=h;
+    document.getElementById("enqRes").innerHTML=enqResHTML(enq(va()));
+  }
+
+  function renderFas(){
+    HID=2000; var R=enq(va());
+    if(!R.ok){ document.getElementById("fasBox").innerHTML='<div class="locked-box">Conclua o <b>Enquadramento</b> para ver as fases.</div>'; return; }
+    var h='<div class="banner fn-info"><b>'+R.tipo.n+'.</b> '+(R.tipo.k==="inominada"?"Caminho direto no Cartório, sem CRF.":"Fases do art. 28 da Lei 13.465/2017.")+'</div>';
+    fases(R).forEach(function(f){ var s=(st.fas[f.id]||{}).s||"", nt=(st.fas[f.id]||{}).n||"";
+      h+='<div class="phase'+(s==="and"?" s-and":s==="ok"?" s-ok":"")+'"><h4><span class="q-id">'+f.code+'</span>'+f.t+hlp(f.h)+'</h4>'+hbox(f.h)+
+        '<div class="meta"><span>Quem: <b>'+{tec:"Você",pref:"Prefeitura",jur:"Jurídico"}[f.quem]+'</b></span><span>Prazo: <b>'+f.prazo+'</b></span><span>Base: <b>'+f.lei+'</b></span></div>'+
+        '<ul class="svc">'+f.docs.map(function(d){return '<li>'+d+'</li>';}).join("")+'</ul>'+
+        '<div class="meta" style="align-items:center"><label class="muted" for="fs_'+f.id+'" style="font-size:12.5px">Andamento</label><select id="fs_'+f.id+'" data-fs="'+f.id+'"><option value="">Não iniciada</option><option value="and"'+(s==="and"?" selected":"")+'>Em andamento</option><option value="ok"'+(s==="ok"?" selected":"")+'>Concluída</option></select></div>'+
+        '<textarea data-fn="'+f.id+'" placeholder="Anotações: protocolo, datas, exigências">'+esc(nt)+'</textarea></div>';
+    });
+    document.getElementById("fasBox").innerHTML=h;
+  }
+
+  function renderPec(){
+    HID=3000; var R=enq(va());
+    if(!R.ok){ document.getElementById("pecBox").innerHTML='<div class="locked-box">Conclua o <b>Enquadramento</b> para gerar a lista de peças.</div>'; return; }
+    var P=pecas(R), done=P.filter(function(x){return st.pec[x.id];}).length;
+    var h='<div class="banner fn-info"><b>'+R.tipo.n+':</b> '+P.length+' itens · '+done+' concluídos. A coluna "Você executa" é o escopo dos seus honorários.</div>';
+    P.forEach(function(x,i){ var on=!!st.pec[x.id];
+      h+='<label class="peca'+(on?' done':'')+'"><input type="checkbox" data-pc="'+x.id+'"'+(on?' checked':'')+'><span class="pc">T'+(i+1)+'</span><span class="pb"><b>'+x.n+'</b>'+hlp(x.h)+'<small>'+x.lei+'</small>'+whoTag(x.quem)+hbox(x.h)+'</span></label>';
+    });
+    document.getElementById("pecBox").innerHTML=h;
+  }
+
+  var OCF=[["un","Unidade","Q.A L.01","Quadra e lote, ou número da casa. Use o mesmo código da planta."],["nome","Nome completo","","Como no documento de identidade. Vai na CRF (art. 41, VI)."],["cpf","CPF",""],["rg","RG",""],
+    ["civil","Estado civil","","Se casado(a), informe o regime de bens na ficha. O cônjuge também é qualificado."],["conj","Cônjuge ou companheiro(a)",""],["prof","Profissão",""],["fil","Filiação","Nome da mãe e do pai","Exigida na listagem da CRF (art. 41, VI)."],
+    ["renda","Renda familiar (R$/mês)","","Soma da renda de todos os moradores. Define REURB-S ou E."],["desde","Posse desde (ano)","","Ano em que o ocupante (ou quem vendeu para ele) começou a ocupar. Comprove com documentos datados."]];
+  function renderOcu(){
+    HID=4000; var s=occStats(), O=st.ocup;
+    var h='<div class="meta-grid"><div class="field"><label for="n_sm">Salário mínimo vigente (R$)'+hlp("Confira o valor vigente no ano. Com ele e o limite municipal, a ferramenta mede a renda dos ocupantes.")+'</label>'+hbox("x")+'<input id="n_sm" data-ng="sm" inputmode="decimal" placeholder="Confira o valor do ano" value="'+esc(st.neg.sm||"")+'"></div>'+
+      '<div class="field"><label for="n_lim">Limite da REURB-S (salários mínimos)'+hlp("Fixado pelo Município, no máximo 5 salários mínimos de renda familiar (Decreto 9.310/2018, art. 6º). Confira a lei municipal.")+'</label>'+hbox("x")+'<input id="n_lim" data-ng="lim" inputmode="decimal" value="'+esc(st.neg.lim||"5")+'"></div></div>';
+    h+='<div class="calc" id="ocuStats"></div>';
+    O.forEach(function(o,i){
+      h+='<div class="occ"><div class="occ-top"><b>'+(i+1)+'. '+esc(o.un||"Unidade")+(o.nome?' · '+esc(o.nome):'')+'</b><span><button class="btn small" type="button" data-odup="'+i+'">Duplicar</button> <button class="btn small danger" type="button" data-odel="'+i+'">Remover</button></span></div><div class="meta-grid">';
+      OCF.forEach(function(f){ h+='<div class="field"><label>'+f[1]+(f[3]?hlp(f[3]):'')+'</label>'+(f[3]?hbox(f[3]):'')+'<input data-o="'+i+'" data-ok="'+f[0]+'" placeholder="'+esc(f[2]||"")+'" value="'+esc(o[f[0]]||"")+'"></div>'; });
+      h+='<div class="field"><label>Uso</label><select data-o="'+i+'" data-ok="uso"><option value="res"'+(o.uso==="res"?" selected":"")+'>Residencial</option><option value="misto"'+(o.uso==="misto"?" selected":"")+'>Misto</option><option value="nres"'+(o.uso==="nres"?" selected":"")+'>Não residencial</option></select></div>';
+      h+='<div class="field"><label>Tem outro imóvel?'+hlp("Na REURB-S, quem é proprietário exclusivo, concessionário ou foreiro de outro imóvel não recebe legitimação fundiária (art. 23, §1º, I).")+'</label>'+hbox("x")+'<select data-o="'+i+'" data-ok="outro"><option value="">?</option><option value="nao"'+(o.outro==="nao"?" selected":"")+'>Não</option><option value="sim"'+(o.outro==="sim"?" selected":"")+'>Sim</option></select></div>';
+      h+='<div class="field"><label>Aderiu?</label><select data-o="'+i+'" data-ok="ades"><option value="">?</option><option value="sim"'+(o.ades==="sim"?" selected":"")+'>Sim</option><option value="nao"'+(o.ades==="nao"?" selected":"")+'>Não</option></select></div>';
+      h+='</div></div>';
+    });
+    h+='<div class="btn-row"><button class="btn primary small" type="button" id="oAdd">+ Adicionar ocupante</button></div>';
+    document.getElementById("ocuBox").innerHTML=h;
+    renderOcuStats();
+  }
+  function renderOcuStats(){
+    var s=occStats(), U=unidades(), el=document.getElementById("ocuStats"); if(!el) return;
+    el.innerHTML='<div><div class="k">Cadastrados</div><div class="v">'+s.n+(U?' / '+U:'')+'</div><div class="s">ocupantes / unidades da ficha</div></div>'+
+      '<div><div class="k">Baixa renda</div><div class="v">'+(s.pctB===null?'·':Math.round(s.pctB*100)+'%')+'</div><div class="s">'+(s.teto?'até '+BRL0(s.teto)+' · '+s.comR+' com renda informada':'informe o salário mínimo')+'</div></div>'+
+      '<div><div class="k">Adesão</div><div class="v">'+s.ades+(U?' ('+Math.round(s.ades/U*100)+'%)':'')+'</div><div class="s">sobre as unidades da ficha</div></div>'+
+      '<div><div class="k">Com outro imóvel</div><div class="v">'+s.outro+'</div><div class="s">sem legitimação fundiária na REURB-S</div></div>';
+  }
+
+  var NEGF=[["hon","Honorário por unidade (R$)","Quanto cada unidade paga pelos serviços técnicos. Calcule pelas horas das peças (aba Peças técnicas) e compare com o mercado da região."],
+    ["ent","Entrada (%)","Percentual pago na assinatura do termo de adesão. É o que financia o levantamento antes da CRF."],
+    ["par","Parcelas do saldo","Número de parcelas mensais do restante. Muitas parcelas facilitam a adesão, mas alongam o seu recebimento."],
+    ["amin","Adesão mínima para começar (%)","Percentual de unidades que precisam aderir e pagar a entrada antes de você iniciar. Protege você de financiar o processo sozinho."],
+    ["custos","Custos diretos até a CRF (R$)","Topografia terceirizada, ART/RRT, deslocamentos, impressões, cadastro. Só o que sai do seu bolso."],
+    ["valid","Validade da proposta","Ex.: 30 dias."]];
+  function renderNeg(){
+    HID=5000; var R=enq(va()), n=st.neg;
+    var M=[["associacao","Associação de moradores","Contrato com a associação e adesão individual de cada morador, com rateio por unidade. Base: legitimados do art. 14, II, e custeio do art. 33, §1º, II (REURB-E) ou §2º (REURB-S)."],
+      ["loteador","Loteador ou proprietário","Um só cliente paga tudo. É o interessado em escriturar e vender os lotes (art. 14, III). Ele continua responsável pelo núcleo que implantou."],
+      ["individual","Moradores, um a um","Sem associação, cada morador contrata. Exige mais gestão e adesão mínima alta."],
+      ["prefeitura","Prefeitura","Licitação ou contratação direta (Lei 14.133/2021). Pagamento garantido, mas exige habilitação e disputa de preço."]];
+    var h='<h3 class="sec">Quem contrata você</h3><div class="opts">'+M.map(function(m){ return '<button type="button" class="opt wide'+(n.modelo===m[0]?' on':'')+'" data-mo="'+m[0]+'">'+m[1]+'</button>'; }).join("")+'</div>';
+    var mm=M.filter(function(m){return m[0]===n.modelo;})[0]; if(mm) h+='<div class="banner fn-info">'+mm[2]+'</div>';
+    if(R.custeio) h+='<div class="banner fn-opp"><b>Pela lei:</b> '+R.custeio+'</div>';
+    h+='<h3 class="sec">Valores</h3><div class="meta-grid">';
+    NEGF.forEach(function(f){ h+='<div class="field"><label for="ng_'+f[0]+'">'+f[1]+hlp(f[2])+'</label>'+hbox(f[2])+'<input id="ng_'+f[0]+'" data-ng="'+f[0]+'" inputmode="decimal" value="'+esc(n[f[0]]||"")+'"></div>'; });
+    h+='</div><div id="negRes"></div>';
+    h+='<h3 class="sec">Custos do cliente (fora dos seus honorários)</h3><ul class="svc">'+
+      (R.mod==="S"?'<li>Emolumentos: isentos na REURB-S para o primeiro registro, a legitimação fundiária e de posse, o registro da CRF com abertura das matrículas, a primeira averbação de casa de até 70 m², o primeiro direito real sobre a unidade, o primeiro registro da laje e as certidões (art. 13, §1º). Não é preciso provar pagamento de tributos para esses atos (art. 13, §2º).</li>':'<li>Emolumentos do registro da CRF e da abertura de matrículas (tabela do Cartório do seu estado).</li>')+
+      '<li>Taxas municipais da REURB, se a lei municipal previr.</li><li>Obras de infraestrutura e compensações definidas na aprovação'+(R.mod==="E"?" (podem ser atribuídas aos beneficiários, art. 38)":" (na REURB-S, a cargo do poder público, art. 37)")+'.</li><li>Averbação individual das construções depois do registro.</li><li>Assessoria jurídica, se contratada à parte.</li></ul>';
+    document.getElementById("negBox").innerHTML=h;
+    renderNegRes();
+  }
+  function renderNegRes(){
+    var el=document.getElementById("negRes"); if(!el) return; var c=negCalc();
+    if(!c.U||!c.hon){ el.innerHTML='<p class="q-where">Informe o número de unidades (aba Núcleo) e o honorário por unidade.</p>'; return; }
+    el.innerHTML='<div class="calc"><div><div class="k">Receita total</div><div class="v">'+BRL0(c.tot)+'</div><div class="s">'+c.U+' unidades × '+BRL0(c.hon)+'</div></div>'+
+      '<div><div class="k">Adesão mínima</div><div class="v">'+c.uMin+' unid.</div><div class="s">'+Math.round(c.amin*100)+'% das unidades</div></div>'+
+      '<div><div class="k">Caixa ao começar</div><div class="v">'+BRL0(c.caixaMin)+'</div><div class="s">entradas da adesão mínima</div></div>'+
+      '<div><div class="k">Parcela por unidade</div><div class="v">'+BRL(c.parc)+'</div><div class="s">entrada de '+BRL(c.entU)+' + '+c.par+'x</div></div></div>'+
+      (c.cus?'<div class="banner '+(c.cobre?'fn-ok':'fn-crit')+'">'+(c.cobre?'<b>A adesão mínima cobre seus custos diretos</b> ('+BRL0(c.caixaMin)+' de entradas para '+BRL0(c.cus)+' de custos).':'<b>A adesão mínima não cobre seus custos diretos.</b> Faltam '+BRL0(c.cus-c.caixaMin)+'. Aumente a entrada, a adesão mínima ou o honorário, ou você vai financiar o processo.')+'</div>':'');
+  }
+
+  function renderTpl(){
+    var R=enq(va()), cur=st.tpl||"prop", last="", h="";
+    TPL.forEach(function(t){ if(t.g!==last){ h+='<div class="tg">'+t.g+'</div>'; last=t.g; } h+='<button type="button" data-tp="'+t.id+'" class="'+(t.id===cur?'on':'')+'">'+t.n+'<small>'+t.s+'</small></button>'; });
+    document.getElementById("tplList").innerHTML=h;
+    var t=TPL.filter(function(x){return x.id===cur;})[0]||TPL[0];
+    document.getElementById("tplDoc_").innerHTML=esc(t.fn(R)).replace(/⟦([^⟧]*)⟧/g,function(m,g){ return '<mark>['+(g||"preencher")+']</mark>'; });
+  }
+  function tplText(){ var R=enq(va()), t=TPL.filter(function(x){return x.id===(st.tpl||"prop");})[0]||TPL[0]; return {t:t, txt:t.fn(R).replace(/⟦([^⟧]*)⟧/g,function(m,g){return "["+(g||"preencher")+"]";})}; }
+
+  function renderNor(){
+    var h='<div class="tbl-wrap"><table class="law"><thead><tr><th>Norma</th><th>O que regula e artigos-chave</th><th style="width:120px">Situação</th></tr></thead><tbody>';
+    NORMAS.forEach(function(x){ var cls={ok:"p-ok",warn:"p-warn",info:"p-info"}[x.st];
+      h+='<tr><td>'+x.n+'<div class="muted" style="font-weight:500;font-size:12.5px;margin-top:3px">'+x.q+'</div></td><td><ul>'+x.a.map(function(i){return '<li>'+i+'</li>';}).join("")+'</ul>'+(x.alt?'<div class="q-where" style="margin-top:6px">'+x.alt+'</div>':'')+'</td><td><span class="pill '+cls+'">'+x.stt+'</span></td></tr>'; });
+    h+='</tbody></table></div><div class="banner fn-info"><b>Prazos legais para lembrar:</b> classificação pelo Município em até 180 dias, com fixação automática da modalidade pedida se ele não decidir (art. 30, §§2º e 3º) · impugnação em 30 dias, silêncio vale concordância (art. 31) · Cartório: 15 dias para exigir ou registrar e 60 dias para concluir, prorrogáveis (art. 44).</div>';
+    document.getElementById("norBox").innerHTML=h;
+  }
+
+  /* ================= RESUMO ================= */
+  function resumo(){
+    var R=enq(va()), F=st.f, P=[], s=occStats();
+    Q.filter(visible).forEach(function(q){ if(!answered(q)) P.push(q.code+": "+q.text); });
+    ["nome","municipio","unid","matriculas","requerente"].forEach(function(k){ if(!has(st.f,k)) P.push("Ficha do núcleo: "+FIELDS.filter(function(f){return f.k===k;})[0].l); });
+    if(R.pend) R.pend.forEach(function(p){ if(P.indexOf(p)<0) P.push(p); });
+    if(R.ok && !s.n) P.push("Cadastrar os ocupantes (aba Ocupantes)");
+    if(R.ok && !has(st.neg,"hon")) P.push("Definir o honorário por unidade (aba Negócio)");
+    return {R:R,P:P,s:s};
+  }
+  function renderRes(){
+    HID=6000; var x=resumo(), R=x.R, F=st.f;
+    document.getElementById("resCaso").textContent=[F.nome,F.municipio,(F.unid?F.unid+" unidades":""),F.requerente].filter(Boolean).join(" · ")||"Preencha a ficha do núcleo";
+    var h="";
+    if(R.ok===null) h='<div class="locked-box">Comece pela aba <b>Núcleo</b> e depois responda ao <b>Enquadramento</b>.</div>';
+    else if(R.ok===false) h='<div class="verdict"><div class="vk">Resultado</div><h3>Não é caso de REURB</h3><p>'+R.motivo+'</p></div>';
+    else {
+      h+='<div class="verdict"><div class="vk">Enquadramento</div><h3>'+R.modN+' · '+R.tipo.n+'</h3><p>'+R.tipo.p+'</p></div>';
+      var crit=R.alerts.filter(function(a){return a.lvl==="crit";}), warn=R.alerts.filter(function(a){return a.lvl==="warn";});
+      h+='<div class="summary"><div class="sum s-crit-t"><div class="k">'+crit.length+'</div><div class="l">Críticos</div></div><div class="sum s-warn-t"><div class="k">'+warn.length+'</div><div class="l">Atenção</div></div><div class="sum s-opp-t"><div class="k">'+R.inst.length+'</div><div class="l">Instrumentos</div></div><div class="sum s-pend-t"><div class="k">'+x.P.length+'</div><div class="l">Pendências</div></div></div>';
+      R.alerts.forEach(function(a){ h+='<div class="banner fn-'+(a.lvl==="info"?"info":a.lvl)+'"><b>'+a.t+'.</b> '+a.p+'</div>'; });
+      h+='<div class="grp-title">Instrumentos</div><ul class="svc">'+R.inst.map(function(i){return '<li><b>'+i.n+'</b> · '+i.lei+'</li>';}).join("")+'</ul>';
+      var P=pecas(R), T=P.filter(function(p){return p.quem==="tec";}), J=P.filter(function(p){return p.quem==="jur";}), PR=P.filter(function(p){return p.quem==="pref"||p.quem==="ocup";});
+      function ul(arr){ return arr.length?'<ul>'+arr.map(function(p){return '<li>'+p.n+'</li>';}).join("")+'</ul>':'<p class="empty">Nada nesta coluna.</p>'; }
+      h+='<div class="scope-grid"><div class="scope sc-tec"><h5>Você executa</h5><p class="hint">Entra nos seus honorários.</p>'+ul(T)+'</div><div class="scope sc-jur"><h5>Parceiro jurídico</h5><p class="hint">Contratação à parte.</p>'+ul(J.concat(st.a.e_confl==="sim"?[{n:"Composição de conflitos e impugnações (arts. 31 e 34)"}]:[]))+'</div><div class="scope sc-org"><h5>Prefeitura e ocupantes</h5><p class="hint">Dependem de terceiros.</p>'+ul(PR)+'</div><div class="scope sc-cli"><h5>Quem paga</h5><p class="hint">Pela lei.</p><p style="font-size:13.5px;margin:0">'+(R.custeio||"Defina a modalidade.")+'</p></div></div>';
+      var c=negCalc();
+      if(c.U&&c.hon) h+='<div class="grp-title">Negócio</div><p style="font-size:13.5px">'+c.U+' unidades × '+BRL0(c.hon)+' = <b>'+BRL0(c.tot)+'</b>. Começa com '+c.uMin+' adesões ('+Math.round(c.amin*100)+'%), que geram '+BRL0(c.caixaMin)+' de entradas'+(c.cus?(c.cobre?', suficiente para os custos diretos de '+BRL0(c.cus)+'.':', <b style="color:var(--red)">abaixo dos custos diretos de '+BRL0(c.cus)+'</b>.'):'.')+'</p>';
+      h+='<div class="grp-title">Pendências</div><ul class="list">'+(x.P.length?x.P.map(function(p){return '<li><span class="dot"></span><span>'+p+'</span></li>';}).join(""):'<li><span class="dot" style="background:var(--ok)"></span><span>Nenhuma pendência.</span></li>')+'</ul>';
+      h+='<div class="grp-title">Argumentos para a reunião com os moradores</div><ul class="list args">'+
+        '<li><span>Com a matrícula, cada família pode vender, financiar, deixar herança e averbar a casa.</span></li>'+
+        (R.mod==="S"?'<li><span>Na REURB-S, os registros no Cartório são gratuitos (art. 13, §1º).</span></li>':'')+
+        (inx("lf",R.inst.map(function(i){return i.k;}))?'<li><span>A legitimação fundiária entrega a propriedade livre das dívidas e ônus do antigo dono (art. 23).</span></li>':'')+
+        '<li><span>Depois do registro, a casa pode ser averbada e o imóvel passa a valer como imóvel regular.</span></li>'+
+        '<li><span>A lei dá prazos ao Município (180 dias para classificar) e ao Cartório (15 e 60 dias), e o silêncio dos notificados vale como concordância.</span></li></ul>';
+    }
+    document.getElementById("resBox").innerHTML=h;
+  }
+  function reportText(){
+    var x=resumo(), R=x.R, F=st.f, L=["REURB · RESUMO DO CASO (MÉTODO ELO)"];
+    if(F.nome) L.push("Núcleo: "+F.nome+(F.municipio?" · "+F.municipio:""));
+    if(F.unid) L.push("Unidades: "+F.unid+(F.familias?" · Famílias: "+F.familias:""));
+    if(F.requerente) L.push("Requerente: "+F.requerente);
+    if(R.ok===false){ L.push("","NÃO É REURB: "+R.motivo); return L.join("\n"); }
+    if(R.ok){ L.push("","MODALIDADE: "+R.modN,"  "+R.modTxt.replace(/<[^>]+>/g,""),"PROCEDIMENTO: "+R.tipo.n+" ("+R.tipo.lei+")","  "+R.tipo.p);
+      if(R.alerts.length){ L.push("","ALERTAS"); R.alerts.forEach(function(a){ L.push("  ["+({crit:"CRÍTICO",warn:"ATENÇÃO",info:"INFO"}[a.lvl])+"] "+a.t+": "+a.p); }); }
+      L.push("","INSTRUMENTOS"); R.inst.forEach(function(i){ L.push("  - "+i.n+" ("+i.lei+")"); });
+      L.push("","PEÇAS TÉCNICAS"); pecas(R).forEach(function(p,i){ L.push("  T"+(i+1)+" "+p.n+" · "+({tec:"você",jur:"jurídico",pref:"Prefeitura",ocup:"ocupante"}[p.quem])); });
+      if(R.custeio) L.push("","QUEM PAGA: "+R.custeio);
+      var c=negCalc(); if(c.U&&c.hon) L.push("","NEGÓCIO: "+c.U+" × "+BRL0(c.hon)+" = "+BRL0(c.tot)+" · adesão mínima "+c.uMin+" unidades · entradas "+BRL0(c.caixaMin));
+    }
+    if(x.P.length){ L.push("","PENDÊNCIAS"); x.P.forEach(function(p){ L.push("  - "+p); }); }
+    return L.join("\n").replace(/<[^>]+>/g,"");
+  }
+
+  /* ================= PROGRESSO E ABAS ================= */
+  function renderProgress(){
+    var vis=Q.filter(visible), ans=vis.filter(answered).length, pct=vis.length?Math.round(ans/vis.length*100):0;
+    document.getElementById("progBar").style.width=pct+"%";
+    document.getElementById("progCount").textContent=ans+" de "+vis.length+" perguntas do enquadramento";
+    document.getElementById("progLabel").textContent=pct===100?"Enquadramento completo":"Enquadramento em andamento";
+    var fk=["nome","municipio","unid","matriculas","requerente"], fn=fk.filter(function(k){return has(st.f,k);}).length;
+    dot("nuc", fn===fk.length?"var(--ok)":fn?"var(--amber)":"transparent");
+    var R=enq(va()); dot("enq", R.ok===false?"var(--red)": pct===100?"var(--ok)": ans?"var(--amber)":"transparent");
+    if(R.ok){ var F=fases(R), fo=F.filter(function(f){return (st.fas[f.id]||{}).s==="ok";}).length; dot("fas", fo===F.length?"var(--ok)":fo||F.some(function(f){return (st.fas[f.id]||{}).s;})?"var(--amber)":"transparent");
+      var P=pecas(R), po=P.filter(function(p){return st.pec[p.id];}).length; dot("pec", po===P.length?"var(--ok)":po?"var(--amber)":"transparent"); }
+    else { dot("fas","transparent"); dot("pec","transparent"); }
+    dot("ocu", st.ocup.length?"var(--amber)":"transparent");
+  }
+  function dot(t,c){ var e=document.getElementById("dot-"+t); if(e) e.style.background=c; }
+
+  var TABS=["nuc","enq","fas","pec","ocu","neg","mod","nor","res"];
+  var TN={nuc:"Núcleo",enq:"Enquadramento",fas:"Procedimento",pec:"Peças técnicas",ocu:"Ocupantes",neg:"Negócio",mod:"Modelos",nor:"Normas",res:"Resumo"};
+  function setTab(t){
+    if(TABS.indexOf(t)<0) t="nuc"; st.tab=t;
+    TABS.forEach(function(x){ var on=x===t; var b=document.getElementById("tab-"+x); b.classList.toggle("active",on); b.setAttribute("aria-selected",on); document.getElementById("panel-"+x).hidden=!on; });
+    var i=TABS.indexOf(t);
+    document.getElementById("btnPrev").hidden=i===0; document.getElementById("btnNext").hidden=i===TABS.length-1;
+    if(i>0) document.getElementById("btnPrev").textContent="← "+TN[TABS[i-1]];
+    if(i<TABS.length-1) document.getElementById("btnNext").textContent=TN[TABS[i+1]]+" →";
+    renderTab(t); save();
+  }
+  function renderTab(t){
+    if(t==="nuc") renderNuc(); else if(t==="enq") renderEnq(); else if(t==="fas") renderFas(); else if(t==="pec") renderPec();
+    else if(t==="ocu") renderOcu(); else if(t==="neg") renderNeg(); else if(t==="mod") renderTpl(); else if(t==="nor") renderNor(); else if(t==="res") renderRes();
+  }
+  function top_(){ try{ window.scrollTo({top:0,behavior:"smooth"}); }catch(e){ window.scrollTo(0,0); } }
+
+  /* ================= EVENTOS ================= */
+  document.addEventListener("click",function(e){
+    var hb=e.target.closest(".hlp");
+    if(hb){ e.preventDefault(); e.stopPropagation(); var bx=document.getElementById(hb.getAttribute("aria-controls")); if(bx){ bx.hidden=!bx.hidden; hb.setAttribute("aria-expanded",!bx.hidden); } return; }
+    var o=e.target.closest(".opt[data-q]");
+    if(o){ st.a[o.dataset.q]=o.dataset.v; prune(); renderEnq(); renderProgress(); save(); return; }
+    var ch=e.target.closest(".chip[data-m]");
+    if(ch){ var k=ch.dataset.m, v=ch.dataset.v, ex=(QQ[k]&&QQ[k].excl)||[], arr=(st.a[k]||[]).slice(), i=arr.indexOf(v);
+      if(i>=0) arr.splice(i,1); else { arr = inx(v,ex)?[]:arr.filter(function(x){return !inx(x,ex);}); arr.push(v); }
+      st.a[k]=arr; renderEnq(); renderProgress(); save(); return; }
+    var tb=e.target.closest(".tab"); if(tb){ setTab(tb.dataset.tab); top_(); return; }
+    var mo=e.target.closest("[data-mo]"); if(mo){ st.neg.modelo=mo.dataset.mo; renderNeg(); save(); return; }
+    var tp=e.target.closest("[data-tp]"); if(tp){ st.tpl=tp.dataset.tp; renderTpl(); save(); document.getElementById("tplMsg").textContent=""; return; }
+    if(e.target.id==="oAdd"){ st.ocup.push({uso:"res"}); renderOcu(); renderProgress(); save(); return; }
+    var od=e.target.closest("[data-odel]"); if(od){ st.ocup.splice(+od.dataset.odel,1); renderOcu(); renderProgress(); save(); return; }
+    var du=e.target.closest("[data-odup]"); if(du){ var c=JSON.parse(JSON.stringify(st.ocup[+du.dataset.odup])); c.nome=""; c.cpf=""; c.rg=""; c.conj=""; c.fil=""; st.ocup.splice(+du.dataset.odup+1,0,c); renderOcu(); save(); return; }
+  });
+  document.addEventListener("input",function(e){
+    var t=e.target, d=t.dataset;
+    if(d.f){ st.f[d.f]=t.value; renderProgress(); save(); return; }
+    if(d.ng){ st.neg[d.ng]=t.value; renderNegRes(); renderOcuStats(); save(); return; }
+    if(d.o!=null && d.ok){ st.ocup[+d.o][d.ok]=t.value; renderOcuStats(); save(); return; }
+    if(d.fn){ st.fas[d.fn]=st.fas[d.fn]||{}; st.fas[d.fn].n=t.value; save(); return; }
+  });
+  document.addEventListener("change",function(e){
+    var t=e.target, d=t.dataset;
+    if(d.fs){ st.fas[d.fs]=st.fas[d.fs]||{}; st.fas[d.fs].s=t.value; renderFas(); renderProgress(); save(); return; }
+    if(d.pc){ st.pec[d.pc]=t.checked; renderPec(); renderProgress(); save(); return; }
+    if(d.o!=null && d.ok){ st.ocup[+d.o][d.ok]=t.value; renderOcuStats(); save(); return; }
+  });
+  document.getElementById("btnPrev").addEventListener("click",function(){ setTab(TABS[Math.max(0,TABS.indexOf(st.tab)-1)]); top_(); });
+  document.getElementById("btnNext").addEventListener("click",function(){ setTab(TABS[Math.min(TABS.length-1,TABS.indexOf(st.tab)+1)]); top_(); });
+
+  var tt; function toast(m){ var el=document.querySelector(".toast"); if(!el){ el=document.createElement("div"); el.className="toast"; el.setAttribute("role","status"); document.body.appendChild(el); } el.textContent=m; el.hidden=false; clearTimeout(tt); tt=setTimeout(function(){el.hidden=true;},2200); }
+  function copy(txt,fb){ function f(){ if(fb){ fb.hidden=false; fb.value=txt; fb.focus(); fb.select(); } toast("Selecione e copie o texto."); }
+    try{ if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function(){ toast("Copiado."); },f); else f(); }catch(er){ f(); } }
+  document.getElementById("btnCopy").addEventListener("click",function(){ copy(reportText(),document.getElementById("copyFallback")); });
+  document.getElementById("tplCopy").addEventListener("click",function(){ var x=tplText(); copy(x.txt,null); document.getElementById("tplMsg").textContent="Texto copiado. Cole no Word ou no Google Docs."; });
+  document.getElementById("tplDoc").addEventListener("click",function(){
+    var x=tplText(), nm=(x.t.n+" - "+(st.f.nome||"REURB")).replace(/[\\/:*?"<>|]/g,"").slice(0,80)+".doc";
+    var html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>'+esc(x.t.n)+'</title><style>body{font-family:"Times New Roman",serif;font-size:12pt;line-height:1.5}p{margin:0 0 6pt}</style></head><body>'+
+      x.txt.split("\n").map(function(l){ return '<p>'+(esc(l)||"&nbsp;")+'</p>'; }).join("")+'</body></html>';
+    try{ var b=new Blob(["﻿"+html],{type:"application/msword"}), u=URL.createObjectURL(b), a=document.createElement("a"); a.href=u; a.download=nm; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(u);},4000); document.getElementById("tplMsg").textContent="Arquivo gerado: "+nm; }
+    catch(er){ document.getElementById("tplMsg").textContent="Download indisponível aqui. Use Copiar texto."; }
+  });
+  var framed=true; try{ framed=window.self!==window.top; }catch(er){}
+  var bp=document.getElementById("btnPrint"); if(!framed){ bp.hidden=false; bp.addEventListener("click",function(){ renderRes(); window.print(); }); }
+
+  function clearAll(){ st=BLANK(); renderAll(); setTab("nuc"); top_(); toast("Caso limpo. Comece pela ficha do núcleo."); }
+  document.getElementById("btnStartOwn").addEventListener("click",clearAll);
+  var rw=document.getElementById("resetWrap");
+  function bindReset(){ document.getElementById("btnReset").addEventListener("click",function(){
+    rw.innerHTML='<span class="confirm">Apagar todo o caso? <button class="btn small danger" type="button" id="rsY">Sim, limpar</button><button class="btn small" type="button" id="rsN">Cancelar</button></span>';
+    document.getElementById("rsY").onclick=function(){ restore(); clearAll(); }; document.getElementById("rsN").onclick=restore; }); }
+  function restore(){ rw.innerHTML='<button class="btn danger small" type="button" id="btnReset">Limpar caso</button>'; bindReset(); }
+  bindReset();
+
+  function renderAll(){ prune(); document.getElementById("exampleBar").hidden=!st.example; renderProgress(); }
+  renderAll(); setTab(st.tab);
+})();
+
+</script>
+</body>
+</html>

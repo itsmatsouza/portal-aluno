@@ -100,7 +100,10 @@ class ToolRepository
                 AND c.deleted_at IS NULL
                 AND t.is_active = 1 AND t.deleted_at IS NULL
                 {$courseFilter}
-            ORDER BY uc.course_id, t.name");
+            ORDER BY (t.name REGEXP '^[0-9]+[[:space:]]*[-–—]') DESC,
+                CASE WHEN t.name REGEXP '^[0-9]+[[:space:]]*[-–—]'
+                    THEN CAST(t.name AS UNSIGNED) ELSE NULL END,
+                t.name, t.id, uc.course_id");
         $stmt->execute([$userId, ...$ids]);
         $result = [];
         foreach ($stmt->fetchAll() as $row) {

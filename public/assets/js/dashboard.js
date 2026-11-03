@@ -151,7 +151,18 @@ function renderTools(courses) {
         });
     });
 
-    const tools = Array.from(toolsMap.values());
+    // A lista reúne cursos diferentes; ordene novamente após remover duplicados.
+    const tools = Array.from(toolsMap.values()).sort((a, b) => {
+        const orderA = a.name.match(/^(\d+)\s*[-–—]/);
+        const orderB = b.name.match(/^(\d+)\s*[-–—]/);
+        if (orderA && orderB) {
+            const difference = Number(orderA[1]) - Number(orderB[1]);
+            if (difference !== 0) return difference;
+        } else if (orderA || orderB) {
+            return orderA ? -1 : 1;
+        }
+        return a.name.localeCompare(b.name, 'pt-BR') || Number(a.id) - Number(b.id);
+    });
 
     toolsGrid.innerHTML = '';
 
