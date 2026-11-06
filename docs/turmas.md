@@ -31,7 +31,7 @@ php bin/hotmart-sync-classes.php
 php bin/hotmart-sync-classes.php --email=aluno@example.com
 ```
 
-O primeiro comando consulta pendências. O segundo consulta todas as matrículas e detecta troca de turma, renovação e mudanças de status no Club. O filtro opcional `--email` restringe a execução ao comprador informado, permitindo testar contas reais sem misturar matrículas fictícias locais. Exemplo de cron, ajustando caminho e executável PHP:
+O primeiro comando consulta pendências. O segundo descobre alunos elegíveis ainda sem matrícula e consulta todas as matrículas para detectar troca de turma, renovação e mudanças de status no Club. O filtro opcional `--email` restringe a execução ao comprador informado, permitindo testar contas reais sem misturar matrículas fictícias locais. Exemplo de cron, ajustando caminho e executável PHP:
 
 ```cron
 * * * * * cd /caminho/portal-aluno && php bin/hotmart-sync-classes.php --pending
@@ -105,3 +105,25 @@ A migration `014_manual_enrollments.sql` acrescenta `user_courses.is_manual`, co
 O cron ignora essas matrículas. Respostas de sincronização iniciadas antes da concessão e webhooks não substituem o vínculo manual. Compras continuam registradas separadamente; a importação preserva o acesso manual. Bloquear a conta, suspender a matrícula ou retirar ferramentas da turma continua revogando acesso.
 
 Publique a migration e os repositórios/serviços correspondentes antes de criar concessões manuais, evitando cron antigo em execução durante a transição. Para rollback, restaure código e backup anterior da matrícula e das views em conjunto: a versão antiga não reconhece essa concessão. Os dados comerciais não devem ser apagados.
+
+### Alunos transferidos manualmente no Hotmart Club
+
+A execução completa de `bin/hotmart-sync-classes.php` também lista alunos do Club nas turmas cadastradas do portal. Inclui contas e matrículas ausentes quando o aluno está `ACTIVE` e existe uma compra `APPROVED` ou `COMPLETE` do mesmo produto. A turma reservada `admin`, usuários locais bloqueados/excluídos e concessões manuais ficam fora dessa descoberta.
+
+Para uma nova matrícula ou mudança de turma, consulta o histórico comercial em janelas mensais, desde a criação do produto, com paginação. Seleciona a última aprovação válida do mesmo produto e comprador. O importador existente preserva transações já conhecidas, reembolsos e chargebacks. A data de aprovação determina o início do prazo; a transferência não reinicia a duração. Uma consulta posterior ao Club confirma a turma antes de liberar ferramentas.
+
+Sem compra válida, não cria conta nem inventa data. Matrículas existentes que precisam dessa revisão ficam pendentes até a descoberta confirmar uma compra; o cron `--pending` não contorna a revisão comercial. Concessões preservadas pelo importador continuam intactas. Falhas de descoberta não interrompem a reconciliação normal das demais matrículas.
+
+O relatório privado `storage/logs/hotmart-discovery.json` contém data, curso, e-mail e motivo das pendências da última execução completa, com permissão `0600`. Uma execução com `--email` grava `hotmart-discovery-filtered.json` e não substitui o relatório completo. Esses arquivos contêm dados pessoais e não devem ser publicados. Pendências ou falhas geram saída CLI diferente de zero.
+
+`--pending` continua limitado às matrículas existentes. Mantenha o cron completo para descobrir novos alunos; não há novo evento de webhook para transferência manual. A descoberta depende das permissões de listagem do Club, catálogo e histórico de vendas, além de `HOTMART_COURSE_SUBDOMAINS`. Não exige migration adicional nem envia e-mails.
+
+Validação isolada: `PORTAL_TEST_SOCKET=/caminho/mariadb-teste.sock php test-club-student-discovery.php`. O teste cria e remove seu próprio schema e usa respostas simuladas da API.
+
+### Vencimento individual de matrícula manual
+
+A migration `015_manual_access_expiration.sql` faz `enrollment_access` respeitar `user_courses.access_expires_at` quando `is_manual=1`. Uma data explícita substitui a duração da turma somente naquela matrícula, inclusive em turmas vitalícias. Sem data, permanece a regra da turma. Matrículas comerciais não mudam. O vencimento é exclusivo: para acesso até 12/05/2027 inclusive, grave `2027-05-13 00:00:00` no horário de Brasília. Suspensões e bloqueios continuam valendo.
+
+A view informa `is_lifetime=0` para essa matrícula, mostrando a data nos painéis existentes. O cron e os webhooks preservam concessões manuais. Este ajuste habilita concessões diretas no banco; não adiciona um formulário administrativo.
+
+Antes da migration, salve `SHOW CREATE VIEW enrollment_access` e as matrículas manuais que já tenham data. Para rollback, revogue ou restaure primeiro as concessões individuais feitas após a migration e depois restaure a view anterior: ela não aplica vencimentos individuais. Nunca restaure apenas a view enquanto essas concessões estiverem ativas.

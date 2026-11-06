@@ -44,6 +44,16 @@ class HotmartApiService
         return $this->get('/club/api/v1/users', $filters);
     }
 
+    /** Lista alunos do Club, incluindo quem ainda não possui matrícula no portal. */
+    public function clubMembers(string $subdomain, ?string $pageToken = null): array
+    {
+        $filters = ['subdomain' => $subdomain, 'max_results' => 100];
+        if ($pageToken !== null) {
+            $filters['page_token'] = $pageToken;
+        }
+        return $this->get('/club/api/v1/users', $filters);
+    }
+
     public function products(?string $pageToken = null): array
     {
         return $this->get('/products/api/v1/products', $pageToken === null ? [] : ['page_token' => $pageToken]);

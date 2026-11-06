@@ -12,6 +12,26 @@ class ClubEnrollmentRepository
     {
     }
 
+    public function discoverableClasses(): array
+    {
+        return $this->db->query("SELECT c.id AS course_id, c.hotmart_product_ucode, cc.hotmart_class_id
+            FROM course_classes cc JOIN courses c ON c.id = cc.course_id
+            WHERE c.deleted_at IS NULL AND c.hotmart_product_ucode IS NOT NULL
+                AND cc.hotmart_class_id <> 'admin' ORDER BY c.id, cc.id")->fetchAll();
+    }
+
+    public function discoveryUser(string $email): ?array
+    {
+        $stmt = $this->db->prepare('SELECT id, email, is_active, deleted_at, role FROM users
+            WHERE email = ? OR hotmart_email = ?');
+        $stmt->execute([$email, $email]);
+        $rows = $stmt->fetchAll();
+        if (count($rows) > 1) {
+            throw new \RuntimeException('Identidade ambígua no portal.');
+        }
+        return $rows[0] ?? null;
+    }
+
     public function snapshot(int $userId, int $courseId): ?array
     {
         $stmt = $this->db->prepare('SELECT uc.*, COALESCE(u.hotmart_email, u.email) AS email,

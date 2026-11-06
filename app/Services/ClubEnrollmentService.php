@@ -9,6 +9,7 @@ use RuntimeException;
 
 class ClubEnrollmentService
 {
+    public const PURCHASE_REVIEW_PREFIX = 'Compra pendente de revisão: ';
     public function __construct(private ClubEnrollmentRepository $enrollments, private HotmartApiService $api)
     {
     }
@@ -18,6 +19,9 @@ class ClubEnrollmentService
         $snapshot = $this->enrollments->snapshot($userId, $courseId);
         if ($snapshot === null || (bool) $snapshot['is_manual']) {
             return true;
+        }
+        if (str_starts_with($snapshot['sync_error'] ?? '', self::PURCHASE_REVIEW_PREFIX)) {
+            return false;
         }
         try {
             $item = $this->lookup($snapshot['hotmart_product_ucode'], $snapshot['email']);
